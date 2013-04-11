@@ -1,0 +1,314 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="DebugTests|Win32">
+      <Configuration>DebugTests</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseTests|Win32">
+      <Configuration>ReleaseTests</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{DF0DA118-3BDC-4795-8E81-0A42D6DBF445}</ProjectGuid>
+    <RootNamespace>PackingGeneration</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugTests|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseTests|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugTests|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseTests|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\Externals\Boost;.\</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WINDOWS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\Debug</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Externals.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugTests|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\Externals\Boost;.\</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WINDOWS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>..\Externals\Boost;.\</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WINDOWS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>..\Release</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Externals.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseTests|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>..\Externals\Boost;.\</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WINDOWS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="Core\Geometry\Headers\GeometryParameters.h" />
+    <ClInclude Include="Core\Geometry\Headers\IGeometryParameters.h" />
+    <ClInclude Include="Core\Headers\BaseOrderedPriorityQueue.h" />
+    <ClInclude Include="Core\Headers\ByteUtility.h" />
+    <ClInclude Include="Core\Headers\Constants.h" />
+    <ClInclude Include="Core\Headers\dirent.h" />
+    <ClInclude Include="Core\Headers\EndiannessProvider.h" />
+    <ClInclude Include="Core\Headers\Exceptions.h" />
+    <ClInclude Include="Core\Headers\HeapUtilities.h" />
+    <ClInclude Include="Core\Headers\IEndiannessProvider.h" />
+    <ClInclude Include="Core\Headers\Macros.h" />
+    <ClInclude Include="Core\Headers\Math.h" />
+    <ClInclude Include="Core\Headers\MemoryUtility.h" />
+    <ClInclude Include="Core\Headers\MpiManager.h" />
+    <ClInclude Include="Core\Headers\OrderedPriorityQueue.h" />
+    <ClInclude Include="Core\Headers\Path.h" />
+    <ClInclude Include="Core\Headers\ScopedFile.h" />
+    <ClInclude Include="Core\Headers\SphericalHarmonicsComputer.h" />
+    <ClInclude Include="Core\Headers\StlUtilities.h" />
+    <ClInclude Include="Core\Headers\Types.h" />
+    <ClInclude Include="Core\Headers\VectorUtilities.h" />
+    <ClInclude Include="Core\Lattice\Headers\ColumnMajorIndexingProvider.h" />
+    <ClInclude Include="Core\Lattice\Headers\D3Q27Lattice.h" />
+    <ClInclude Include="Core\Lattice\Headers\ILattice.h" />
+    <ClInclude Include="Core\Lattice\Headers\ILatticeIndexingProvider.h" />
+    <ClInclude Include="Core\Lattice\Headers\ILinearIndexingProvider.h" />
+    <ClInclude Include="Core\Lattice\Headers\LatticeIndexingProvider.h" />
+    <ClInclude Include="Execution\Headers\PackingGenerationTask.h" />
+    <ClInclude Include="Execution\Headers\PackingTaskFactory.h" />
+    <ClInclude Include="Generation\Constants.h" />
+    <ClInclude Include="Generation\GenerationManager.h" />
+    <ClInclude Include="Generation\Geometries\Headers\BaseGeometry.h" />
+    <ClInclude Include="Generation\Geometries\Headers\BulkGeometry.h" />
+    <ClInclude Include="Generation\Geometries\Headers\CircleGeometry.h" />
+    <ClInclude Include="Generation\Geometries\Headers\IGeometry.h" />
+    <ClInclude Include="Generation\Geometries\Headers\RectangleGeometry.h" />
+    <ClInclude Include="Generation\Geometries\Headers\TrapezoidGeometry.h" />
+    <ClInclude Include="Generation\Model\Headers\Config.h" />
+    <ClInclude Include="Generation\Model\Headers\Types.h" />
+    <ClInclude Include="Generation\PackingGenerators\Headers\BaseConjugateGradientStep.h" />
+    <ClInclude Include="Generation\PackingGenerators\Headers\BasePackingStep.h" />
+    <ClInclude Include="Generation\PackingGenerators\Headers\BezrukovJodreyToryStep.h" />
+    <ClInclude Include="Generation\PackingGenerators\Headers\DecreasingConjugateGradientStep.h" />
+    <ClInclude Include="Generation\PackingGenerators\Headers\DensificationStep.h" />
+    <ClInclude Include="Generation\PackingGenerators\Headers\IncreasingConjugateGradientStep.h" />
+    <ClInclude Include="Generation\PackingGenerators\Headers\IPackingGenerator.h" />
+    <ClInclude Include="Generation\PackingGenerators\Headers\IPackingStep.h" />
+    <ClInclude Include="Generation\PackingGenerators\Headers\KhirevichJodreyToryStep.h" />
+    <ClInclude Include="Generation\PackingGenerators\Headers\MonteCarloStep.h" />
+    <ClInclude Include="Generation\PackingGenerators\Headers\OriginalJodreyToryStep.h" />
+    <ClInclude Include="Generation\PackingGenerators\Headers\PackingGenerator.h" />
+    <ClInclude Include="Generation\PackingGenerators\Headers\SimpleConjugateGradientStep.h" />
+    <ClInclude Include="Generation\PackingGenerators\InitialGenerators\Headers\BulkPoissonGenerator.h" />
+    <ClInclude Include="Generation\PackingGenerators\InitialGenerators\Headers\BulkPoissonInCellsGenerator.h" />
+    <ClInclude Include="Generation\PackingGenerators\InitialGenerators\Headers\HcpGenerator.h" />
+    <ClInclude Include="Generation\PackingGenerators\LubachevsckyStillinger\Headers\BaseEventProcessor.h" />
+    <ClInclude Include="Generation\PackingGenerators\LubachevsckyStillinger\Headers\BaseEventProvider.h" />
+    <ClInclude Include="Generation\PackingGenerators\LubachevsckyStillinger\Headers\CollisionEventProcessor.h" />
+    <ClInclude Include="Generation\PackingGenerators\LubachevsckyStillinger\Headers\CollisionEventProvider.h" />
+    <ClInclude Include="Generation\PackingGenerators\LubachevsckyStillinger\Headers\CompositeEventProcessor.h" />
+    <ClInclude Include="Generation\PackingGenerators\LubachevsckyStillinger\Headers\CompositeEventProvider.h" />
+    <ClInclude Include="Generation\PackingGenerators\LubachevsckyStillinger\Headers\IEventProcessor.h" />
+    <ClInclude Include="Generation\PackingGenerators\LubachevsckyStillinger\Headers\IEventProvider.h" />
+    <ClInclude Include="Generation\PackingGenerators\LubachevsckyStillinger\Headers\LubachevsckyStillingerStep.h" />
+    <ClInclude Include="Generation\PackingGenerators\LubachevsckyStillinger\Headers\MoveEventProcessor.h" />
+    <ClInclude Include="Generation\PackingGenerators\LubachevsckyStillinger\Headers\NeighborTransferEventProcessor.h" />
+    <ClInclude Include="Generation\PackingGenerators\LubachevsckyStillinger\Headers\NeighborTransferEventProvider.h" />
+    <ClInclude Include="Generation\PackingGenerators\LubachevsckyStillinger\Headers\ParticleCollisionService.h" />
+    <ClInclude Include="Generation\PackingGenerators\LubachevsckyStillinger\Headers\Types.h" />
+    <ClInclude Include="Generation\PackingGenerators\LubachevsckyStillinger\Headers\VelocityService.h" />
+    <ClInclude Include="Generation\PackingGenerators\LubachevsckyStillinger\Headers\VoronoiTesselationProvider.h" />
+    <ClInclude Include="Generation\PackingGenerators\LubachevsckyStillinger\Headers\VoronoiTransferEventProcessor.h" />
+    <ClInclude Include="Generation\PackingGenerators\LubachevsckyStillinger\Headers\VoronoiTransferEventProvider.h" />
+    <ClInclude Include="Generation\PackingGenerators\LubachevsckyStillinger\Headers\WallTransferEventProcessor.h" />
+    <ClInclude Include="Generation\PackingGenerators\LubachevsckyStillinger\Headers\WallTransferEventProvider.h" />
+    <ClInclude Include="Generation\PackingServices\DistanceServices\Headers\BaseDistanceService.h" />
+    <ClInclude Include="Generation\PackingServices\DistanceServices\Headers\CellListNeighborProvider.h" />
+    <ClInclude Include="Generation\PackingServices\DistanceServices\Headers\ClosestPairProvider.h" />
+    <ClInclude Include="Generation\PackingServices\DistanceServices\Headers\DistanceService.h" />
+    <ClInclude Include="Generation\PackingServices\DistanceServices\Headers\IClosestPairProvider.h" />
+    <ClInclude Include="Generation\PackingServices\DistanceServices\Headers\INeighborProvider.h" />
+    <ClInclude Include="Generation\PackingServices\DistanceServices\Headers\NaiveNeighborProvider.h" />
+    <ClInclude Include="Generation\PackingServices\DistanceServices\Headers\VerletListNeighborProvider.h" />
+    <ClInclude Include="Generation\PackingServices\EnergyServices\Headers\BezrukovPotential.h" />
+    <ClInclude Include="Generation\PackingServices\EnergyServices\Headers\EnergyService.h" />
+    <ClInclude Include="Generation\PackingServices\EnergyServices\Headers\HarmonicPotential.h" />
+    <ClInclude Include="Generation\PackingServices\EnergyServices\Headers\IEnergyService.h" />
+    <ClInclude Include="Generation\PackingServices\EnergyServices\Headers\ImpermeableAttractionPotential.h" />
+    <ClInclude Include="Generation\PackingServices\EnergyServices\Headers\IPairPotential.h" />
+    <ClInclude Include="Generation\PackingServices\EnergyServices\Headers\NoRattlersEnergyService.h" />
+    <ClInclude Include="Generation\PackingServices\Headers\GeometryCollisionService.h" />
+    <ClInclude Include="Generation\PackingServices\Headers\GeometryService.h" />
+    <ClInclude Include="Generation\PackingServices\Headers\IContextDependentService.h" />
+    <ClInclude Include="Generation\PackingServices\Headers\IParticleService.h" />
+    <ClInclude Include="Generation\PackingServices\Headers\MathService.h" />
+    <ClInclude Include="Generation\PackingServices\Headers\PackingSerializer.h" />
+    <ClInclude Include="Generation\PackingServices\PostProcessing\Headers\HessianService.h" />
+    <ClInclude Include="Generation\PackingServices\PostProcessing\Headers\InsertionRadiiGenerator.h" />
+    <ClInclude Include="Generation\PackingServices\PostProcessing\Headers\MolecularDynamicsService.h" />
+    <ClInclude Include="Generation\PackingServices\PostProcessing\Headers\OrderService.h" />
+    <ClInclude Include="Generation\PackingServices\PostProcessing\Headers\PressureService.h" />
+    <ClInclude Include="Generation\PackingServices\PostProcessing\Headers\RattlerRemovalService.h" />
+    <ClInclude Include="Parallelism\Headers\ILoadBalancer.h" />
+    <ClInclude Include="Parallelism\Headers\ITask.h" />
+    <ClInclude Include="Parallelism\Headers\ITaskFactory.h" />
+    <ClInclude Include="Parallelism\Headers\ITaskManager.h" />
+    <ClInclude Include="Parallelism\Headers\RandomLoadBalancer.h" />
+    <ClInclude Include="Parallelism\Headers\TaskManager.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Core\Geometry\Source\GeometryParameters.cpp" />
+    <ClCompile Include="Core\Lattice\Source\ColumnMajorIndexingProvider.cpp" />
+    <ClCompile Include="Core\Lattice\Source\D3Q27Lattice.cpp" />
+    <ClCompile Include="Core\Lattice\Source\LatticeIndexingProvider.cpp" />
+    <ClCompile Include="Core\Source\EndiannessProvider.cpp" />
+    <ClCompile Include="Core\Source\Exceptions.cpp" />
+    <ClCompile Include="Core\Source\Math.cpp" />
+    <ClCompile Include="Core\Source\MpiManager.cpp" />
+    <ClCompile Include="Core\Source\Path.cpp" />
+    <ClCompile Include="Core\Source\VectorUtilities.cpp" />
+    <ClCompile Include="Execution\Source\PackingGenerationTask.cpp" />
+    <ClCompile Include="Execution\Source\PackingTaskFactory.cpp" />
+    <ClCompile Include="Main.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugTests|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseTests|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Generation\GenerationManager.cpp" />
+    <ClCompile Include="Generation\Geometries\Source\BaseGeometry.cpp" />
+    <ClCompile Include="Generation\Geometries\Source\BulkGeometry.cpp" />
+    <ClCompile Include="Generation\Geometries\Source\CircleGeometry.cpp" />
+    <ClCompile Include="Generation\Geometries\Source\RectangleGeometry.cpp" />
+    <ClCompile Include="Generation\Geometries\Source\TrapezoidGeometry.cpp" />
+    <ClCompile Include="Generation\Model\Source\Config.cpp" />
+    <ClCompile Include="Generation\PackingGenerators\InitialGenerators\Source\BulkPoissonGenerator.cpp" />
+    <ClCompile Include="Generation\PackingGenerators\InitialGenerators\Source\BulkPoissonInCellsGenerator.cpp" />
+    <ClCompile Include="Generation\PackingGenerators\InitialGenerators\Source\HcpGenerator.cpp" />
+    <ClCompile Include="Generation\PackingGenerators\LubachevsckyStillinger\Source\BaseEventProcessor.cpp" />
+    <ClCompile Include="Generation\PackingGenerators\LubachevsckyStillinger\Source\BaseEventProvider.cpp" />
+    <ClCompile Include="Generation\PackingGenerators\LubachevsckyStillinger\Source\CollisionEventProcessor.cpp" />
+    <ClCompile Include="Generation\PackingGenerators\LubachevsckyStillinger\Source\CollisionEventProvider.cpp" />
+    <ClCompile Include="Generation\PackingGenerators\LubachevsckyStillinger\Source\CompositeEventProcessor.cpp" />
+    <ClCompile Include="Generation\PackingGenerators\LubachevsckyStillinger\Source\CompositeEventProvider.cpp" />
+    <ClCompile Include="Generation\PackingGenerators\LubachevsckyStillinger\Source\LubachevsckyStillingerStep.cpp" />
+    <ClCompile Include="Generation\PackingGenerators\LubachevsckyStillinger\Source\MoveEventProcessor.cpp" />
+    <ClCompile Include="Generation\PackingGenerators\LubachevsckyStillinger\Source\NeighborTransferEventProcessor.cpp" />
+    <ClCompile Include="Generation\PackingGenerators\LubachevsckyStillinger\Source\NeighborTransferEventProvider.cpp" />
+    <ClCompile Include="Generation\PackingGenerators\LubachevsckyStillinger\Source\ParticleCollisionService.cpp" />
+    <ClCompile Include="Generation\PackingGenerators\LubachevsckyStillinger\Source\Types.cpp" />
+    <ClCompile Include="Generation\PackingGenerators\LubachevsckyStillinger\Source\VelocityService.cpp" />
+    <ClCompile Include="Generation\PackingGenerators\LubachevsckyStillinger\Source\VoronoiTesselationProvider.cpp" />
+    <ClCompile Include="Generation\PackingGenerators\LubachevsckyStillinger\Source\VoronoiTransferEventProcessor.cpp" />
+    <ClCompile Include="Generation\PackingGenerators\LubachevsckyStillinger\Source\VoronoiTransferEventProvider.cpp" />
+    <ClCompile Include="Generation\PackingGenerators\LubachevsckyStillinger\Source\WallTransferEventProcessor.cpp" />
+    <ClCompile Include="Generation\PackingGenerators\LubachevsckyStillinger\Source\WallTransferEventProvider.cpp" />
+    <ClCompile Include="Generation\PackingGenerators\Source\BaseConjugateGradientStep.cpp" />
+    <ClCompile Include="Generation\PackingGenerators\Source\BasePackingStep.cpp" />
+    <ClCompile Include="Generation\PackingGenerators\Source\BezrukovJodreyToryStep.cpp" />
+    <ClCompile Include="Generation\PackingGenerators\Source\DecreasingConjugateGradientStep.cpp" />
+    <ClCompile Include="Generation\PackingGenerators\Source\DensificationStep.cpp" />
+    <ClCompile Include="Generation\PackingGenerators\Source\IncreasingConjugateGradientStep.cpp" />
+    <ClCompile Include="Generation\PackingGenerators\Source\KhirevichJodreyToryStep.cpp" />
+    <ClCompile Include="Generation\PackingGenerators\Source\MonteCarloStep.cpp" />
+    <ClCompile Include="Generation\PackingGenerators\Source\OriginalJodreyToryStep.cpp" />
+    <ClCompile Include="Generation\PackingGenerators\Source\PackingGenerator.cpp" />
+    <ClCompile Include="Generation\PackingGenerators\Source\SimpleConjugateGradientStep.cpp" />
+    <ClCompile Include="Generation\PackingServices\DistanceServices\Source\BaseDistanceService.cpp" />
+    <ClCompile Include="Generation\PackingServices\DistanceServices\Source\CellListNeighborProvider.cpp" />
+    <ClCompile Include="Generation\PackingServices\DistanceServices\Source\ClosestPairProvider.cpp" />
+    <ClCompile Include="Generation\PackingServices\DistanceServices\Source\DistanceService.cpp" />
+    <ClCompile Include="Generation\PackingServices\DistanceServices\Source\NaiveNeighborProvider.cpp" />
+    <ClCompile Include="Generation\PackingServices\DistanceServices\Source\VerletListNeighborProvider.cpp" />
+    <ClCompile Include="Generation\PackingServices\EnergyServices\Source\BezrukovPotential.cpp" />
+    <ClCompile Include="Generation\PackingServices\EnergyServices\Source\EnergyService.cpp" />
+    <ClCompile Include="Generation\PackingServices\EnergyServices\Source\HarmonicPotential.cpp" />
+    <ClCompile Include="Generation\PackingServices\EnergyServices\Source\ImpermeableAttractionPotential.cpp" />
+    <ClCompile Include="Generation\PackingServices\EnergyServices\Source\NoRattlersEnergyService.cpp" />
+    <ClCompile Include="Generation\PackingServices\PostProcessing\Source\HessianService.cpp" />
+    <ClCompile Include="Generation\PackingServices\PostProcessing\Source\InsertionRadiiGenerator.cpp" />
+    <ClCompile Include="Generation\PackingServices\PostProcessing\Source\MolecularDynamicsService.cpp" />
+    <ClCompile Include="Generation\PackingServices\PostProcessing\Source\OrderService.cpp" />
+    <ClCompile Include="Generation\PackingServices\PostProcessing\Source\PressureService.cpp" />
+    <ClCompile Include="Generation\PackingServices\PostProcessing\Source\RattlerRemovalService.cpp" />
+    <ClCompile Include="Generation\PackingServices\Source\GeometryCollisionService.cpp" />
+    <ClCompile Include="Generation\PackingServices\Source\GeometryService.cpp" />
+    <ClCompile Include="Generation\PackingServices\Source\MathService.cpp" />
+    <ClCompile Include="Generation\PackingServices\Source\PackingSerializer.cpp" />
+    <ClCompile Include="Parallelism\Source\RandomLoadBalancer.cpp" />
+    <ClCompile Include="Parallelism\Source\TaskManager.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

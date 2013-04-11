@@ -1,0 +1,104 @@
+﻿This document describes high-level architecture of PackingGeneration.
+
+Table of Contents:
+I. General points
+II. Points specific to the project
+
+I. General points
+=================
+
+1. OOP is used, TDD is used (or at least program is designed to support TDD), interface-driven 
+development is used. Domain-driven design is used. Service-layered architecture is used.
+
+2. Google C++ style guidelines are used, with amendments:
+
+	1. C#-similar naming conventions are followed, see 
+	http://msdn.microsoft.com/en-us/library/xzf533w0(v=vs.71).aspx or 
+	http://msdn.microsoft.com/en-us/library/vstudio/ms229002(v=vs.100).aspx:
+		- local function variables, private variables of classes are in camel case, 
+		- methods, classes, typedefs, structures, public structure variables are in pascal case, 
+		- define macroses and global constants are in caps. 
+		- No hungarian notations is used, no Type postfix is used.
+
+	2. Structured exception-handling is introduced in the project; for exception types see
+	Exceptions.h.
+
+	3. C# and Java-similar inheritance is used: no multiple inheritance of classes. If a class
+	contains just abstract methods (no fields, no implementations), it's called an interface, and 
+	its name is prefixed with "I" (ex. IPackingGenerator). Multiple interface inheritance is allowed.
+
+	4. Default copy constructors and assignment operators are used for simple structures (data 
+	containers, Data Transfer Objects).
+
+	5. I do use "using namespace XXX" in cpp files.
+
+3. (From Google C++ style guide). Every object has a single owner, therefore we don't need copy 
+constructors and assignment operators. They are explicilty disallowed for most objects (except DTO).
+
+4. How object ownership is transfered:
+
+	1. If an object A is passed (by pointer/reference) to the function B or constructor of an object C, 
+	this function B or object C do not own A and should never delete it.
+
+	2. If an object A creates an object B in the constructor, it owns it (obvious).
+
+	3. If a function creates an object, it owns it (obvious).
+
+	4. If an object's A method returns an object B by pointer to an object C,
+	ownership depends on semantics:
+		* For methods GetXXX, FindXXX, etc object A still owns the object B.
+		* For methods CreateXXX (usually if A is a factory) object C, not A, owns the object B.
+		* Therefore, the only case when you need smart pointers is for run-time polymorphic factory 
+		methods (other objects can be created with RAII). Still, the users of these polymorphic 
+		objects still receive a raw pointer, not a smart pointer.
+
+5. I prefer delegation (often of interfaces, by pointers) over template polymorphism, as
+
+	1. the delegated interface is explicit
+
+	2. it provides better compiler checks
+
+	3. it supports run-time delegation updates
+
+6. If an object A delegates functionality to an object B, better declare B as a pointer in A, pass 
+it to the constructor or create inside a constructor, not create it by value (though it still 
+conforms to the single owner principle), because it allows TDD (supplying stubs or mocks).
+
+II. Points specific to the project
+=================
+
+1. General architecture. 
+It's a standard layered architecture, common in Domain Driven Design (see, e.g. *Domain Driven 
+Design Quickly Online by Avram and Marinescu* http://www.infoq.com/minibooks/domain-driven-design-quickly; 
+*Patterns of Enterprise Architecture by Fowler*).
+
+	1. No UI layer, instead, a high-level client layer, file Main.cpp
+
+	2. Controllers layer, file GenerationManager.cpp
+
+	3. Domain Model aka Business Layer
+		- Services (Application Services)
+		- Model (Domain Data Objects, usually plain Data Transfer Objects)
+
+	4. No Data Access Layer :-), but Core utilities
+
+2. The basic project structure is from the Domain-Driven Design: Model (merely data transfer objects)
+and Services (see Domain-Driven Design Quickly book). Multiple model types are included in the file
+(Types.h) for simplicity, services include PackingGenerators and PackingServices (i.e. services over 
+packings). To reduce folder depth we omit the parent "Services" folder.
+
+3. Initialize method (and similar SetParticles, SetContext) is used along with constructors (in 
+almost all services) to support TDD: services are passed to other services for delegation in 
+constructors, at very first program stages (PackingGenerationTask; also, we could use IoC 
+frameworks), particles and config are not initialized yet (they will be created or deserialized by 
+certain services). So we need to pass them at later stages in Init, SetContext, SetParticles methods. 
+Such methods should be called from top to bottom over all delegated objects (e.g. 
+JoudreyToryGenerationStep should call SetParticles and SetContext over ClosestPairProvider and over 
+INeighborProvider internal objects; ClosestPairProvider should call the same methods over 
+INeighborProvider internal object).
+
+4. These top-down tree-like calls (similar to decorator pattern) may lead to small overehead at 
+initialization (and in StartMove/EndMove calls), as INeighborProvider is the same for 
+ClosestPairProvider and JoudreyToryGenerationStep. But this is an acceptable disadvantage.
+
+

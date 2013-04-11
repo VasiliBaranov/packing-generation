@@ -1,0 +1,102 @@
+﻿This document describes how to edit and build PackingGeneration.
+
+Table of Contents:
+I. Reading and editing
+II. Compiling
+III. Recommended workflow for Windows
+IV. Enabling special features
+V. Running tests
+
+I. Reading and editing
+=================
+
+The codes are supplied with an Eclipse CDT or PDT project and a Visual Studio solution at the root
+folder. Just open them and start reading or editing. Or simply use notepad++, Sublime Text, emacs or 
+vim. In Visual Studio you better select Show all files option for the project, because filters are 
+not implemented to mimic the file structure.
+
+II. Compiling
+=================
+
+No prerequisits are required to compile and link this program. The needed boost libraries are 
+shipped with the project. Some parts of the code use Gnu Scientific Library and LAPACK, but they are 
+optional and guarded with defines.
+
+For compiling for MPI you need to declare a special define in compiler options, PARALLEL 
+(see README.txt), as done in _ParallelIccDebug and _ParallelIccRelease. For compiling on 
+Windows you need to declare a special define in compiler options, WINDOWS, as done in Visual Studio 
+projects.
+
+
+1. Direct makefile compiling and linking
+-----------------
+
+Makefiles are stored inside folders with the underscore _ prefix; so just go to _Debug or _Release 
+folders and run make. On windows you will need MinSys or cygwin to do this.
+
+Folders _ParallelIccDebug and _ParallelIccRelease contain makefiles for building with Intel compiler 
+(icc) with an MPI wrapper (mpicpc).
+
+2. Visual Studio
+-----------------
+
+Just open the Visual Studio solution and run the needed build configuration
+
+3. Eclipse CDT or PDT
+-----------------
+
+Just add the existing Eclipse project to your workspace and run the needed build configuration.
+
+Eclipse project is set up to generate makefiles into the folders with underscore prefixes, and will 
+use them for building the project, so you won't have to generate makefiles manually or with 
+CMake/qmake/premake/SCons after editing the project. If you are using Windows, you will have to 
+install MinSys or Cygwin to compile and debug with Eclipse.
+
+III. Recommended workflow (at least for Windows)
+=================
+
+I found Eclipse CDT or PDT much better than Visual Studio for editing C++. I found installing cygwin 
+better and easier than installing MinSys (no tricks with Path variables, etc). Also, with Cygwin you 
+may be sure that your program will also compile on a true nix system with GCC.
+
+So, 
+1. install cygwin 
+2. install Eclipse CDT or PDT 
+3. edit PackingGeneration files, add files in Eclipse 
+4. build with Eclipse (makefiles will be added or updated) 
+5. commit updated and added makefiles to source control 
+6. use these makefiles on supercomputers or other nix machines 
+
+IV. Enabling special features
+=================
+
+Some parts of the code are optional, guarded with defines, and are not actually tested well. So you 
+need these steps only if you would like to make them work eventually.
+
+1. Gnu Scientific Library (GSL)
+-----------------
+
+It is used in *ConjugateGradient* generation algorithms (see *-cja* option in README.txt). 
+Install GSL on a local machine, update Visual Studio projects, Eclipse projects or makefiles manually 
+to point to GSL header files and libraries. Add GSL_AVAILABLE define in compiler options.
+
+2. LAPACK
+-----------------
+
+It is used in *hessian* calculation postprocessing (see *-hessian* option in README.txt). 
+Install LAPACK on a local machine, update Visual Studio projects, Eclipse projects or makefiles 
+manually to point to LAPACK header files and libraries. Add LAPACK_AVAILABLE define in compiler 
+options.
+
+V. Running tests
+=================
+
+The program contains some test cases. There are special build configuration for them (_DebugTests 
+and _ReleaseTests for Eclipse and manual runs; DebugTests and ReleaseTests for Visual Studio). Build 
+them and run the console applications. The tests are implemented as simple console applications (no 
+external libraries as CppUnit, boost::tests or google tests were used to minimize dependencies). 
+Tests exe should simply display "Success!" message. Always use both configurations for tests, 
+as release may expose certain bugs (e.g., after compiler optimizations) and debug may conduct 
+additional compiler checks.
+
+
