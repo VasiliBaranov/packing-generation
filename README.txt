@@ -5,14 +5,14 @@ The program allows hard-sphere packing generation and packing post-processing (s
 http://en.wikipedia.org/wiki/Sphere_packing and http://en.wikipedia.org/wiki/Random_close_pack).
 
 It supports Lubachevsky-Stillinger, Jodrey-Tory, and force-biased generation algorithms; it can
-calculate pore-size entropy, Steinhard Q6 global and local order measures, coordination numbers for
+calculate pore-size entropy, Steinhardt Q6 global and local order measures, coordination numbers for
 non-rattler particles, pair correlation function, structure factor, and reduced pressure after
 pressure equilibration. It doesn't require any preinstalled libraries, is multiplatform (Windows/nix)
 and can generate multiple packings simultaneously if compiled and run as an MPI application.
 
 It was developed by me (Vasili Baranau) while doing research on hard-sphere packings in the group of
 Prof. Dr. Ulrich Tallarek in Marburg, Germany, in 2012-2013. It is distributed under the MIT license
-(see [LICENSE.txt](LICENSE.txt)).
+(see LICENSE.txt).
 
 To get an overview of the group reserch directions, please see
 http://www.uni-marburg.de/fb15/ag-tallarek and http://www.khirevich.com.
@@ -30,12 +30,12 @@ Sample files, used or produced by the program, can be found in Docs/Examples.
 For program options and basic usage, please read further.
 
 Table of Contents:
-I. General information
+I. Program execution
 II. Packing generation
 III. Post-processing
 IV. Sample usage
 
-I. General information
+I. Program execution
 =================
 
 The program will examine the current folder and all its subfolders recursively for the file
@@ -110,7 +110,8 @@ or 2 (Poisson in cells, S). See *Khirevich et al. (2010) Statistical analysis of
 origin of short-range disorder, and its impact on eddy dispersion* for details. 
 This is the only optional parameter.
 
-Post-processing algorithms will use only Particles count, Packing size, Seed, Boundaries mode parameters.
+Post-processing algorithms will use only Particles count, Packing size, Seed, Boundaries mode
+parameters.
 
 II. Packing generation
 =================
@@ -129,9 +130,9 @@ Billiards and Similar Systems*; or *Skoge (2006) Packing hyperspheres in high-di
 spaces*. NOTE: Lubachevsky-Stillinger code will work correctly only when the initial packing has 
 relatively large density (0.4 - 0.6), otherwise collisions with far particles will be missed, because 
 far particles will not be included as possible neighbors by cell list or verlet list algorithms. 
-Therefore i used the following procedure: generated packings with force-biased algorithm (see below) 
-for densities 0.4-0.6, then called Lubachevsky-Stillinger algorithm. The same applies for the two 
-other Lubachevsky-Stillinger variations below (-lsgd and -lsebc).
+Therefore i used the following procedure: generated packings with the force-biased algorithm (see 
+below) for densities 0.4-0.6, then called Lubachevsky-Stillinger algorithm. The same applies for the 
+two other Lubachevsky-Stillinger variations below (-lsgd and -lsebc).
 
 2. PackingGeneration.exe -ls: same Lubachevsky-Stillinger.
 
@@ -190,7 +191,7 @@ Pore-size entropy of random hard-sphere packings*. They are saved in a binary fi
 *insertion_radii.txt* (as floating point numbers in double precision in little-endian byte order).
 
 2. -entropy [optional integer to specify min radii count]: calculates pore-size entropy at once by 
-the formula (12) from Baranau et al (2013) Pore-size entropy of random hard-sphere packings. The 
+the formula (12) from *Baranau et al (2013) Pore-size entropy of random hard-sphere packings*. The 
 factor alpha is chosen as 2. The radii count is selected dynamically, so that adding 10000 pores 
 changes the large pores quantity by no more than 1%. Optional integer will specify min pores quantity 
 to generate, it's 1e7 by default (therefore computation will consume several minutes). Entropy is 
@@ -203,8 +204,8 @@ first particle center to the second particle center (of unity length).
 
 4. -contraction: calculates energies of particle intersections after uniform packing contraction 
 (or, equivalently, radii increases), as if particles were supplied with potential. Uses second-order 
-harmonic potential (see Xu et. al. (2005) Random close packing revisited: Ways to pack frictionless 
-disks) and zero-order potential which is equivalent to calculating coordination number per particle. 
+harmonic potential (see *Xu et. al. (2005) Random close packing revisited: Ways to pack frictionless 
+disks*) and zero-order potential which is equivalent to calculating coordination number per particle. 
 For jammed packings coordination number should be close to 6. Results are saved into a text file 
 *contraction_energies.txt* with the following columns: contraction ratio (1 / strain rate), potential 
 order (0 or 2), total energy, non-rattler particles count, energy per non-rattler particle. 

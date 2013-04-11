@@ -15,7 +15,7 @@ folder. Just open them and start reading or editing. Or simply use notepad++, Su
 vim. In Visual Studio you better select Show all files option for the project, because filters are 
 not implemented to mimic the file structure.
 
-II. Compiling
+II. Compiling and linking
 =================
 
 No prerequisits are required to compile and link this program. The needed boost libraries are 
@@ -62,7 +62,7 @@ may be sure that your program will also compile on a true nix system with GCC.
 So, 
 1. install cygwin 
 2. install Eclipse CDT or PDT 
-3. edit PackingGeneration files, add files in Eclipse 
+3. edit PackingGeneration source, add source code files in Eclipse
 4. build with Eclipse (makefiles will be added or updated) 
 5. commit updated and added makefiles to source control 
 6. use these makefiles on supercomputers or other nix machines 
@@ -95,7 +95,7 @@ The program contains some test cases. There are special build configuration for 
 and _ReleaseTests for Eclipse and manual runs; DebugTests and ReleaseTests for Visual Studio). Build 
 them and run the console applications. The tests are implemented as simple console applications (no 
 external libraries as CppUnit, boost::tests or google tests were used to minimize dependencies). 
-Tests exe should simply display "Success!" message. Always use both configurations for tests, 
+Tests executable should simply display "Success!" message. Always use both configurations for tests, 
 as release may expose certain bugs (e.g., after compiler optimizations) and debug may conduct 
 additional compiler checks.
 
