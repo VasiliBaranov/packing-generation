@@ -4,7 +4,7 @@
 The program allows hard-sphere packing generation and packing post-processing (see
 http://en.wikipedia.org/wiki/Sphere_packing and http://en.wikipedia.org/wiki/Random_close_pack).
 
-It supports Lubachevsky-Stillinger, Jodrey-Tory, and force-biased generation algorithms; it can
+It supports Lubachevsky–Stillinger, Jodrey–Tory, and force-biased generation algorithms; it can
 calculate pore-size entropy, Steinhardt Q6 global and local order measures, coordination numbers for
 non-rattler particles, pair correlation function, structure factor, and reduced pressure after
 pressure equilibration. It doesn't require any preinstalled libraries, is multiplatform (Windows/nix)
@@ -124,25 +124,25 @@ successful, an error is issued and *packing.nfo* is not saved.
 
 Usage and options:
 
-1. PackingGeneration.exe: uses Lubachevsky-Stillinger algorithm. See *Lubachevscky, Stillinger 
+1. PackingGeneration.exe: uses Lubachevsky–Stillinger algorithm. See *Lubachevscky, Stillinger 
 (1990) Geometric properties of random disk packings*; or *Lubachevsky (1990) How to Simulate 
 Billiards and Similar Systems*; or *Skoge (2006) Packing hyperspheres in high-dimensional Euclidean 
-spaces*. NOTE: Lubachevsky-Stillinger code will work correctly only when the initial packing has 
+spaces*. NOTE: Lubachevsky–Stillinger code will work correctly only when the initial packing has 
 relatively large density (0.4 - 0.6), otherwise collisions with far particles will be missed, because 
 far particles will not be included as possible neighbors by cell list or verlet list algorithms. 
 Therefore i used the following procedure: generated packings with the force-biased algorithm (see 
-below) for densities 0.4-0.6, then called Lubachevsky-Stillinger algorithm. The same applies for the 
-two other Lubachevsky-Stillinger variations below (-lsgd and -lsebc).
+below) for densities 0.4-0.6, then called Lubachevsky–Stillinger algorithm. The same applies for the 
+two other Lubachevsky–Stillinger variations below (-lsgd and -lsebc).
 
-2. PackingGeneration.exe -ls: same Lubachevsky-Stillinger.
+2. PackingGeneration.exe -ls: same Lubachevsky–Stillinger.
 
-3. -lsgd: Lubachevsky-Stillinger with gradual densification: the LS generation is run until the 
+3. -lsgd: Lubachevsky–Stillinger with gradual densification: the LS generation is run until the 
 non-equilibrium reduced pressure is high enough (e.g., a conventional value of 1e12), then 
 compression rate is decreased (devided by 2) and the LS generation is run again, until the pressure 
 is high enough again; this procedure is repeated until the compression rate is low enough (1e-4). 
 The paper is not submitted yet.
 
-4. -lsebc: Lubachevsky-Stillinger with equilibration between compressions, we modified the LS 
+4. -lsebc: Lubachevsky–Stillinger with equilibration between compressions, we modified the LS 
 generation procedure and after each 20 collisions for each particle with compression we completely 
 equilibrate the packings. The equilibration is done by performing sets of 20 collisions for each 
 particle with zero compression rate in a loop until the relative difference of reduced pressures in 
@@ -156,15 +156,15 @@ Simulated Random Packings of Spheres*.
 
 NOTE: algorithms below have not been used by me for a long time and may not work well in some 
 special cases. If packings contain large intersections after generation, an error will be issued, 
-so you won't get incorrect results, but may still lose time. Anyway, original Jodrey-Tory and 
-Jodrey-Tory modification by Khirevich are much slower than LS and FBA and can't produce dense 
+so you won't get incorrect results, but may still lose time. Anyway, original Jodrey–Tory and 
+Jodrey–Tory modification by Khirevich are much slower than LS and FBA and can't produce dense 
 packings.
 
-6. -ojt: original Jodrey-Tory algorithm. See *Jodrey and Tory (1985) Computer simulation of close 
+6. -ojt: original Jodrey–Tory algorithm. See *Jodrey and Tory (1985) Computer simulation of close 
 random packing of equal spheres*; *Bargieł and Mościński (1991) C-language program for the irregular 
 close packing of hard spheres*.
 
-7. -kjt: Jodrey-Tory algorithm modification by Khirevich. See *Khirevich et al. (2010) Statistical 
+7. -kjt: Jodrey–Tory algorithm modification by Khirevich. See *Khirevich et al. (2010) Statistical 
 analysis of packed beds, the origin of short-range disorder, and its impact on eddy dispersion*.
 
 NOTE: algorithms below most certainly do not work well at all. They are left here just for your 
@@ -249,7 +249,7 @@ IV. Sample usage
 =================
 
 This section includes sample codes to do the following: generate initial force-biased algorithm 
-packing, then create a packing with a Lubachevsky-Stillinger protocol, then find the closest jamming 
+packing, then create a packing with a Lubachevsky–Stillinger protocol, then find the closest jamming 
 density for the LS packing by the LS with gradual densification protocol, then calculate Q6 local 
 and global order for the final packing.
 
