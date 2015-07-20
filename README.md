@@ -32,10 +32,10 @@ This code was initialy hosted on https://code.google.com/p/packing-generation/, 
 
 Table of Contents:
 
-1. [Program execution](https://github.com/VasiliBaranov/packing-generation#1-program-execution)
-2. [Packing generation](https://github.com/VasiliBaranov/packing-generation#2-packing-generation)
-3. [Post-processing](https://github.com/VasiliBaranov/packing-generation#3-post-processing)
-4. [Sample usage](https://github.com/VasiliBaranov/packing-generation#4-sample-usage)
+[1. Program execution](https://github.com/VasiliBaranov/packing-generation#1-program-execution)<br>
+[2. Packing generation](https://github.com/VasiliBaranov/packing-generation#2-packing-generation)<br>
+[3. Post-processing](https://github.com/VasiliBaranov/packing-generation#3-post-processing)<br>
+[4. Sample usage](https://github.com/VasiliBaranov/packing-generation#4-sample-usage)
 
 1. Program execution
 =================
@@ -68,25 +68,16 @@ little-endian format.
 1.2. *generation.conf* format (see also the Examples folder)
 -----------------
 
-> Particles count: 10000 
-
-> Packing size: 20.0823593086113 20.0823593086113 20.0823593086113 
-
-> Generation start: 0 
-
-> Seed: 341 
-
-> Steps to write: 1000 
-
-> Boundaries mode: 1 
-
-> Contraction rate: 1.328910e-005 
-
-> Generation mode: 1 
-
-> 1. boundaries mode: 1 - bulk; 2 - ellipse (inscribed in XYZ box, Z is length of an ellipse); 3 - rectangle 
-
-> 2. generationMode = 1 (Poisson, R) or 2 (Poisson in cells, S) 
+> Particles count: 10000 <br>
+> Packing size: 20.0823593086113 20.0823593086113 20.0823593086113 <br>
+> Generation start: 0 <br>
+> Seed: 341 <br>
+> Steps to write: 1000 <br>
+> Boundaries mode: 1 <br>
+> Contraction rate: 1.328910e-005 <br>
+> Generation mode: 1 <br>
+> 1. boundaries mode: 1 - bulk; 2 - ellipse (inscribed in XYZ box, Z is length of an ellipse); 3 - rectangle <br>
+> 2. generationMode = 1 (Poisson, R) or 2 (Poisson in cells, S) <br>
 
 1.3. Parameter description
 ------------------
@@ -264,11 +255,8 @@ packing, then create a packing with a Lubachevsky–Stillinger protocol, then fi
 density for the LS packing by the LS with gradual densification protocol, then calculate Q6 local 
 and global order for the final packing.
 
-PackingGeneration.exe -fba | tee log_fba.txt
-
-PackingGeneration.exe -ls | tee log_ls.txt
-
-PackingGeneration.exe -lsgd | tee log_lsgd.txt
-
+PackingGeneration.exe -fba | tee log_fba.txt <br>
+PackingGeneration.exe -ls | tee log_ls.txt <br>
+PackingGeneration.exe -lsgd | tee log_lsgd.txt <br>
 PackingGeneration.exe -order | tee log_entropy.txt
 
