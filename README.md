@@ -28,11 +28,14 @@ Sample files, used or produced by the program, can be found in Docs/Examples.
 
 For program options and basic usage, please read further.
 
+This code was initialy hosted on https://code.google.com/p/packing-generation/, before google closed the google code hosting.
+
 Table of Contents:
-1. [Program execution](https://github.com/VasiliBaranov/packing-generation#program-execution)
-2. [Packing generation](https://github.com/VasiliBaranov/packing-generation#packing-generation)
-3. [Post-processing](https://github.com/VasiliBaranov/packing-generation#post-processing)
-4. [Sample usage](https://github.com/VasiliBaranov/packing-generation#sample-usage)
+
+1. [Program execution](https://github.com/VasiliBaranov/packing-generation#1-program-execution)
+2. [Packing generation](https://github.com/VasiliBaranov/packing-generation#2-packing-generation)
+3. [Post-processing](https://github.com/VasiliBaranov/packing-generation#3-post-processing)
+4. [Sample usage](https://github.com/VasiliBaranov/packing-generation#4-sample-usage)
 
 1. Program execution
 =================
@@ -66,14 +69,23 @@ little-endian format.
 -----------------
 
 > Particles count: 10000 
+
 > Packing size: 20.0823593086113 20.0823593086113 20.0823593086113 
+
 > Generation start: 0 
+
 > Seed: 341 
+
 > Steps to write: 1000 
+
 > Boundaries mode: 1 
+
 > Contraction rate: 1.328910e-005 
+
 > Generation mode: 1 
+
 > 1. boundaries mode: 1 - bulk; 2 - ellipse (inscribed in XYZ box, Z is length of an ellipse); 3 - rectangle 
+
 > 2. generationMode = 1 (Poisson, R) or 2 (Poisson in cells, S) 
 
 1.3. Parameter description
@@ -252,8 +264,11 @@ packing, then create a packing with a Lubachevsky–Stillinger protocol, then fi
 density for the LS packing by the LS with gradual densification protocol, then calculate Q6 local 
 and global order for the final packing.
 
-PackingGeneration.exe -fba | tee log_fba.txt 
-PackingGeneration.exe -ls | tee log_ls.txt 
-PackingGeneration.exe -lsgd | tee log_lsgd.txt 
-PackingGeneration.exe -order | tee log_entropy.txt 
+PackingGeneration.exe -fba | tee log_fba.txt
+
+PackingGeneration.exe -ls | tee log_ls.txt
+
+PackingGeneration.exe -lsgd | tee log_lsgd.txt
+
+PackingGeneration.exe -order | tee log_entropy.txt
 
