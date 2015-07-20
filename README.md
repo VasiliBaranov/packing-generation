@@ -20,9 +20,9 @@ If you use this program in research projects, please cite the paper *Baranau et 
 entropy of random hard-sphere packings*; DOI 10.1039/C3SM27374A;
 http://pubs.rsc.org/en/content/articlelanding/2013/sm/c3sm27374a.
 
-For building the program, please read Docs/Building.txt.
+For building the program, please read the [Compilation](https://github.com/VasiliBaranov/packing-generation/wiki/Compilation) wiki page or the [Docs/Compilation.txt](https://github.com/VasiliBaranov/packing-generation/tree/master/Docs/Compilation.txt) source file.
 
-If you would like to understand the code or update it, please read Docs/Architecture.txt.
+If you would like to understand the code or update it, please read the [Architecture](https://github.com/VasiliBaranov/packing-generation/wiki/Architecture) wiki page or the [Docs/Architecture.txt](https://github.com/VasiliBaranov/packing-generation/tree/master/Docs/Architecture.txt) source file.
 
 Sample files, used or produced by the program, can be found in Docs/Examples.
 
@@ -30,12 +30,11 @@ For program options and basic usage, please read further.
 
 This code was initialy hosted on https://code.google.com/p/packing-generation/, before google closed the google code hosting.
 
-Table of Contents:
-
-[1. Program execution](https://github.com/VasiliBaranov/packing-generation#1-program-execution)<br>
-[2. Packing generation](https://github.com/VasiliBaranov/packing-generation#2-packing-generation)<br>
-[3. Post-processing](https://github.com/VasiliBaranov/packing-generation#3-post-processing)<br>
-[4. Sample usage](https://github.com/VasiliBaranov/packing-generation#4-sample-usage)
+Table of Contents:<br><br>
+1. [Program execution](https://github.com/VasiliBaranov/packing-generation#1-program-execution)<br>
+2. [Packing generation](https://github.com/VasiliBaranov/packing-generation#2-packing-generation)<br>
+3. [Post-processing](https://github.com/VasiliBaranov/packing-generation#3-post-processing)<br>
+4. [Sample usage](https://github.com/VasiliBaranov/packing-generation#4-sample-usage)
 
 1. Program execution
 =================
