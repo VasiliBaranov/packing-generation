@@ -17,6 +17,16 @@ If you use this program in research projects, please **cite the paper**
 Or, alternatively, *Baranau et al. (2013) Pore-size entropy of random hard-sphere packings*; 
 [doi:10.1039/C3SM27374A](http://pubs.rsc.org/en/content/articlelanding/2013/sm/c3sm27374a).
 
+Sample generated packings look like this:
+
+![SamplePackings](https://github.com/VasiliBaranov/packing-generation/blob/master/Docs/SamplePackings.png)
+Left: a monodisperse packing of 10000 particles; 
+taken from [Fig. 1](http://pubs.rsc.org/en/content/articlehtml/2016/sm/c6sm00567e#imgfig1) in 
+[Baranau et al., 2016](http://pubs.rsc.org/en/content/articlelanding/2016/sm/c6sm00567e). 
+Right: a polydisperse packing of 10000 particles; 
+taken from [Fig. 1](http://pubs.rsc.org/en/content/articlehtml/2014/sm/c3sm52959b#imgfig1) in 
+[Baranau and Tallarek, 2014](http://pubs.rsc.org/en/content/articlelanding/2014/sm/c3sm52959b).
+
 For building the program, please read the 
 [Compilation](https://github.com/VasiliBaranov/packing-generation/wiki/Compilation) wiki page or the 
 [Docs/Compilation.txt](https://github.com/VasiliBaranov/packing-generation/tree/master/Docs/Compilation.txt) source file.
