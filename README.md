@@ -30,14 +30,14 @@ For program options and basic usage, please read further.
 
 This code was initialy hosted on https://code.google.com/p/packing-generation/, before google closed the google code hosting.
 
-Table of Contents:<br><br>
-1. [Program execution](https://github.com/VasiliBaranov/packing-generation#1-program-execution)<br>
-2. [Packing generation](https://github.com/VasiliBaranov/packing-generation#2-packing-generation)<br>
-3. [Post-processing](https://github.com/VasiliBaranov/packing-generation#3-post-processing)<br>
+Table of Contents:
+
+1. [Program execution](https://github.com/VasiliBaranov/packing-generation#1-program-execution)
+2. [Packing generation](https://github.com/VasiliBaranov/packing-generation#2-packing-generation)
+3. [Post-processing](https://github.com/VasiliBaranov/packing-generation#3-post-processing)
 4. [Sample usage](https://github.com/VasiliBaranov/packing-generation#4-sample-usage)
 
-1. Program execution
-=================
+# 1. Program execution
 
 The program will examine the current folder and all its subfolders recursively for the file
 *generation.conf* and run generation (or post-processing) algorithm for each of these files.
@@ -55,8 +55,7 @@ the program.
 The program doesn't write log to a file automatically, use nix pipes instead, e.g.,
 PackingGeneration.exe > log.txt or PackingGeneration.exe | tee log.txt.
 
-1.1. Packing file format
------------------
+## 1.1. Packing file format
 
 The program will read and write all the packings in the following file format: It should be a binary
 file which stores sequentially sphere center x, y, z coordinates and diameter for each particle as
@@ -64,8 +63,7 @@ floating points in double precision in little-endian byte order. If the machine 
 is being run is big-endian, the program will detect it and will still read and write in
 little-endian format.
 
-1.2. *generation.conf* format (see also the Examples folder)
------------------
+## 1.2. *generation.conf* format (see also the Examples folder)
 
 > Particles count: 10000 <br>
 > Packing size: 20.0823593086113 20.0823593086113 20.0823593086113 <br>
@@ -78,8 +76,7 @@ little-endian format.
 > 1. boundaries mode: 1 - bulk; 2 - ellipse (inscribed in XYZ box, Z is length of an ellipse); 3 - rectangle <br>
 > 2. generationMode = 1 (Poisson, R) or 2 (Poisson in cells, S) <br>
 
-1.3. Parameter description
-------------------
+## 1.3. Parameter description
 
 All floating-point parameters support exponential and decimal notations (%g format in printf).
 
@@ -114,8 +111,7 @@ This is the only optional parameter.
 Post-processing algorithms will use only Particles count, Packing size, Seed, Boundaries mode
 parameters.
 
-2. Packing generation
-=================
+# 2. Packing generation
 
 After successful packing generation the program will write an additional file *packing.nfo* with 
 packing generation statistics. At the end of every generation the program searches for the closest 
@@ -178,8 +174,7 @@ the construction of random bead packs*. It produces highly crystalline packings.
 pack frictionless disks*; and other papers by O'Hern. This algorithm requires GNU Scientific library, 
 and also some updates to compiling and linking options (see Docs/Building.txt).
 
-3. Post-processing
-=================
+# 3. Post-processing
 
 The program will run post-processing just in those packing folders, that contain *packing.nfo* files.
 
@@ -246,8 +241,7 @@ according to your own needs.
 Ways to pack frictionless disks*). Writes the matrix to a text file *hessian.txt*. It requires 
 LAPACK, and also some updates to compiling and linking options (see Docs/Building.txt).
 
-4. Sample usage
-=================
+# 4. Sample usage
 
 This section includes sample codes to do the following: generate initial force-biased algorithm 
 packing, then create a packing with a Lubachevsky–Stillinger protocol, then find the closest jamming 
