@@ -45,7 +45,7 @@ before Google closed the Google Code hosting.
 2. [Latest release](https://github.com/VasiliBaranov/packing-generation/releases/latest)
 3. [Wiki](https://github.com/VasiliBaranov/packing-generation/wiki)
 4. [Example](https://github.com/VasiliBaranov/packing-generation/tree/master/Docs/Examples): Sample files, used and produced by the program
-5. [Matlab scripts for reading resulting packings](https://github.com/VasiliBaranov/packing-generation/tree/master/Docs/MATLAB%20scripts%20for%20interpreting%20results)
+5. [Matlab scripts for reading resulting packings](https://github.com/VasiliBaranov/packing-generation/tree/master/Docs/MATLAB%20scripts%20for%20interpreting%20results) (the [main script file](https://github.com/VasiliBaranov/packing-generation/blob/master/Docs/MATLAB%20scripts%20for%20interpreting%20results/ReadPackingScript.m))
 
 ___
 Table of contents for the contents below:
@@ -248,7 +248,7 @@ and also some updates to compiling and linking options (see the
 
 The program will run post-processing just in those packing folders, that contain *packing.nfo* files.
 To do the post processing after generation, you have to **manually scale particle diameters** after generation, 
-as explained in the [note on final diameters](https://github.com/VasiliBaranov/packing-generation#2-packing-generation).
+as explained in the [note on final diameters](https://github.com/VasiliBaranov/packing-generation#21-note-on-final-diameters).
 Though it is not crucial for post-processing types that depend only on particle positions (like *-directions* 
 or *-order* below).
 
@@ -336,4 +336,12 @@ and global order for the final packing.
 PackingGeneration.exe -fba | tee log_fba.txt <br>
 PackingGeneration.exe -ls | tee log_ls.txt <br>
 PackingGeneration.exe -lsgd | tee log_lsgd.txt <br>
+Rescale particle diameters as done in the [MATLAB script](https://github.com/VasiliBaranov/packing-generation/blob/master/Docs/MATLAB%20scripts%20for%20interpreting%20results/ReadPackingScript.m) and explained in the [note on final diameters](https://github.com/VasiliBaranov/packing-generation#21-note-on-final-diameters) <br>
 PackingGeneration.exe -order | tee log_entropy.txt
+
+As explained in the [note on final diameters](https://github.com/VasiliBaranov/packing-generation#21-note-on-final-diameters),
+you can omit rescaling the packing between different generation steps (*-fba*, *-ls*, *-lsgd*) because each of them scales 
+the packing prior to generation anyway. When using only the Q6 order measure (*-order*), you can actually omit rescaling the 
+packing at all, because *-order* depends only on particle positions and not on diameters, 
+but rescaling is needed in the general case, of course.
+
