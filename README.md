@@ -27,6 +27,8 @@ Right: a polydisperse packing of 10000 particles;
 taken from [Fig. 1](http://pubs.rsc.org/en/content/articlehtml/2014/sm/c3sm52959b#imgfig1) in 
 [Baranau and Tallarek, 2014](http://pubs.rsc.org/en/content/articlelanding/2014/sm/c3sm52959b).
 
+For program options and basic usage, please read further.
+
 For building the program, please read the 
 [Compilation](https://github.com/VasiliBaranov/packing-generation/wiki/Compilation) wiki page or the 
 [Docs/Compilation.txt](https://github.com/VasiliBaranov/packing-generation/tree/master/Docs/Compilation.txt) source file.
@@ -35,15 +37,18 @@ If you would like to understand the code or update it, please read the
 [Architecture](https://github.com/VasiliBaranov/packing-generation/wiki/Architecture) wiki page or the 
 [Docs/Architecture.txt](https://github.com/VasiliBaranov/packing-generation/tree/master/Docs/Architecture.txt) source file.
 
-Sample files, used or produced by the program, can be found in 
-[Docs/Examples](https://github.com/VasiliBaranov/packing-generation/tree/master/Docs/Examples).
-
-For program options and basic usage, please read further.
-
 This code was initialy hosted on [Google Code](https://code.google.com/p/packing-generation/), 
 before Google closed the Google Code hosting.
 
-Table of Contents:
+# Main links in the project
+1. This page, below : program options, their description, and basic usage
+2. [Latest release](https://github.com/VasiliBaranov/packing-generation/releases/latest)
+3. [Wiki](https://github.com/VasiliBaranov/packing-generation/wiki)
+4. [Example](https://github.com/VasiliBaranov/packing-generation/tree/master/Docs/Examples): Sample files, used and produced by the program
+5. [Matlab scripts for reading resulting packings](https://github.com/VasiliBaranov/packing-generation/tree/master/Docs/MATLAB%20scripts%20for%20interpreting%20results)
+
+___
+Table of contents for the contents below:
 
 1. [Program execution](https://github.com/VasiliBaranov/packing-generation#1-program-execution)
 2. [Packing generation](https://github.com/VasiliBaranov/packing-generation#2-packing-generation)
