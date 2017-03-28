@@ -3,7 +3,7 @@
 The program allows hard-sphere packing generation and packing post-processing (see the [sphere packing](
 http://en.wikipedia.org/wiki/Sphere_packing) and the [random-close packing](http://en.wikipedia.org/wiki/Random_close_pack) wikipedia pages).
 
-It supports Lubachevsky–Stillinger, Jodrey–Tory, and force-biased generation algorithms; it can
+It supports the Lubachevsky–Stillinger, Jodrey–Tory, and force-biased generation algorithms; it can
 calculate the particle insertion probability, Steinhardt Q6 global and local order measures, coordination numbers for
 non-rattler particles, pair correlation function, structure factor, and reduced pressure after
 pressure equilibration. It doesn't require any preinstalled libraries and is multiplatform (Windows/nix).
@@ -25,7 +25,8 @@ If you would like to understand the code or update it, please read the
 [Architecture](https://github.com/VasiliBaranov/packing-generation/wiki/Architecture) wiki page or the 
 [Docs/Architecture.txt](https://github.com/VasiliBaranov/packing-generation/tree/master/Docs/Architecture.txt) source file.
 
-Sample files, used or produced by the program, can be found in Docs/Examples.
+Sample files, used or produced by the program, can be found in 
+[Docs/Examples](https://github.com/VasiliBaranov/packing-generation/tree/master/Docs/Examples).
 
 For program options and basic usage, please read further.
 
@@ -46,7 +47,9 @@ The program will examine the current folder and all its subfolders recursively f
 
 All the packing generation and post-processing algorithms are serial (non-parallel).
 
-If the program is compiled and is run as an MPI application (see Docs/Building.txt),
+If the program is compiled and is run as an MPI application (see the 
+[compilation wiki page](https://github.com/VasiliBaranov/packing-generation/wiki/Compilation) or
+[Docs/Compilation.txt](https://github.com/VasiliBaranov/packing-generation/tree/master/Docs/Compilation.txt)),
 the packings to be generated or analyzed will be distributed randomly and evenly by MPI processes
 (some supercomputers do not allow single process program runs, some may simply have higher priority
 for MPI jobs).
@@ -189,7 +192,9 @@ It produces highly crystalline packings.
 *Xu et. al. (2005) Random close packing revisited: Ways to pack frictionless disks*, 
 [doi:10.1103/PhysRevE.71.061306](http://link.aps.org/doi/10.1103/PhysRevE.71.061306)
 and other papers by O'Hern. This algorithm requires GNU Scientific library, 
-and also some updates to compiling and linking options (see Docs/Building.txt).
+and also some updates to compiling and linking options (see the 
+[compilation wiki page](https://github.com/VasiliBaranov/packing-generation/wiki/Compilation) or
+[Docs/Compilation.txt](https://github.com/VasiliBaranov/packing-generation/tree/master/Docs/Compilation.txt)).
 
 # 3. Post-processing
 
@@ -265,7 +270,9 @@ according to your own needs.
 (see *Xu et. al. (2005) Random close packing revisited: Ways to pack frictionless disks*, 
 [doi:10.1103/PhysRevE.71.061306](http://link.aps.org/doi/10.1103/PhysRevE.71.061306)). 
 Writes the matrix to a text file *hessian.txt*. It requires 
-LAPACK, and also some updates to compiling and linking options (see Docs/Building.txt).
+LAPACK, and also some updates to compiling and linking options (see the 
+[compilation wiki page](https://github.com/VasiliBaranov/packing-generation/wiki/Compilation) or
+[Docs/Compilation.txt](https://github.com/VasiliBaranov/packing-generation/tree/master/Docs/Compilation.txt)).
 
 # 4. Sample usage
 
