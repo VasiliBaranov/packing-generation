@@ -131,15 +131,48 @@ This is the only optional parameter.
 Post-processing algorithms will use only Particles count, Packing size, Seed, Boundaries mode
 parameters.
 
+## 1.4. Note on final diameters
+
+If you specify the desired diameters through *diameters.txt* or *packing.xyzd*, 
+this does not mean that the final packing will possess them. The final diameters will only be *proportional* to them. 
+*I.e.*, you specify the diameters up to a constant scaling factor (unknown before generation).
+
+In general, at the beginning of generation all algorithms select some initial scaling factor to make the closest pair 
+of particles touch each other (this scaling factor will be small for Poisson configurations). Then, they gradually increase 
+this scaling factor during the generation until the termination criterion is met. The final scaling factor will usually 
+be below unity, but it can in principle also reach values higher than unity.
+
+In case of the Lubachevsky--Stillinger algorithm, the final scaling factor is determined by the contraction rate 
+(the lower the rate, the larger the final diameters). In case of the force-biased algorithm, 
+the final scaling factor is determined by the contraction rate and indirectly by the original diameters 
+(more precisely, by the original packing density as expected from the original diameters). The higher the original density, 
+the higher the final density. The lower the contraction rate, the closer the final density is to the original density. 
+See the papers in the descriptions of the algorithms below for details.
+
 # 2. Packing generation
 
-After successful packing generation the program will write an additional file *packing.nfo* with 
+After a successful packing generation the program will write an additional file *packing.nfo* with 
 packing generation statistics. At the end of every generation the program searches for the closest 
-pair by the most naive implementation (two nested cycles by particles). If the program finds a pair 
+pair of particles by the most naive implementation (two nested cycles by particles). If the program finds a pair 
 of particles that are closer than expected by the generation algorithm, the generation is not 
 successful, an error is issued and *packing.nfo* is not saved.
 
-Usage and options:
+## 2.1. Note on final diameters
+
+As mentioned, the final diameters after generation will only be proportinal to the 
+original ones. The final packing file will store correct particle centers, but due to historical reasons i do not scale 
+the diameters in the output packing file with the final scaling factor. I.e., they will be the same as in the diameters.txt or 
+the original packing.xyzd (if they were present). You have to **scale the diameters manually** as explained in the 
+[script for reading packings](https://github.com/VasiliBaranov/packing-generation/blob/master/Docs/MATLAB%20scripts%20for%20interpreting%20results/ReadPackingScript.m). 
+Basically, you have to multiply the diameters by 
+*(finalDensity / theoreticalDensity)^(1/3) = ((1 - finalPorosity) / (1 - theoreticalPorosity))^(1/3)* 
+where the values of *finalPorosity* and *theoreticalPorosity* can be taken from the *packing.nfo* file.
+
+At the same time, because all generation algorithms select the initial scaling factor (prior to generation) to make 
+the closest pair of particles touch each other, you may run one generation algorithm after another without 
+manually rescaling the diameters, because the proper initial scaling factor will anyway be ensured. 
+
+## 2.2. Program usage and options for generation
 
 1. PackingGeneration.exe: uses Lubachevsky–Stillinger algorithm. See *Lubachevsky, Stillinger 
 (1990) Geometric properties of random disk packings*, [doi:10.1007/BF01025983](http://dx.doi.org/10.1007/BF01025983); 
@@ -156,14 +189,20 @@ two other Lubachevsky–Stillinger variations below (-lsgd and -lsebc).
 
 2. PackingGeneration.exe -ls: same Lubachevsky–Stillinger.
 
-3. -lsgd: Lubachevsky–Stillinger with gradual densification: the LS generation is run until the 
+3. -fba: force-biased algorithm. See 
+*Mościński et al (1989) The Force-Biased Algorithm for the Irregular Close Packing of Equal Hard Spheres*, 
+[doi:10.1080/08927028908031373](http://www.tandfonline.com/doi/abs/10.1080/08927028908031373); 
+*Bezrukov et al (2002) Statistical Analysis of Simulated Random Packings of Spheres*, 
+[doi:10.1002/1521-4117(200205)19:2&lt;111::AID-PPSC111&gt;3.0.CO;2-M](http://onlinelibrary.wiley.com/doi/10.1002/1521-4117(200205)19:2&lt;111::AID-PPSC111&gt;3.0.CO;2-M/abstract) (yes, that's the real doi).
+
+4. -lsgd: Lubachevsky–Stillinger with gradual densification: the LS generation is run until the 
 non-equilibrium reduced pressure is high enough (e.g., a conventional value of 1e12), then 
 compression rate is decreased (devided by 2) and the LS generation is run again, until the pressure 
 is high enough again; this procedure is repeated until the compression rate is low enough (1e-4). 
 See *Baranau and Tallarek (2014) Random-close packing limits for monodisperse and polydisperse hard spheres*, 
 [doi:10.1039/C3SM52959B](http://pubs.rsc.org/en/content/articlelanding/2014/sm/c3sm52959b).
 
-4. -lsebc: Lubachevsky–Stillinger with equilibration between compressions, we modified the LS 
+5. -lsebc: Lubachevsky–Stillinger with equilibration between compressions, we modified the LS 
 generation procedure and after each 20 collisions for each particle with compression we completely 
 equilibrate the packings. The equilibration is done by performing sets of 20 collisions for each 
 particle with zero compression rate in a loop until the relative difference of reduced pressures in 
@@ -171,12 +210,6 @@ the last two sets is less than 1%, so the pressure is stationary. When a packing
 we perform collisions with compression again. 
 See *Baranau et al (2013) Pore-size entropy of random hard-sphere packings*, 
 [doi:10.1039/C3SM27374A](http://pubs.rsc.org/en/content/articlelanding/2013/sm/c3sm27374a).
-
-5. -fba: force-biased algorithm. See 
-*Mościński et al (1989) The Force-Biased Algorithm for the Irregular Close Packing of Equal Hard Spheres*, 
-[doi:10.1080/08927028908031373](http://www.tandfonline.com/doi/abs/10.1080/08927028908031373); 
-*Bezrukov et al (2002) Statistical Analysis of Simulated Random Packings of Spheres*, 
-[doi:10.1002/1521-4117(200205)19:2&lt;111::AID-PPSC111&gt;3.0.CO;2-M](http://onlinelibrary.wiley.com/doi/10.1002/1521-4117(200205)19:2&lt;111::AID-PPSC111&gt;3.0.CO;2-M/abstract) (yes, that's the real doi).
 
 NOTE: algorithms below have not been used by me for a long time and may not work well in some 
 special cases. If packings contain large intersections after generation, an error will be issued, 
@@ -214,6 +247,10 @@ and also some updates to compiling and linking options (see the
 # 3. Post-processing
 
 The program will run post-processing just in those packing folders, that contain *packing.nfo* files.
+To do the post processing after generation, you have to **manually scale particle diameters** after generation, 
+as explained in the [note on final diameters](https://github.com/VasiliBaranov/packing-generation#2-packing-generation).
+Though it is not crucial for post-processing types that depend only on particle positions (like *-directions* 
+or *-order* below).
 
 Usage and options:
 
