@@ -13,9 +13,9 @@ It was developed by me (Vasili Baranau) while doing research on hard-sphere pack
 
 If you use this program in research projects, please **cite the paper** 
 *Baranau and Tallarek (2014) Random-close packing limits for monodisperse and polydisperse hard spheres*, 
-[DOI:10.1039/C3SM52959B](http://pubs.rsc.org/en/content/articlelanding/2014/sm/c3sm52959b). 
+[doi:10.1039/C3SM52959B](http://pubs.rsc.org/en/content/articlelanding/2014/sm/c3sm52959b). 
 Or, alternatively, *Baranau et al. (2013) Pore-size entropy of random hard-sphere packings*; 
-[DOI:10.1039/C3SM27374A](http://pubs.rsc.org/en/content/articlelanding/2013/sm/c3sm27374a).
+[doi:10.1039/C3SM27374A](http://pubs.rsc.org/en/content/articlelanding/2013/sm/c3sm27374a).
 
 For building the program, please read the 
 [Compilation](https://github.com/VasiliBaranov/packing-generation/wiki/Compilation) wiki page or the 
@@ -107,7 +107,7 @@ dimensions), so always use 1.
 
 8. Generation mode: specifies which algorithm for initial packing generation to use, 1 (Poisson, R) 
 or 2 (Poisson in cells, S). See *Khirevich et al. (2010) Statistical analysis of packed beds, the 
-origin of short-range disorder, and its impact on eddy dispersion*, [DOI:10.1016/j.chroma.2010.05.019](http://www.sciencedirect.com/science/article/pii/S0021967310006631) for details. 
+origin of short-range disorder, and its impact on eddy dispersion*, [doi:10.1016/j.chroma.2010.05.019](http://www.sciencedirect.com/science/article/pii/S0021967310006631) for details. 
 This is the only optional parameter.
 
 Post-processing algorithms will use only Particles count, Packing size, Seed, Boundaries mode
@@ -124,11 +124,11 @@ successful, an error is issued and *packing.nfo* is not saved.
 Usage and options:
 
 1. PackingGeneration.exe: uses Lubachevsky–Stillinger algorithm. See *Lubachevsky, Stillinger 
-(1990) Geometric properties of random disk packings*, [DOI:10.1007/BF01025983](http://dx.doi.org/10.1007/BF01025983); 
+(1990) Geometric properties of random disk packings*, [doi:10.1007/BF01025983](http://dx.doi.org/10.1007/BF01025983); 
 or *Lubachevsky (1990) How to Simulate Billiards and Similar Systems*, 
-[DOI:10.1016/0021-9991(91)90222-7](http://www.sciencedirect.com/science/article/pii/0021999191902227); 
+[doi:10.1016/0021-9991(91)90222-7](http://www.sciencedirect.com/science/article/pii/0021999191902227); 
 or *Skoge (2006) Packing hyperspheres in high-dimensional Euclidean 
-spaces*, [DOI:10.1103/PhysRevE.74.041127](http://link.aps.org/doi/10.1103/PhysRevE.74.041127). 
+spaces*, [doi:10.1103/PhysRevE.74.041127](http://link.aps.org/doi/10.1103/PhysRevE.74.041127). 
 NOTE: The Lubachevsky–Stillinger code will work correctly only when the initial packing has 
 relatively large density (0.4 - 0.6), otherwise collisions with far particles will be missed, because 
 far particles will not be included as possible neighbors by cell list or verlet list algorithms. 
@@ -143,7 +143,7 @@ non-equilibrium reduced pressure is high enough (e.g., a conventional value of 1
 compression rate is decreased (devided by 2) and the LS generation is run again, until the pressure 
 is high enough again; this procedure is repeated until the compression rate is low enough (1e-4). 
 See *Baranau and Tallarek (2014) Random-close packing limits for monodisperse and polydisperse hard spheres*, 
-[DOI:10.1039/C3SM52959B](http://pubs.rsc.org/en/content/articlelanding/2014/sm/c3sm52959b).
+[doi:10.1039/C3SM52959B](http://pubs.rsc.org/en/content/articlelanding/2014/sm/c3sm52959b).
 
 4. -lsebc: Lubachevsky–Stillinger with equilibration between compressions, we modified the LS 
 generation procedure and after each 20 collisions for each particle with compression we completely 
@@ -152,13 +152,13 @@ particle with zero compression rate in a loop until the relative difference of r
 the last two sets is less than 1%, so the pressure is stationary. When a packing is equilibrated 
 we perform collisions with compression again. 
 See *Baranau et al (2013) Pore-size entropy of random hard-sphere packings*, 
-[DOI:10.1039/C3SM27374A](http://pubs.rsc.org/en/content/articlelanding/2013/sm/c3sm27374a).
+[doi:10.1039/C3SM27374A](http://pubs.rsc.org/en/content/articlelanding/2013/sm/c3sm27374a).
 
 5. -fba: force-biased algorithm. See 
 *Mościński et al (1989) The Force-Biased Algorithm for the Irregular Close Packing of Equal Hard Spheres*, 
-[DOI:10.1080/08927028908031373](http://www.tandfonline.com/doi/abs/10.1080/08927028908031373); 
+[doi:10.1080/08927028908031373](http://www.tandfonline.com/doi/abs/10.1080/08927028908031373); 
 *Bezrukov et al (2002) Statistical Analysis of Simulated Random Packings of Spheres*, 
-[DOI:10.1002/1521-4117(200205)19:2&lt;111::AID-PPSC111&gt;3.0.CO;2-M](http://onlinelibrary.wiley.com/doi/10.1002/1521-4117(200205)19:2&lt;111::AID-PPSC111&gt;3.0.CO;2-M/abstract) (yes, that's the real doi).
+[doi:10.1002/1521-4117(200205)19:2&lt;111::AID-PPSC111&gt;3.0.CO;2-M](http://onlinelibrary.wiley.com/doi/10.1002/1521-4117(200205)19:2&lt;111::AID-PPSC111&gt;3.0.CO;2-M/abstract) (yes, that's the real doi).
 
 NOTE: algorithms below have not been used by me for a long time and may not work well in some 
 special cases. If packings contain large intersections after generation, an error will be issued, 
@@ -168,26 +168,26 @@ packings.
 
 6. -ojt: original Jodrey–Tory algorithm. See 
 *Jodrey and Tory (1985) Computer simulation of close random packing of equal spheres*, 
-[DOI:10.1103/PhysRevA.32.2347](http://link.aps.org/doi/10.1103/PhysRevA.32.2347); 
+[doi:10.1103/PhysRevA.32.2347](http://link.aps.org/doi/10.1103/PhysRevA.32.2347); 
 *Bargieł and Mościński (1991) C-language program for the irregular close packing of hard spheres*, 
-[DOI:10.1016/0010-4655(91)90060-X](http://www.sciencedirect.com/science/article/pii/001046559190060X).
+[doi:10.1016/0010-4655(91)90060-X](http://www.sciencedirect.com/science/article/pii/001046559190060X).
 
 7. -kjt: Jodrey–Tory algorithm modification by Khirevich. See 
 *Khirevich et al. (2010) Statistical analysis of packed beds, the origin of short-range disorder, 
 and its impact on eddy dispersion*, 
-[DOI:10.1016/j.chroma.2010.05.019](http://www.sciencedirect.com/science/article/pii/S0021967310006631).
+[doi:10.1016/j.chroma.2010.05.019](http://www.sciencedirect.com/science/article/pii/S0021967310006631).
 
 NOTE: algorithms below most certainly do not work well at all. They are left here just for your 
 information. If needed, you may test them, fix bugs, and use according to your own needs.
 
 8. -mca: Monte Carlo algorithm. See 
 *Maier et al. (2008) Sensitivity of pore-scale dispersion to the construction of random bead packs*, 
-[DOI:200810.1029/2006WR005577](http://www.agu.org/pubs/crossref/2008/2006WR005577.shtml). 
+[doi:200810.1029/2006WR005577](http://www.agu.org/pubs/crossref/2008/2006WR005577.shtml). 
 It produces highly crystalline packings.
 
 9. -cja: Conjugate gradient. See paper 
 *Xu et. al. (2005) Random close packing revisited: Ways to pack frictionless disks*, 
-[DOI:10.1103/PhysRevE.71.061306](http://link.aps.org/doi/10.1103/PhysRevE.71.061306)
+[doi:10.1103/PhysRevE.71.061306](http://link.aps.org/doi/10.1103/PhysRevE.71.061306)
 and other papers by O'Hern. This algorithm requires GNU Scientific library, 
 and also some updates to compiling and linking options (see Docs/Building.txt).
 
@@ -201,14 +201,14 @@ Usage and options:
 chosen center positions. The default pores count is 1e7 (therefore computation will consume several 
 minutes). These radii can be later used to calculate particle insertion probability. 
 See *Baranau et al (2013) Pore-size entropy of random hard-sphere packings*, 
-[DOI:10.1039/C3SM27374A](http://pubs.rsc.org/en/content/articlelanding/2013/sm/c3sm27374a); or 
-[DOI:10.1063/1.4953079](http://scitation.aip.org/content/aip/journal/jcp/144/21/10.1063/1.4953079). 
+[doi:10.1039/C3SM27374A](http://pubs.rsc.org/en/content/articlelanding/2013/sm/c3sm27374a); or 
+[doi:10.1063/1.4953079](http://scitation.aip.org/content/aip/journal/jcp/144/21/10.1063/1.4953079). 
 They are saved in a binary file *insertion_radii.txt* 
 (as floating point numbers in double precision in little-endian byte order).
 
 2. -entropy [optional integer to specify min radii count]: calculates the "pore-size entropy" at once by 
 the formula (12) from *Baranau et al (2013) Pore-size entropy of random hard-sphere packings*, 
-[DOI:10.1039/C3SM27374A](http://pubs.rsc.org/en/content/articlelanding/2013/sm/c3sm27374a). The 
+[doi:10.1039/C3SM27374A](http://pubs.rsc.org/en/content/articlelanding/2013/sm/c3sm27374a). The 
 factor alpha is chosen as 2. The radii count is selected dynamically, so that adding 10000 pores 
 changes the large pores quantity by no more than 1%. Optional integer will specify min pores quantity 
 to generate, it's 1e7 by default (therefore computation will consume several minutes). Entropy is 
@@ -222,7 +222,7 @@ first particle center to the second particle center (of unity length).
 4. -contraction: calculates energies of particle intersections after uniform packing contraction 
 (or, equivalently, radii increases), as if particles were supplied with potential. Uses second-order 
 harmonic potential (see *Xu et. al. (2005) Random close packing revisited: Ways to pack frictionless 
-disks*, [DOI:10.1103/PhysRevE.71.061306](http://link.aps.org/doi/10.1103/PhysRevE.71.061306)) 
+disks*, [doi:10.1103/PhysRevE.71.061306](http://link.aps.org/doi/10.1103/PhysRevE.71.061306)) 
 and zero-order potential which is equivalent to calculating coordination number per particle. 
 For jammed packings coordination number should be close to 6. Results are saved into a text file 
 *contraction_energies.txt* with the following columns: contraction ratio (1 / strain rate), potential 
@@ -232,14 +232,14 @@ removal see option -rm below.
 
 5. -order: calculates global and local Q6 orders, saves them to a text file *orders.txt*. See 
 *Jin, Makse (2010) A first-order phase transition defines the random close packing of hard spheres*,
-[DOI:10.1016/j.physa.2010.08.010](http://www.sciencedirect.com/science/article/pii/S0378437110006928).
+[doi:10.1016/j.physa.2010.08.010](http://www.sciencedirect.com/science/article/pii/S0378437110006928).
 
 6. -md: conducts Lubachevscky-Stillinger simulation with zero contraction rate, i.e., molecular 
 dynamics simulation, tracks reduced pressure, waits until packings are completely equilibrated 
 (pressure is stationary) and saves stationary pressure into a text file 
 *molecular_dynamics_statistics.txt*. You can supply this stationary pressure into the equation of 
 state by Salsburg and Wood. See *Salsburg and Wood (1962) Equation of State of Classical Hard Spheres 
-at High Density*, [DOI:10.1063/1.1733163](http://jcp.aip.org/resource/1/jcpsa6/v37/i4/p798_s1). 
+at High Density*, [doi:10.1063/1.1733163](http://jcp.aip.org/resource/1/jcpsa6/v37/i4/p798_s1). 
 The results of this application by me are not yet submitted anywhere.
 
 7. -rm: removes rattler particles. Particle is a rattler if it has less than 4 contacts if the 
@@ -263,7 +263,7 @@ according to your own needs.
 
 10. -hessian: computes a hessian matrix 
 (see *Xu et. al. (2005) Random close packing revisited: Ways to pack frictionless disks*, 
-[DOI:10.1103/PhysRevE.71.061306](http://link.aps.org/doi/10.1103/PhysRevE.71.061306)). 
+[doi:10.1103/PhysRevE.71.061306](http://link.aps.org/doi/10.1103/PhysRevE.71.061306)). 
 Writes the matrix to a text file *hessian.txt*. It requires 
 LAPACK, and also some updates to compiling and linking options (see Docs/Building.txt).
 
@@ -278,4 +278,3 @@ PackingGeneration.exe -fba | tee log_fba.txt <br>
 PackingGeneration.exe -ls | tee log_ls.txt <br>
 PackingGeneration.exe -lsgd | tee log_lsgd.txt <br>
 PackingGeneration.exe -order | tee log_entropy.txt
-
