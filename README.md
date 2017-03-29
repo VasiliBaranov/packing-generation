@@ -140,14 +140,29 @@ this does not mean that the final packing will possess them. The final diameters
 In general, at the beginning of generation all algorithms select some initial scaling factor to make the closest pair 
 of particles touch each other (this scaling factor will be small for Poisson configurations). Then, they gradually increase 
 this scaling factor during the generation until the termination criterion is met. The final scaling factor will usually 
-be below unity, but it can in principle also reach values higher than unity.
+be below unity. For the force-biased algorithm, it is always below or very slightly above unity. 
+For the Lubachevsky–Stillinger algorithm, it can in principle also reach values higher than unity 
+(but when starting the generation from the Poisson configuration, it will almost always be below unity at the end).
 
-In case of the Lubachevsky--Stillinger algorithm, the final scaling factor is determined by the contraction rate 
+In case of the Lubachevsky–Stillinger algorithm, the final scaling factor is determined by the contraction rate 
 (the lower the rate, the larger the final diameters). In case of the force-biased algorithm, 
-the final scaling factor is determined by the contraction rate and indirectly by the original diameters 
+the final scaling factor is determined by the contraction rate and indirectly by the original (expected, theoretical) diameters 
 (more precisely, by the original packing density as expected from the original diameters). The higher the original density, 
 the higher the final density. The lower the contraction rate, the closer the final density is to the original density. 
 See the papers in the descriptions of the algorithms below for details.
+
+You can find the dependence of the final packing density on the contraction rate for packings with different 
+radii distributions (monodisperse and log-normal with relative standard deviations 0.05-0.3) for the Lubachevsky–Stillinger
+and force-biased algorithms in [Figs. 2a and c](http://pubs.rsc.org/en/content/articlehtml/2014/sm/c3sm52959b#imgfig2) in 
+[Baranau and Tallarek, (2014)](http://pubs.rsc.org/en/content/articlelanding/2014/sm/c3sm52959b). Please note that the plot 
+for the FB algorithm assumes a certain dependence of expected packings densities *φ*<sub>exp</sub> on the contraction rate *γ*:
+*φ*<sub>exp</sub> = *φ*<sub>min</sub> + (*φ*<sub>max</sub> - *φ*<sub>min</sub>) / 
+(ln*γ*<sub>slow</sub> - ln*γ*<sub>fast</sub>) \* (ln*γ*<sub>fast</sub> - ln*γ*). 
+It is basically a line in the plane (ln*γ*, *φ*<sub>exp</sub>) through the points 
+(ln*γ*<sub>fast</sub>, *φ*<sub>min</sub>) and (ln*γ*<sub>slow</sub>, *φ*<sub>max</sub>), 
+where the following parameters were used: *γ*<sub>fast</sub> = 10<sup>-3</sup>, *φ*<sub>min</sub> = 0.6, 
+*γ*<sub>slow</sub> = 10<sup>-7</sup>, *φ*<sub>max</sub> = 0.7.
+
 
 # 2. Packing generation
 
