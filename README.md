@@ -91,7 +91,7 @@ little-endian format.
 > Seed: 341 <br>
 > Steps to write: 1000 <br>
 > Boundaries mode: 1 <br>
-> Contraction rate: 1.328910e-005 <br>
+> Contraction rate: 1.328910e-002 <br>
 > Generation mode: 1 <br>
 > 1. boundaries mode: 1 - bulk; 2 - ellipse (inscribed in XYZ box, Z is length of an ellipse); 3 - rectangle <br>
 > 2. generationMode = 1 (Poisson, R) or 2 (Poisson in cells, S) <br>
@@ -279,12 +279,13 @@ They are saved in a binary file *insertion_radii.txt*
 (as floating point numbers in double precision in little-endian byte order).
 
 2. -entropy [optional integer to specify min radii count]: calculates the "pore-size entropy" at once by 
-the formula (12) from *Baranau et al (2013) Pore-size entropy of random hard-sphere packings*, 
+the formula (12) from *Baranau et al. (2013) Pore-size entropy of random hard-sphere packings*, 
 [doi:10.1039/C3SM27374A](http://pubs.rsc.org/en/content/articlelanding/2013/sm/c3sm27374a). The 
 factor alpha is chosen as 2. The radii count is selected dynamically, so that adding 10000 pores 
 changes the large pores quantity by no more than 1%. Optional integer will specify min pores quantity 
 to generate, it's 1e7 by default (therefore computation will consume several minutes). Entropy is 
-saved in a file *entropy.txt* (not as a binary float, just a simple text value).
+saved in a file *entropy.txt* (not as a binary float, just a simple text value). See also 
+*Baranau and Tallarek (2016)*, [doi:10.1063/1.4953079](http://aip.scitation.org/doi/full/10.1063/1.4953079).
 
 3. -directions: calculates all unique directions between particles (uses closest periodic images 
 for directions), saves it to a text file *particle_directions.txt*. It has five columns: zero-based 
@@ -293,7 +294,7 @@ first particle center to the second particle center (of unity length).
 
 4. -contraction: calculates energies of particle intersections after uniform packing contraction 
 (or, equivalently, radii increases), as if particles were supplied with potential. Uses second-order 
-harmonic potential (see *Xu et. al. (2005) Random close packing revisited: Ways to pack frictionless 
+harmonic potential (see *Xu et al. (2005) Random close packing revisited: Ways to pack frictionless 
 disks*, [doi:10.1103/PhysRevE.71.061306](http://link.aps.org/doi/10.1103/PhysRevE.71.061306)) 
 and zero-order potential which is equivalent to calculating coordination number per particle. 
 For jammed packings coordination number should be close to 6. Results are saved into a text file 
@@ -306,13 +307,21 @@ removal see option -rm below.
 *Jin, Makse (2010) A first-order phase transition defines the random close packing of hard spheres*,
 [doi:10.1016/j.physa.2010.08.010](http://www.sciencedirect.com/science/article/pii/S0378437110006928).
 
-6. -md: conducts Lubachevscky-Stillinger simulation with zero contraction rate, i.e., molecular 
-dynamics simulation, tracks reduced pressure, waits until packings are completely equilibrated 
-(pressure is stationary) and saves stationary pressure into a text file 
+6. -md [optional integer to specify number of LS steps]: conducts Lubachevscky-Stillinger simulation 
+with zero contraction rate, i.e., molecular dynamics simulation. It tracks the reduced pressure, 
+self-diffusion coefficient, full intermediate scattering function (ISF),
+and self-part of the ISF. Terminates when the pressure changes sufficiently slowly *and* 
+the normalized full ISF crosses the critical value *e<sup>-1</sup>* at least ten times. 
+The optional integer specifies the number of LS steps (each step is 20 collisions per particle).
+Some computed parameters are displayd in stdout as a log (thus, one can use *-md | tee log.txt*).
+Scattering function values are saved in the *ScatteringFunctions* folder.
+For more advanced options, refer to the source code 
+([MolecularDynamicsStatistics.cpp, CalculateStationaryStatistics](https://github.com/VasiliBaranov/packing-generation/blob/master/PackingGeneration/Generation/PackingServices/PostProcessing/Source/MolecularDynamicsService.cpp#L117)).
+At the end, saves the stationary reduced pressure into a text file 
 *molecular_dynamics_statistics.txt*. You can supply this stationary pressure into the equation of 
-state by Salsburg and Wood. See *Salsburg and Wood (1962) Equation of State of Classical Hard Spheres 
-at High Density*, [doi:10.1063/1.1733163](http://jcp.aip.org/resource/1/jcpsa6/v37/i4/p798_s1). 
-The results of this application by me are not yet submitted anywhere.
+state by Salsburg and Wood, if packing was close enough to jamming. 
+See *Salsburg and Wood (1962) Equation of State of Classical Hard Spheres 
+at High Density*, [doi:10.1063/1.1733163](http://jcp.aip.org/resource/1/jcpsa6/v37/i4/p798_s1).
 
 7. -rm: removes rattler particles. Particle is a rattler if it has less than 4 contacts if the 
 packing is uniformely contracted with a strain rate 1e-7. Rattlers are removed recursively (because 
