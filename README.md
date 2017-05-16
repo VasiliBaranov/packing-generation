@@ -10,6 +10,7 @@ pressure equilibration. It doesn't require any preinstalled libraries and is mul
 
 It was developed by me (Vasili Baranau) while doing research on hard-sphere packings in the group of
 [Prof. Ulrich Tallarek](http://www.uni-marburg.de/fb15/ag-tallarek) in Marburg, Germany, in 2012-2013. It is distributed under the MIT license (see [LICENSE.txt](https://github.com/VasiliBaranov/packing-generation/blob/master/LICENSE.txt)).
+This code (release v1.0.1.28) **has a DOI**: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.580324.svg)](https://doi.org/10.5281/zenodo.580324).
 
 If you use this program in research projects, please **cite the paper** 
 *Baranau and Tallarek (2014) Random-close packing limits for monodisperse and polydisperse hard spheres*, 
