@@ -35,7 +35,7 @@ namespace Tests
         velocityService->FillVelocities(&particles);
 
         FLOAT_TYPE actualKineticEnergy = velocityService->GetActualKineticEnergy(particles);
-        FLOAT_TYPE expectedKineticEnergy = velocityService->GetExpectedKineticEnergy(particlesCount);
+        FLOAT_TYPE expectedKineticEnergy = velocityService->GetExpectedKineticEnergy(particles);
 
         Assert::AreAlmostEqual(actualKineticEnergy, expectedKineticEnergy, "FillInitialVelocity_CompareTemperature_ActualTemperatureCorrect");
         TearDown();
@@ -55,7 +55,7 @@ namespace Tests
         velocityService->RescaleVelocities(0.0, actualKineticEnergy, &particles);
 
         actualKineticEnergy = velocityService->GetActualKineticEnergy(particles);
-        FLOAT_TYPE expectedKineticEnergy = velocityService->GetExpectedKineticEnergy(particlesCount);
+        FLOAT_TYPE expectedKineticEnergy = velocityService->GetExpectedKineticEnergy(particles);
 
         Assert::AreAlmostEqual(actualKineticEnergy, expectedKineticEnergy, "FillInitialVelocity_CompareTemperature_ActualTemperatureCorrect");
         TearDown();

@@ -69,5 +69,10 @@ namespace Geometries
 //
 //        EnsureVerticalPeriodicityAfterRepulsion(movedParticle->coordinates[Axis::Z]);
     }
+
+    bool TrapezoidGeometry::IsSphereInside(const Core::SpatialVector& sphereCenter, Core::FLOAT_TYPE sphereRadius) const
+    {
+        throw NotImplementedException("Implement");
+    }
 }
 

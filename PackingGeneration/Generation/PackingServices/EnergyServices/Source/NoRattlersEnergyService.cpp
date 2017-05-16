@@ -92,8 +92,8 @@ namespace PackingServices
 
            for (ParticleIndex particleIndex = 0; particleIndex < config->particlesCount; ++particleIndex)
            {
-               const DomainParticle* particle = &particlesRef[particleIndex];
-                if (rattlerMask[particleIndex])
+                const DomainParticle* particle = &particlesRef[particleIndex];
+                if (rattlerMask[particleIndex] || particle->isImmobile)
                 {
                     continue;
                 }
@@ -121,6 +121,55 @@ namespace PackingServices
         }
 
         return energiesResult;
+    }
+
+    // TODO: Merge with GetContractionEnergies!!!! (and maybe with EnergyService::GetContractionEnergiesPerParticle
+    OVERRIDE void NoRattlersEnergyService::GetContractionEnergiesPerParticle(const vector<FLOAT_TYPE>& contractionRatios, const vector<const IPairPotential*>& pairPotentials, vector<IEnergyService::EnergiesPerParticle>* energiesPerParticle)
+    {
+        int energyTypesCount = contractionRatios.size();
+        vector<IEnergyService::EnergiesPerParticle>& energiesPerParticleRef = *energiesPerParticle;
+        energiesPerParticleRef.resize(energyTypesCount);
+
+        const Packing& particlesRef = *particles;
+
+        for (int energyTypeIndex = 0; energyTypeIndex < energyTypesCount; ++energyTypeIndex)
+        {
+            energiesPerParticleRef[energyTypeIndex].contractionEnergiesPerParticle.resize(config->particlesCount, 0.0);
+            energiesPerParticleRef[energyTypeIndex].rattlerMask.resize(config->particlesCount);
+
+            FLOAT_TYPE contractionRatio = contractionRatios[energyTypeIndex];
+            const IPairPotential* pairPotential = pairPotentials[energyTypeIndex];
+
+            rattlerRemovalService->FillRattlerMask(contractionRatio, &energiesPerParticleRef[energyTypeIndex].rattlerMask);
+
+            for (ParticleIndex particleIndex = 0; particleIndex < config->particlesCount; ++particleIndex)
+            {
+                const DomainParticle* particle = &particlesRef[particleIndex];
+                if (energiesPerParticleRef[energyTypeIndex].rattlerMask[particleIndex] ||  particle->isImmobile)
+                {
+                    continue;
+                }
+
+                ParticleIndex neighborsCount;
+                const ParticleIndex* neighborIndexes = neighborProvider->GetNeighborIndexes(particleIndex, &neighborsCount);
+                for (ParticleIndex i = 0; i < neighborsCount; ++i)
+                {
+                    ParticleIndex neighborIndex = neighborIndexes[i];
+                    const Particle* neighbor = &particlesRef[neighborIndex];
+                    if (energiesPerParticleRef[energyTypeIndex].rattlerMask[neighborIndex])
+                    {
+                        continue;
+                    }
+
+                    FLOAT_TYPE distance =  mathService->GetDistanceLength(neighbor->coordinates, particle->coordinates);
+                    Nullable<FLOAT_TYPE> energy = pairPotential->GetEnergy(particle->diameter, neighbor->diameter, distance * contractionRatio);
+                    if (energy.hasValue)
+                    {
+                        energiesPerParticleRef[energyTypeIndex].contractionEnergiesPerParticle[particleIndex] += potentialNormalizer * energy.value;
+                    }
+                }
+            }
+        }
     }
 
     ParticlePair NoRattlersEnergyService::FillParticleForces(FLOAT_TYPE contractionRatio, const IPairPotential& pairPotential, vector<SpatialVector>* particleForces)

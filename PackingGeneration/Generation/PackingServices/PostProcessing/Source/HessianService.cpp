@@ -20,6 +20,7 @@ using namespace std;
 using namespace Core;
 using namespace Model;
 
+// TODO: Use Eigen instead of LAPACK
 namespace PackingServices
 {
     const FLOAT_TYPE HessianService::contractionRatio = 0.999;
@@ -53,7 +54,9 @@ namespace PackingServices
     {
         const Packing& particlesRef = *particles;
         // N particles, 6 contacts per particle, 3 entries per contact (one per spatial dimension). Therefore, 18N entries. While the entire matrix will be 3N by 3N.
-        hessian->values.reserve(18 * nonRattlersCount);
+        const int averageContactsPerParticle = 2 * DIMENSIONS;
+        const int contactDirectionsPerParticle = DIMENSIONS * averageContactsPerParticle;
+        hessian->values.reserve(contactDirectionsPerParticle * nonRattlersCount);
         hessian->dimension = nonRattlersCount * DIMENSIONS;
 
         FLOAT_TYPE diagonalValues[DIMENSIONS][DIMENSIONS];

@@ -19,7 +19,6 @@ namespace Tests
         static void TestGettingSimpleMultidimensionalIndex();
         static void TestGettingComplexMultidimensionalIndex();
         static void TestPeriodicConditions();
-        static void DisplaySampleIndexing();
 
         static void TestPeriodicConditionsBackwards(Core::ColumnMajorIndexingProvider* provider);
         static void TestPeriodicConditionsLongBackwards(Core::ColumnMajorIndexingProvider* provider);

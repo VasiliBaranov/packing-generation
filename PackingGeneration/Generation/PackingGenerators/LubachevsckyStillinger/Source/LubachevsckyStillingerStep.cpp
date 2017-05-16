@@ -22,11 +22,21 @@
 #include "../Headers/CompositeEventProcessor.h"
 #include "../Headers/MoveEventProcessor.h"
 
+#include "Core/Headers/StlUtilities.h"
 #include "Core/Headers/MemoryUtility.h"
 #include "Core/Headers/Exceptions.h"
+#include "Core/Headers/ScopedFile.h"
+#include "Core/Headers/Path.h"
+#include "Core/Headers/MpiManager.h"
 #include "Generation/Model/Headers/Config.h"
 #include "Generation/PackingServices/DistanceServices/Headers/IClosestPairProvider.h"
 #include "Generation/PackingServices/DistanceServices/Headers/INeighborProvider.h"
+#include "Generation/PackingServices/Headers/PackingSerializer.h"
+#include "Generation/PackingServices/Headers/GeometryService.h"
+#include "Generation/Constants.h"
+
+#include "Generation/PackingServices/EnergyServices/Headers/HarmonicPotential.h"
+#include "Generation/PackingServices/EnergyServices/Headers/IEnergyService.h"
 
 using namespace PackingServices;
 using namespace Core;
@@ -40,11 +50,13 @@ namespace PackingGenerators
     LubachevsckyStillingerStep::LubachevsckyStillingerStep(GeometryService* geometryService,
             INeighborProvider* neighborProvider,
             IClosestPairProvider* distanceService,
-            MathService* mathService) :
+            MathService* mathService,
+            PackingSerializer* packingSerializer,
+            IEnergyService* contractionEnergyService) :
             BasePackingStep(geometryService, neighborProvider, distanceService, mathService),
             particleCollisionService(mathService)
     {
-        operationMode = PackingGenerationAlgorithm::LubachevskyStillingerSimple;
+        this->contractionEnergyService = contractionEnergyService;
         eventsPerParticle = 20;
 
         isOuterDiameterChanging = false;
@@ -62,9 +74,9 @@ namespace PackingGenerators
     {
         BasePackingStep::SetParticles(particles);
         ratioGrowthRate = generationConfig->contractionRate;
-        operationMode = generationConfig->generationAlgorithm;
         growthRateUpdatesCount = 0;
         equilibrationsCount = 0;
+        startTime = clock();
 
         CreateEventProviders();
         CreateEventProcessors();
@@ -77,8 +89,9 @@ namespace PackingGenerators
             {
                 innerDiameterRatio = 1.0;
             }
-            if (innerDiameterRatio < 1.0 - 1e-10)
+            if (innerDiameterRatio < 1.0 - 1e-7)
             {
+                printf("Inner diameter ratio is %.15f\n", innerDiameterRatio);
                 throw InvalidOperationException("preserveInitialDiameter is true, \
 but innerDiameterRatio is < 1.0, so preserving will lead to particle intersections, \
 decreasing the diameters will lead to unexpected consequences (e.g., incorrect density).");
@@ -201,13 +214,21 @@ decreasing the diameters will lead to unexpected consequences (e.g., incorrect d
 
         DisplaceRealParticles();
 
-        if (operationMode == PackingGenerationAlgorithm::LubachevskyStillingerEquilibrationBetweenCompressions)
+        if (generationConfig->generationAlgorithm == PackingGenerationAlgorithm::LubachevskyStillingerEquilibrationBetweenCompressions)
         {
             SwitchCompressionRateWithZero(previousPressure);
         }
-        else if (operationMode == PackingGenerationAlgorithm::LubachevskyStillingerGradualDensification)
+        else if (generationConfig->generationAlgorithm == PackingGenerationAlgorithm::LubachevskyStillingerGradualDensification)
         {
             DecreaseCompressionRate();
+        }
+        else if (generationConfig->generationAlgorithm == PackingGenerationAlgorithm::LubachevskyStillingerConstantPower)
+        {
+            EnsureConstantPower();
+        }
+        else if (generationConfig->generationAlgorithm == PackingGenerationAlgorithm::LubachevskyStillingerBiazzo)
+        {
+            DecreaseCompressionRateAsBiazzo();
         }
         else
         {
@@ -215,19 +236,97 @@ decreasing the diameters will lead to unexpected consequences (e.g., incorrect d
         }
     }
 
+    void LubachevsckyStillingerStep::EnsureConstantPower()
+    {
+        FLOAT_TYPE finalCompressionRate = generationConfig->finalContractionRate;
+        const FLOAT_TYPE expectedFinalDensity = 0.64;
+        FLOAT_TYPE initialDensity = 1.0 - CalculateCurrentPorosity(initialInnerDiameterRatio);
+        FLOAT_TYPE currentDensity = 1.0 - CalculateCurrentPorosity(innerDiameterRatio);
+
+        FLOAT_TYPE finalDensity = (initialDensity > expectedFinalDensity) ? initialDensity : expectedFinalDensity;
+
+        FLOAT_TYPE nextRatioGrowthRate = finalCompressionRate * maxPressure / statistics.reducedPressure * pow(currentDensity / finalDensity, 4.0 / 3.0);
+        bool shouldChange = nextRatioGrowthRate < ratioGrowthRate && nextRatioGrowthRate >= finalCompressionRate * 0.5;
+        shouldContinue = !(nextRatioGrowthRate <= finalCompressionRate && statistics.reducedPressure >= maxPressure);
+        if (shouldChange)
+        {
+            ratioGrowthRate = nextRatioGrowthRate;
+            particleCollisionService.Initialize(initialInnerDiameterRatio, ratioGrowthRate);
+            InitializeEvents();
+
+            ExecutionConfig actualExecutionConfig;
+            actualExecutionConfig.systemConfig.MergeWith(*config);
+            actualExecutionConfig.generationConfig.MergeWith(*generationConfig);
+            actualExecutionConfig.generationConfig.contractionRate = ratioGrowthRate;
+
+            string configPath = Path::Append(generationConfig->baseFolder, Generation::CONFIG_FILE_NAME);
+            packingSerializer->SerializeConfig(configPath, actualExecutionConfig);
+
+            printf("ratioGrowthRate: %g\n", ratioGrowthRate);
+        }
+    }
+
+    void LubachevsckyStillingerStep::DecreaseCompressionRateAsBiazzo()
+    {
+        shouldContinue = !(statistics.reducedPressure > maxPressure && ratioGrowthRate <= generationConfig->finalContractionRate);
+
+        // Original paper: Biazzo et al (2009) Theory of Amorphous Packings of Binary Mixtures of Hard Spheres.pdf.
+        // Last values are added to avoid finite precision effects for further threshold updates.
+//        boost::array<FLOAT_TYPE, 3> pressureThresholds = {1e2, 1e3, 1e9, 1e12}; // maxPressure = 1e12
+//        boost::array<FLOAT_TYPE, 3> nextRatioGrowthRates = {1e-3, 1e-4, 1e-5, 1e-6}; // starting at 1e-2
+
+//        VectorUtilities::MultiplyByValue(pressureThresholds, maxPressure / 1e12, &pressureThresholds);
+//        VectorUtilities::MultiplyByValue(nextRatioGrowthRates, generationConfig->finalContractionRate / 1e-5, &nextRatioGrowthRates);
+
+        boost::array<FLOAT_TYPE, 4> pressureThresholds = {{1e2, 1e3, 1e9, 1e12}}; // maxPressure = 1e12
+        boost::array<FLOAT_TYPE, 4> nextRatioGrowthRates = {{1e-2, 1e-3, 1e-4, 1e-4 * 0.9}};
+
+        Nullable<size_t> firstLargerPressureIndex = StlUtilities::GetLowerBoundIndex(pressureThresholds, statistics.reducedPressure);
+        if (!firstLargerPressureIndex.hasValue)
+        {
+            // No larger pressure exists
+            firstLargerPressureIndex.value = pressureThresholds.size();
+        }
+        int nextRatioGrowthRateIndex = firstLargerPressureIndex.value - 1;
+        if (nextRatioGrowthRateIndex < 0)
+        {
+            return;
+        }
+        FLOAT_TYPE nextRatioGrowthRate = nextRatioGrowthRates[nextRatioGrowthRateIndex];
+        // nextRatioGrowthRate may become greater than actual ratioGrowthRate if the pressure drops very rapidly after rate decrease.
+        if (nextRatioGrowthRate >= ratioGrowthRate)
+        {
+            return;
+        }
+
+        ratioGrowthRate = nextRatioGrowthRate;
+        particleCollisionService.Initialize(initialInnerDiameterRatio, ratioGrowthRate);
+        InitializeEvents();
+
+        ExecutionConfig actualExecutionConfig;
+        actualExecutionConfig.systemConfig.MergeWith(*config);
+        actualExecutionConfig.generationConfig.MergeWith(*generationConfig);
+        actualExecutionConfig.generationConfig.contractionRate = ratioGrowthRate;
+
+        string configPath = Path::Append(generationConfig->baseFolder, Generation::CONFIG_FILE_NAME);
+        packingSerializer->SerializeConfig(configPath, actualExecutionConfig);
+
+        printf("ratioGrowthRate: %g\n", ratioGrowthRate);
+    }
+
     void LubachevsckyStillingerStep::DecreaseCompressionRate()
     {
         // Try to generate RCP packings with equilibration and exponential compression rate decrease
         // Update growth rate
-        const FLOAT_TYPE minCompressionRate = 1e-4;
+
         bool growthRateUpdated = false;
         shouldContinue = true;
         if (ratioGrowthRate > 0.0)
         {
-            shouldContinue = !(statistics.reducedPressure > maxPressure && ratioGrowthRate <= minCompressionRate);
+            shouldContinue = !(statistics.reducedPressure > maxPressure && ratioGrowthRate <= generationConfig->finalContractionRate);
             if (statistics.reducedPressure > maxPressure) // Suppress growth if the algorithm would terminate by non-equilibrium pressure
             {
-                // Suppress growth to equilibrate packings.
+                // Suppress growth to equilibrate packings
                 printf("Suppress growth\n");
                 ratioGrowthRate = 0.0;
                 equilibrationsCount = 0;
@@ -241,9 +340,30 @@ decreasing the diameters will lead to unexpected consequences (e.g., incorrect d
             {
                 // Also decrease the contraction rate
                 growthRateUpdatesCount++;
-                ratioGrowthRate = generationConfig->contractionRate / pow(2.0, growthRateUpdatesCount);
+                ratioGrowthRate = generationConfig->contractionRate / pow(generationConfig->contractionRateDecreaseFactor, growthRateUpdatesCount);
 
-                printf("Start growing again. Compression rate is %f\n", ratioGrowthRate);
+                printf("Start growing again. Compression rate is %g\n", ratioGrowthRate);
+                ExecutionConfig actualExecutionConfig;
+                actualExecutionConfig.systemConfig.MergeWith(*config);
+                actualExecutionConfig.generationConfig.MergeWith(*generationConfig);
+                actualExecutionConfig.generationConfig.contractionRate = ratioGrowthRate;
+
+                string configPath = Path::Append(generationConfig->baseFolder, Generation::CONFIG_FILE_NAME);
+                packingSerializer->SerializeConfig(configPath, actualExecutionConfig);
+
+                if (MpiManager::GetInstance()->GetNumberOfProcesses() > 1)
+                {
+                    // When there are many more packings than tasks, it's better to restrict computation time,
+                    // as there are always several packings (~10%) with extremely long generation times.
+                    FLOAT_TYPE computationTime = (clock() - startTime) / static_cast<double>(CLOCKS_PER_SEC);
+                    FLOAT_TYPE maxComputationTime = 6 * 3600; // 6 hours
+                    if (computationTime > maxComputationTime)
+                    {
+                        shouldContinue = false;
+                        printf("Computation time in a parallel environment for a current packing is too large, it may prevent other packings from processing. Terminating...");
+                    }
+                }
+
                 growthRateUpdated = true;
             }
             else
@@ -251,6 +371,12 @@ decreasing the diameters will lead to unexpected consequences (e.g., incorrect d
                 equilibrationsCount++;
                 const int maxEquilibrationsCount = 50;
                 shouldContinue = equilibrationsCount < maxEquilibrationsCount;
+                if (!shouldContinue)
+                {
+                    printf("Equilibration lasted for %d rounds, but pressure is still high. Packing is almost jammed.\n", maxEquilibrationsCount);
+                    // May be throw an error or simply discard packings with low coordination number that require long equilibration:
+                    // long equilibration will lead to macroscopic rearrangement.
+                }
             }
         }
 
@@ -318,7 +444,8 @@ decreasing the diameters will lead to unexpected consequences (e.g., incorrect d
 
     void LubachevsckyStillingerStep::CalculateStatistics()
     {
-        statistics.exchangedMomentum = collisionEventProcessor->exchangedMomentum;
+        // Sometimes i get negative exchanged momentum. TODO: investigate this carefully.
+        statistics.exchangedMomentum = std::abs(collisionEventProcessor->exchangedMomentum);
         statistics.kineticEnergy = velocityService.GetActualKineticEnergy(movingParticles);
         statistics.eventsCount = eventsPerParticle * config->particlesCount;
         statistics.timePeriod = currentTime;
@@ -337,7 +464,7 @@ decreasing the diameters will lead to unexpected consequences (e.g., incorrect d
         statistics.reducedPressure = 1.0 + statistics.exchangedMomentum / (2.0 * statistics.kineticEnergy * currentTime);
 
         printf("Time: %g, reduced pressure: %g, actual temperature: %g\n",
-                currentTime, statistics.reducedPressure, velocityService.GetActualTemperature(statistics.kineticEnergy, config->particlesCount));
+                currentTime, statistics.reducedPressure, velocityService.GetActualTemperature(statistics.kineticEnergy, movingParticles));
 
 //        collisionEventProcessor->FillDistinctCollidingPairs(&collidedPairs);
 
@@ -383,6 +510,7 @@ decreasing the diameters will lead to unexpected consequences (e.g., incorrect d
         statistics.collisionErrorsExisted = false;
         innerDiameterRatio = initialInnerDiameterRatio + ratioGrowthRate * currentTime;
 
+        // TODO: exclude pairs of immobile particles from comparison. They can grow and eventually overlap.
         ParticlePair closestPair = closestPairProvider->FindClosestPair();
         FLOAT_TYPE expectedInnerDiameterRatio = sqrt(closestPair.normalizedDistanceSquare);
         if (expectedInnerDiameterRatio < innerDiameterRatio - 1e-14) // (std::abs(expectedInnerDiameterRatio - innerDiameterRatio) > 1e-14)
@@ -392,37 +520,15 @@ decreasing the diameters will lead to unexpected consequences (e.g., incorrect d
             statistics.collisionErrorsExisted = true;
         }
 
-//        for (ParticleIndex particleIndex = 0; particleIndex < config->particlesCount; ++particleIndex)
-//        {
-//            VectorUtilities::Multiply(movingParticles[particleIndex].velocity, currentTime - movingParticles[particleIndex].lastEventTime, particles[particleIndex].coordinates);
-//            VectorUtilities::Add(movingParticles[particleIndex].coordinates, particles[particleIndex].coordinates, particles[particleIndex].coordinates);
-//        }
+//        // For debug purposes only!
+//        closestPair = geometryService->GetMinNormalizedDistanceNaive(*particles);
+//        FLOAT_TYPE minNormalizedDistance = sqrt(closestPair.normalizedDistanceSquare);
 //
-//        statistics.collisionErrorsExisted = false;
-//        innerDiameterRatio = initialInnerDiameterRatio + ratioGrowthRate * currentTime;
-//
-//        FLOAT_TYPE minDistanceSquare = MAX_FLOAT_VALUE;
-//        FLOAT_TYPE currentDistanceSquare = 0;
-//        ParticleIndex firstIndex = 0;
-//        ParticleIndex secondIndex = 0;
-//        for (ParticleIndex i = 0; i < config->particlesCount - 1; ++i)
-//        {
-//            for (ParticleIndex j = i + 1; j < config->particlesCount; ++j)
-//            {
-//                currentDistanceSquare = mathService->GetNormalizedDistanceSquare(i, j, particles);
-//                if (currentDistanceSquare < minDistanceSquare)
-//                {
-//                    minDistanceSquare = currentDistanceSquare;
-//                    firstIndex = i;
-//                    secondIndex = j;
-//                }
-//            }
-//        }
-//        FLOAT_TYPE trueInnerDiameterRatio = sqrt(minDistanceSquare);
-//        if (std::abs(innerDiameterRatio - trueInnerDiameterRatio) > 1e-14)
+//        if (expectedInnerDiameterRatio < innerDiameterRatio - 1e-14)
 //        {
 //            printf("ERROR: innerDiameterRatio %g is not equal to min normalized distance from naive computation %g in the pair %d %d. Probably bugs in distance provider.\n",
-//                    innerDiameterRatio, trueInnerDiameterRatio, firstIndex, secondIndex);
+//                    innerDiameterRatio, minNormalizedDistance, closestPair.firstParticleIndex, closestPair.secondParticleIndex);
+//            throw InvalidOperationException("InnerDiameterRatio is not equal to min normalized distance from naive computation.");
 //        }
     }
 

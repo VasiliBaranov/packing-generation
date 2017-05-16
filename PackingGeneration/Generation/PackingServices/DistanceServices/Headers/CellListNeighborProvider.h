@@ -5,9 +5,10 @@
 #ifndef Generation_PackingServices_DistanceServices_Headers_CellListNeighborProvider_h
 #define Generation_PackingServices_DistanceServices_Headers_CellListNeighborProvider_h
 
+#include <map>
 #include "Core/Geometry/Headers/GeometryParameters.h"
 #include "Core/Lattice/Headers/LatticeIndexingProvider.h"
-#include "Core/Lattice/Headers/D3Q27Lattice.h"
+#include "Core/Lattice/Headers/GenericLattice.h"
 #include "Core/Lattice/Headers/ColumnMajorIndexingProvider.h"
 #include "Generation/Model/Headers/Types.h"
 #include "INeighborProvider.h"
@@ -19,30 +20,34 @@ namespace PackingServices
 {
     // Represents a class to efficiently determine nearest neighbors of a current particle.
     // Uses Cell Lists algorithm: see http://en.wikipedia.org/wiki/Cell_lists and Raschdorf, Kolonko (2011) A comparison of data structures for the simulation of polydisperse particle packings.
-    // Better data structures are octtree, loose octtree. But when using Verlet lists as a decorator of this neighbor provider the alternatives are not crucial.
+    // Better data structures are octtree, loose octtree. But when using Verlet lists as a decorator of this neighbor provider, the alternatives are not crucial.
     class CellListNeighborProvider : public virtual INeighborProvider
     {
     private:
-        // Represents a single cell in the spatial domain, tracking particles belonging to this cell
+        // Represents a single cell in the spatial domain, tracking particles belonging to this cell.
+        // In a standard implementation, a cubic domain is devided by, e.g. 4x4x4 = 64 cells, each particle belongs to one cell.
+        // When searching for the close neighbors, particle lists from 27 neighboring cells are joined.
+        // In this implementation, each cell contains particles from 27 neighboring cells from the previous implementation, each particle belongs to 27 cells.
+        // It allows to avoid joining of 27 lists at every neighbor search, but makes updating cells more costly.
+        // But even for moderately dense packings particles cross cell boundaries very rarely, so this overhead is negligible.
         struct Cell : public Model::CubicBox
         {
             std::vector<Model::ParticleIndex> particleIndexes;
             std::vector<int> neighborCellIndexes; // for each cell index stores all its neighbors
-            std::vector<Model::ParticleIndex> particleIndexesPermutation; // particleIndexesPermutation[i] gets the index of the particle i in the particleIndexes array
+            std::map<Model::ParticleIndex, int> particleIndexesPermutation; // particleIndexesPermutation[i] gets the index of the particle i in the particleIndexes array
 
             Cell()
             {
                 particleIndexes.reserve(50);
                 neighborCellIndexes.reserve(50);
-                particleIndexesPermutation.reserve(50);
             }
         };
 
         // Services
         // Declare as pointers and pass to the constructor if you need to make them replaceable (primarily for tests).
         Core::GeometryParameters geometryParameters;
-        Core::D3Q27Lattice lattice;
         Core::ColumnMajorIndexingProvider linearIndexingProvider;
+        Core::GenericLattice lattice;
         Core::LatticeIndexingProvider latticeIndexingProvider;
 
         GeometryService* geometryService;
@@ -61,6 +66,7 @@ namespace PackingServices
         Core::DiscreteSpatialVector previousLatticePoint;
 
         static const int MAX_NEIGHBORS_COUNT = 200;
+        static const int NOT_PRESENT_PERMUTATION = -1;
 
     public:
         CellListNeighborProvider(GeometryService* geometryService, GeometryCollisionService* geometryCollisionService);

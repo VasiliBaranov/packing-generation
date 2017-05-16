@@ -5,6 +5,7 @@
 #ifndef Generation_PackingGenerators_LubachevsckyStillinger_Headers_LubachevsckyStillingerStep_h
 #define Generation_PackingGenerators_LubachevsckyStillinger_Headers_LubachevsckyStillingerStep_h
 
+#include <ctime>
 #include <boost/shared_ptr.hpp>
 #include "Core/Headers/OrderedPriorityQueue.h"
 #include "Generation/PackingServices/Headers/GeometryCollisionService.h"
@@ -17,11 +18,14 @@ namespace PackingGenerators { class CollisionEventProcessor; }
 namespace PackingGenerators { class CompositeEventProvider; }
 namespace PackingGenerators { class IEventProvider; }
 namespace PackingGenerators { class IEventProcessor; }
+namespace PackingServices { class PackingSerializer; }
+namespace PackingServices { class IEnergyService; }
 
 namespace PackingGenerators
 {
     // See Lubachevscky, Stillinger (1990) Geometric properties of random disk packings
     // or Lubachevsky (1990) How to Simulate Billiards and Similar Systems.
+    // TODO: refactor!
     class LubachevsckyStillingerStep : public BasePackingStep
     {
     public:
@@ -31,7 +35,6 @@ namespace PackingGenerators
         int eventsPerParticle;
         bool lockParticles;
         bool preserveInitialDiameter;
-        Model::PackingGenerationAlgorithm::Type operationMode;
 
     private:
         // Original Donev code usually terminates at 1e12, but for those packings that exhibit 1e12 for Donev code our code determines pressure at 1e8.
@@ -50,6 +53,7 @@ namespace PackingGenerators
         bool shouldContinue;
         int growthRateUpdatesCount;
         int equilibrationsCount;
+        clock_t startTime;
 
         // Services
         // These ones are too internal for the LS Step, so i do not pass them in constructor as pointers.
@@ -57,6 +61,8 @@ namespace PackingGenerators
         ParticleCollisionService particleCollisionService;
         VelocityService velocityService;
         PackingServices::GeometryCollisionService geometryCollisionService;
+        PackingServices::PackingSerializer* packingSerializer;
+        PackingServices::IEnergyService* contractionEnergyService;
 
         // Event providers and processors. Most of these fields are needed for memory management.
         // I'm initializing the providers and processors inside this class, as it knows better which providers and processors it needs.
@@ -74,7 +80,9 @@ namespace PackingGenerators
         LubachevsckyStillingerStep(PackingServices::GeometryService* geometryService,
                 PackingServices::INeighborProvider* neighborProvider,
                 PackingServices::IClosestPairProvider* distanceService,
-                PackingServices::MathService* mathService);
+                PackingServices::MathService* mathService,
+                PackingServices::PackingSerializer* packingSerializer,
+                PackingServices::IEnergyService* contractionEnergyService);
 
         OVERRIDE void SetParticles(Model::Packing* particles);
 
@@ -90,6 +98,10 @@ namespace PackingGenerators
         void ProcessEvents(int count);
 
         void DecreaseCompressionRate();
+
+        void DecreaseCompressionRateAsBiazzo();
+
+        void EnsureConstantPower();
 
         void SwitchCompressionRateWithZero(Core::FLOAT_TYPE previousPressue);
 

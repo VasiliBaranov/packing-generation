@@ -68,25 +68,20 @@ namespace PackingGenerators
 
         clock_t Log(unsigned long long iterationCounter) const;
 
-        void Finish(clock_t totalTime, unsigned long long iterationCounter, int runsCount) const;
+        void Finish(clock_t totalTime, unsigned long long iterationCounter) const;
 
         // region Checking
         // All functions return shouldContinue
 
-        bool Check() const;
+        void DisplayPorosity() const;
 
-        bool CheckPorosity() const;
-
-        void CheckInnerDiameterNaive() const;
-
-        Model::ParticlePair GetMinNormalizedDistanceNaive() const;
+        void CheckIntersectionsNaive() const;
 
         // end region Checking
 
         DISALLOW_COPY_AND_ASSIGN(PackingGenerator);
     };
 }
-
 
 #endif /* Generation_PackingGenerators_Headers_PackingGenerator_h */
 

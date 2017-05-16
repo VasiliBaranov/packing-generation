@@ -12,6 +12,24 @@
 
 namespace Core
 {
+    // See http://www.cplusplus.com/reference/cstdio/fopen/
+    struct FileOpenMode
+    {
+        enum Type
+        {
+            Read = 1,
+            Write = 2,
+            Append = 4,
+            Update = 8,
+            Binary = 16
+        };
+    };
+
+    // See http://stackoverflow.com/questions/1448396/how-to-use-enums-as-flags-in-c
+    // TODO: create macros for this
+    inline FileOpenMode::Type operator | (FileOpenMode::Type a, FileOpenMode::Type b) { return static_cast<FileOpenMode::Type>(static_cast<int>(a) | static_cast<int>(b)); }
+    inline FileOpenMode::Type operator & (FileOpenMode::Type a, FileOpenMode::Type b) { return static_cast<FileOpenMode::Type>(static_cast<int>(a) & static_cast<int>(b)); }
+
     /**
      * This is a file class, that closes FILE* handle upon destruction.
      * errorCode parameter will be logged by FileErrorHandler in
@@ -28,17 +46,22 @@ namespace Core
         int errorCode;
 
     public:
-        ScopedFile(const char* fileName, const char* mode, int errorCode = 0)
+        ScopedFile(const char* fileName, FileOpenMode::Type mode, int errorCode = 0)
         {
             Initialize(fileName, mode, errorCode);
         }
 
-        ScopedFile(std::string fileName, const char* mode, int errorCode = 0)
+        ScopedFile(std::string fileName, FileOpenMode::Type mode, int errorCode = 0)
         {
             Initialize(fileName.c_str(), mode, errorCode);
         }
 
         ~ScopedFile()
+        {
+            Close();
+        }
+
+        void Close()
         {
             if (file != NULL)
             {
@@ -51,6 +74,7 @@ namespace Core
                            .append("\n");
                     errorHandler.HandleError(errorMessage.c_str(), errorCode);
                 }
+                file = NULL;
             }
         }
 
@@ -65,11 +89,14 @@ namespace Core
         }
 
     private:
-        void Initialize(const char* fileName, const char* mode, int errorCode = 0)
+        void Initialize(const char* fileName, FileOpenMode::Type mode, int errorCode = 0)
         {
             this->errorCode = errorCode;
             this->fileName = fileName;
-            file = fopen(fileName, mode);
+
+            std::string charMode = GetCharMode(mode);
+
+            file = fopen(fileName, charMode.c_str());
 
             if (file == NULL)
             {
@@ -77,10 +104,40 @@ namespace Core
                 errorMessage
                        .append(fileName)
                        .append(" with mode ")
-                       .append(mode)
+                       .append(charMode.c_str())
                        .append("\n");
                 errorHandler.HandleError(errorMessage.c_str(), errorCode);
             }
+        }
+
+        std::string GetCharMode(FileOpenMode::Type mode)
+        {
+            std::string charMode;
+
+            if ((mode & FileOpenMode::Read) != 0)
+            {
+                charMode = "r";
+            }
+            else if ((mode & FileOpenMode::Write) != 0)
+            {
+                charMode = "w";
+            }
+            else if ((mode & FileOpenMode::Append) != 0)
+            {
+                charMode = "a";
+            }
+
+            if ((mode & FileOpenMode::Update) != 0)
+            {
+                charMode += "+";
+            }
+
+            if ((mode & FileOpenMode::Binary) != 0)
+            {
+                charMode += "b";
+            }
+
+            return charMode;
         }
 
         DISALLOW_COPY_AND_ASSIGN(ScopedFile);

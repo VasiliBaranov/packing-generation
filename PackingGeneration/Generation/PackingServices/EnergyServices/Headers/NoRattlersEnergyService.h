@@ -45,6 +45,8 @@ namespace PackingServices
 
         OVERRIDE Model::ParticlePair FillParticleForces(Core::FLOAT_TYPE contractionRatio, const IPairPotential& pairPotential, std::vector<Core::SpatialVector>* particleForces);
 
+        OVERRIDE void GetContractionEnergiesPerParticle(const std::vector<Core::FLOAT_TYPE>& contractionRatios, const std::vector<const IPairPotential*>& pairPotentials, std::vector<EnergiesPerParticle>* energiesPerParticle);
+
     private:
         DISALLOW_COPY_AND_ASSIGN(NoRattlersEnergyService);
     };

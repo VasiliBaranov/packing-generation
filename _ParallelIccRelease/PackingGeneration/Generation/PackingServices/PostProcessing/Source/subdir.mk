@@ -32,7 +32,7 @@ CPP_DEPS += \
 PackingGeneration/Generation/PackingServices/PostProcessing/Source/%.o: ../PackingGeneration/Generation/PackingServices/PostProcessing/Source/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: Cygwin C++ Compiler'
-	mpiicpc -DPARALLEL -DMPICH_IGNORE_CXX_SEEK -DBOOST_DISABLE_ASSERTS -DMPICH_SKIP_MPICXX -I../Externals/Boost -I../PackingGeneration -O3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	mpiicpc -DPARALLEL -DNDEBUG -DMPICH_IGNORE_CXX_SEEK -DBOOST_DISABLE_ASSERTS -DMPICH_SKIP_MPICXX -I../Externals/Boost -I../Externals/Eigen -I../PackingGeneration -O3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

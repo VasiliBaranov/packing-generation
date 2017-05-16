@@ -24,9 +24,9 @@ namespace PackingGenerators
 
         Core::FLOAT_TYPE GetActualKineticEnergy(const std::vector<MovingParticle>& particles) const;
 
-        Core::FLOAT_TYPE GetActualTemperature(Core::FLOAT_TYPE kineticEnergy, int particlesCount) const;
+        Core::FLOAT_TYPE GetActualTemperature(Core::FLOAT_TYPE kineticEnergy, const std::vector<MovingParticle>& particles) const;
 
-        Core::FLOAT_TYPE GetExpectedKineticEnergy(int particlesCount) const;
+        Core::FLOAT_TYPE GetExpectedKineticEnergy(const std::vector<MovingParticle>& particles) const;
 
         void RescaleVelocities(Core::FLOAT_TYPE currentTime, Core::FLOAT_TYPE actualKineticEnergy, std::vector<MovingParticle>* particles) const;
 
@@ -34,6 +34,8 @@ namespace PackingGenerators
 
     private:
         void FillInitialVelocity(Core::SpatialVector* velocity) const;
+
+        int GetMobileParticlesCount(const std::vector<MovingParticle>& particles) const;
 
         DISALLOW_COPY_AND_ASSIGN(VelocityService);
     };

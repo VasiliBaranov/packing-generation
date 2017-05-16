@@ -5,6 +5,7 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
 ../PackingGeneration/Generation/PackingServices/DistanceServices/Source/BaseDistanceService.cpp \
+../PackingGeneration/Generation/PackingServices/DistanceServices/Source/BondsProvider.cpp \
 ../PackingGeneration/Generation/PackingServices/DistanceServices/Source/CellListNeighborProvider.cpp \
 ../PackingGeneration/Generation/PackingServices/DistanceServices/Source/ClosestPairProvider.cpp \
 ../PackingGeneration/Generation/PackingServices/DistanceServices/Source/DistanceService.cpp \
@@ -13,6 +14,7 @@ CPP_SRCS += \
 
 OBJS += \
 ./PackingGeneration/Generation/PackingServices/DistanceServices/Source/BaseDistanceService.o \
+./PackingGeneration/Generation/PackingServices/DistanceServices/Source/BondsProvider.o \
 ./PackingGeneration/Generation/PackingServices/DistanceServices/Source/CellListNeighborProvider.o \
 ./PackingGeneration/Generation/PackingServices/DistanceServices/Source/ClosestPairProvider.o \
 ./PackingGeneration/Generation/PackingServices/DistanceServices/Source/DistanceService.o \
@@ -21,6 +23,7 @@ OBJS += \
 
 CPP_DEPS += \
 ./PackingGeneration/Generation/PackingServices/DistanceServices/Source/BaseDistanceService.d \
+./PackingGeneration/Generation/PackingServices/DistanceServices/Source/BondsProvider.d \
 ./PackingGeneration/Generation/PackingServices/DistanceServices/Source/CellListNeighborProvider.d \
 ./PackingGeneration/Generation/PackingServices/DistanceServices/Source/ClosestPairProvider.d \
 ./PackingGeneration/Generation/PackingServices/DistanceServices/Source/DistanceService.d \
@@ -32,7 +35,7 @@ CPP_DEPS += \
 PackingGeneration/Generation/PackingServices/DistanceServices/Source/%.o: ../PackingGeneration/Generation/PackingServices/DistanceServices/Source/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: Cygwin C++ Compiler'
-	mpiicpc -DPARALLEL -DMPICH_IGNORE_CXX_SEEK -DBOOST_DISABLE_ASSERTS -DMPICH_SKIP_MPICXX -I../Externals/Boost -I../PackingGeneration -O3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	mpiicpc -DPARALLEL -DNDEBUG -DMPICH_IGNORE_CXX_SEEK -DBOOST_DISABLE_ASSERTS -DMPICH_SKIP_MPICXX -I../Externals/Boost -I../Externals/Eigen -I../PackingGeneration -O3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

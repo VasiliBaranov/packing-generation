@@ -33,7 +33,7 @@ namespace Model
         // Geometry params
         Core::SpatialVector packingSize;
         BoundariesMode::Type boundariesMode;
-        double alpha; //relates just to trapezoid geometry; bullshit, but for now it's ok
+        double alpha; // relates just to trapezoid geometry; bullshit, but for now it's ok
 
     public:
         SystemConfig();
@@ -56,17 +56,16 @@ namespace Model
         ExecutionMode::Type executionMode;
 
         // Params for packing generation
-        int generationStart;
+        Core::Nullable<bool> shouldStartGeneration;
         int seed;
         int stepsToWrite;
         InitialParticleDistribution::Type initialParticleDistribution;
         Core::FLOAT_TYPE contractionRate;
+        Core::FLOAT_TYPE finalContractionRate; // only for LubachevskyStillingerGradualDensification
+        Core::FLOAT_TYPE contractionRateDecreaseFactor; // only for LubachevskyStillingerGradualDensification
+        Core::Nullable<bool> shouldSuppressCrystallization;
 
         // Params for packing generation, usually set manually
-        int maxIterations;
-        int maxRunsCount;
-        int minRunsCount;
-        bool stopOnTheoreticalDensity;
         PackingGenerationAlgorithm::Type generationAlgorithm;
 
         // Params for other algorithms
@@ -113,9 +112,10 @@ namespace Model
     public:
         SystemConfig* config;
         Geometries::IGeometry* geometry;
+        Geometries::IGeometry* activeGeometry;
 
     public:
-        ModellingContext(SystemConfig* config, Geometries::IGeometry* geometry);
+        ModellingContext(SystemConfig* config, Geometries::IGeometry* geometry, Geometries::IGeometry* activeGeometry = NULL);
 
     private:
         DISALLOW_COPY_AND_ASSIGN(ModellingContext);

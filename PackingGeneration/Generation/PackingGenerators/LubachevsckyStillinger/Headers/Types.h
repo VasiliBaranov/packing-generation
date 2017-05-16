@@ -88,7 +88,7 @@ namespace PackingGenerators
         Model::ParticleIndex particleIndex;
         Model::ParticleIndex neighborIndex;
 
-        bool operator==(const VoronoiPlane& other)
+        bool operator==(const VoronoiPlane& other) const
         {
             Core::SpatialVector difference;
             Core::VectorUtilities::Subtract(normal, other.normal, &difference);
@@ -99,6 +99,35 @@ namespace PackingGenerators
                     neighborIndex == other.neighborIndex &&
                     differenceSquare < epsilon &&
                     std::abs(displacement - other.displacement) < epsilon;
+        };
+
+        bool operator<(const VoronoiPlane& other) const
+        {
+            if (particleIndex < other.particleIndex)
+            {
+                return true;
+            }
+            if (neighborIndex < other.neighborIndex)
+            {
+                return true;
+            }
+            if (normal[Core::Axis::X] < other.normal[Core::Axis::X])
+            {
+                return true;
+            }
+            if (normal[Core::Axis::Y] < other.normal[Core::Axis::Y])
+            {
+                return true;
+            }
+            if (normal[Core::Axis::Z] < other.normal[Core::Axis::Z])
+            {
+                return true;
+            }
+            if (displacement < other.displacement)
+            {
+                return true;
+            }
+            return false;
         };
     };
 

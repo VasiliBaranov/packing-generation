@@ -14,6 +14,7 @@
 #include "PackingServices/Headers/MathService.h"
 #include "PackingServices/Headers/PackingSerializer.h"
 #include "PackingServices/Headers/GeometryService.h"
+#include "PackingServices/Headers/ImmobileParticlesService.h"
 
 #include "PackingServices/PostProcessing/Headers/InsertionRadiiGenerator.h"
 #include "PackingServices/PostProcessing/Headers/HessianService.h"
@@ -33,6 +34,7 @@
 
 #include "PackingGenerators/InitialGenerators/Headers/BulkPoissonGenerator.h"
 #include "PackingGenerators/InitialGenerators/Headers/BulkPoissonInCellsGenerator.h"
+#include "PackingGenerators/InitialGenerators/Headers/HcpGenerator.h"
 
 #include "PackingGenerators/Headers/IPackingGenerator.h"
 
@@ -54,7 +56,8 @@ namespace Generation
             HessianService* hessianService,
             PressureService* pressureService,
             MolecularDynamicsService* molecularDynamicsService,
-            RattlerRemovalService* rattlerRemovalService)
+            RattlerRemovalService* rattlerRemovalService,
+            ImmobileParticlesService* immobileParticlesService)
     {
         this->packingSerializer = packingSerializer;
         this->packingGenerator = packingGenerator;
@@ -66,6 +69,7 @@ namespace Generation
         this->pressureService = pressureService;
         this->molecularDynamicsService = molecularDynamicsService;
         this->rattlerRemovalService = rattlerRemovalService;
+        this->immobileParticlesService = immobileParticlesService;
 
         innerDiameterRatio = 1.0;
     }
@@ -78,6 +82,16 @@ namespace Generation
     void GenerationManager::GenerateInsertionRadii(const ExecutionConfig& userConfig)
     {
         ExecuteAlgorithm(userConfig, INSERTION_RADII_FILE_NAME, true, true, &GenerationManager::GenerateInsertionRadii);
+    }
+
+    void GenerationManager::CalculateDistancesToClosestSurfaces(const ExecutionConfig& userConfig)
+    {
+        ExecuteAlgorithm(userConfig, DISTANCES_TO_CLOSEST_SURFACES_FOLDER_NAME, true, true, &GenerationManager::CalculateDistancesToClosestSurfaces);
+    }
+
+    void GenerationManager::CalculateContactNumberDistribution(const ExecutionConfig& userConfig)
+    {
+        ExecuteAlgorithm(userConfig, CONTACT_NUMBER_DISTRIBUTION_FILE_NAME, true, true, &GenerationManager::CalculateContactNumberDistribution);
     }
 
     void GenerationManager::CalculateEntropy(const ExecutionConfig& userConfig)
@@ -130,6 +144,26 @@ namespace Generation
         ExecuteAlgorithm(userConfig, STRUCTURE_FACTOR_FILE_NAME, true, true, &GenerationManager::CalculateStructureFactor);
     }
 
+    void GenerationManager::GenerateLocalOrientationalDisorder(const ExecutionConfig& userConfig)
+    {
+        ExecuteAlgorithm(userConfig, LOCAL_ORIENTATIONAL_DISORDER_FILE_NAME, true, true, &GenerationManager::GenerateLocalOrientationalDisorder);
+    }
+
+    void GenerationManager::CalculateImmediateMolecularDynamicsStatistics(const ExecutionConfig& userConfig)
+    {
+        ExecuteAlgorithm(userConfig, IMMEDIATE_MOLECULAR_DYNAMICS_STATISTICS_FILE_NAME, true, true, &GenerationManager::CalculateImmediateMolecularDynamicsStatistics);
+    }
+
+    void GenerationManager::CalculateNearestNeighbors(const ExecutionConfig& userConfig)
+    {
+        ExecuteAlgorithm(userConfig, NEAREST_NEIGHBORS_FILE_NAME, true, true, &GenerationManager::CalculateNearestNeighbors);
+    }
+
+    void GenerationManager::CalculateActiveGeometry(const Model::ExecutionConfig& userConfig)
+    {
+        ExecuteAlgorithm(userConfig, ACTIVE_GEOMETRY_FILE_NAME, true, true, &GenerationManager::CalculateActiveGeometry);
+    }
+
     void GenerationManager::ExecuteAlgorithm(const ExecutionConfig& userConfig, string targetFileName,
             bool shouldExitIfTargetFileExists, bool shouldAlwaysReadPacking, Action algorithm)
     {
@@ -144,7 +178,20 @@ namespace Generation
 
         Math::SetSeed(fullConfig.generationConfig.seed);
         boost::shared_ptr<IGeometry> geometry = CreateGeometry(fullConfig.systemConfig);
-        ModellingContext context(&fullConfig.systemConfig, geometry.get());
+
+        SystemConfig activeConfig;
+        boost::shared_ptr<IGeometry> activeGeometry;
+        string activeConfigPath = Path::Append(fullConfig.generationConfig.baseFolder, ACTIVE_GEOMETRY_FILE_NAME);
+        if (Path::Exists(activeConfigPath))
+        {
+            SpatialVector shift;
+            packingSerializer->ReadActiveConfig(activeConfigPath, &activeConfig, &shift);
+            activeConfig.MergeWith(fullConfig.systemConfig);
+
+            activeGeometry = CreateGeometry(activeConfig, shift);
+        }
+
+        ModellingContext context(&fullConfig.systemConfig, geometry.get(), activeGeometry.get());
 
         packingGenerator->SetContext(context);
         insertionRadiiGenerator->SetContext(context);
@@ -166,6 +213,27 @@ namespace Generation
 
     void GenerationManager::GeneratePacking(const ExecutionConfig& fullConfig, const ModellingContext& context, string targetFilePath, Packing* particles)
     {
+        string infoFile = Path::Append(fullConfig.generationConfig.baseFolder, PACKING_FILE_NAME_NFO);
+        if (Path::Exists(infoFile))
+        {
+            return;
+        }
+
+//        // A quick fix for Matthias packings
+//        Packing& particlesRef = *particles;
+//        string nearestNeighbotsPath = Path::Append(fullConfig.generationConfig.baseFolder, NEAREST_NEIGHBORS_FILE_NAME);
+//        if (Path::Exists(nearestNeighbotsPath))
+//        {
+//            vector<ParticlePair> closestPairs;
+//            packingSerializer->ReadNearestNeighbors(nearestNeighbotsPath, &closestPairs);
+//            for (size_t i = 0; i < closestPairs.size(); ++i)
+//            {
+//                bool radiusCorrect = closestPairs[i].normalizedDistanceSquare > 0.95;
+//                particlesRef[closestPairs[i].firstParticleIndex].isImmobile = radiusCorrect;
+//                particlesRef[closestPairs[i].secondParticleIndex].isImmobile = radiusCorrect;
+//            }
+//        }
+
         packingGenerator->SetGenerationConfig(fullConfig.generationConfig);
         packingGenerator->ArrangePacking(particles);
 
@@ -185,6 +253,84 @@ namespace Generation
         vector<FLOAT_TYPE> insertionRadii;
         insertionRadiiGenerator->FillInsertionRadii(*particles, fullConfig.generationConfig.insertionRadiiCount, &insertionRadii);
         packingSerializer->SerializeInsertionRadii(targetFilePath, insertionRadii);
+    }
+
+    void GenerationManager::CalculateDistancesToClosestSurfaces(const ExecutionConfig& fullConfig, const ModellingContext& context, string targetFolderPath, Packing* particles)
+    {
+        vector<int> surfaceIndexes;
+        vector<vector<FLOAT_TYPE> > distancesToSurfaces;
+
+        int minNeighborsCount = 2; // Now: some number to ensure that we have all the numbers consecutively. Before: contractionEnergyService->GetMinNeighborsCount(); // average neighbors count in mechanically stable packings with infinite friction
+        int maxNeighborsCount = 14; // max number of contacts in monodisperse packings
+        int minSurfaceIndex = minNeighborsCount - 1;
+        int surfaceIndexesCount = maxNeighborsCount - minNeighborsCount + 1;
+        surfaceIndexes.resize(surfaceIndexesCount);
+        VectorUtilities::FillLinearScale(minSurfaceIndex, &surfaceIndexes);
+        surfaceIndexes.insert(surfaceIndexes.begin(), 0);
+
+        insertionRadiiGenerator->FillDistancesToSurfaces(*particles, fullConfig.generationConfig.insertionRadiiCount, surfaceIndexes, targetFolderPath, *packingSerializer);
+    }
+
+    void GenerationManager::CalculateContactNumberDistribution(const ExecutionConfig& fullConfig, const ModellingContext& context, string targetFilePath, Packing* particles)
+    {
+        printf("Calculating contact number distributions\n");
+
+        FLOAT_TYPE contractionRate = 1.0 - 1e-4;
+        vector<int> neighborCounts;
+        vector<int> neighborCountFrequencies;
+        contractionEnergyService->SetParticles(*particles);
+        FLOAT_TYPE estimatedCoordinationNumber = insertionRadiiGenerator->GetContactNumberDistribution(*particles, contractionEnergyService,
+                contractionRate, &neighborCounts, &neighborCountFrequencies);
+
+        printf("Estimated coordination number is %f\n", estimatedCoordinationNumber);
+
+        packingSerializer->SerializeContactNumberDistribution(targetFilePath, neighborCounts, neighborCountFrequencies);
+
+
+//        FLOAT_TYPE expectedCoordinationNumber = GetExpectedCoordinationNumber(fullConfig, context, targetFilePath, particles);
+//        // Find the best contraction rate to get this coordination number
+//        FLOAT_TYPE contractionRate = insertionRadiiGenerator->GetContractionRateForCoordinationNumber(contractionEnergyService, expectedCoordinationNumber);
+//
+//        // Find coordination numbers distribution
+//        vector<int> neighborCounts;
+//        vector<int> neighborCountFrequencies;
+//        FLOAT_TYPE estimatedCoordinationNumber = insertionRadiiGenerator->GetContactNumberDistribution(*particles, contractionEnergyService, contractionRate, &neighborCounts, &neighborCountFrequencies);
+//        if (std::abs(estimatedCoordinationNumber - expectedCoordinationNumber) > 1e-2)
+//        {
+//            printf("Coordination number estimated incorrectly\n");
+//        }
+//
+//        packingSerializer->SerializeContactNumberDistribution(targetFilePath, neighborCounts, neighborCountFrequencies);
+    }
+
+    FLOAT_TYPE GenerationManager::GetExpectedCoordinationNumber(const Model::ExecutionConfig& fullConfig, const Model::ModellingContext& context, std::string targetFilePath, Model::Packing* particles) const
+    {
+        string energyFilePath = Path::Append(Path::GetParentPath(targetFilePath), CONTRACTION_ENERGIES_FILE_NAME);
+        if (!Path::Exists(energyFilePath))
+        {
+            throw InvalidOperationException("Contraction energy file does not exist.");
+        }
+        contractionEnergyService->SetParticles(*particles);
+
+        // Read coordination numbers from file
+        vector<FLOAT_TYPE> contractionRatios;
+        vector<FLOAT_TYPE> energyPowers;
+        vector<FLOAT_TYPE> contractionEnergies;
+        vector<int> nonRattlersCounts;
+        packingSerializer->ReadContractionEnergies(energyFilePath, &contractionRatios, &energyPowers, &contractionEnergies, &nonRattlersCounts);
+
+        // Find expected coordination number
+        FLOAT_TYPE expectedCoordinationNumber = 0;
+        for (size_t i = 0; i < contractionRatios.size(); ++i)
+        {
+            if (energyPowers[i] > 0)
+            {
+                expectedCoordinationNumber = contractionEnergies[i - 1] / nonRattlersCounts[i - 1];
+                break;
+            }
+        }
+
+        return expectedCoordinationNumber;
     }
 
     void GenerationManager::CalculateEntropy(const ExecutionConfig& fullConfig, const ModellingContext& context, string targetFilePath, Packing* particles)
@@ -284,19 +430,16 @@ namespace Generation
         molecularDynamicsService->SetParticles(*particles);
 
         MolecularDynamicsStatistics statistics = molecularDynamicsService->CalculateStationaryStatistics();
-//        MolecularDynamicsStatistics statistics = molecularDynamicsService->CalculateStatisticsWithLocking();
         packingSerializer->SerializeMolecularDynamicsStatistics(targetFilePath, statistics);
-
-//        vector<PressureData> pressuresData;
-//        molecularDynamicsService->FillInitialPressuresAfterStrain(&pressuresData);
-//        packingSerializer->SerializeMolecularDynamicsStatistics(targetFilePath, &pressuresData);
     }
 
     void GenerationManager::RemoveRattlers(const ExecutionConfig& fullConfig, const ModellingContext& context, string targetFilePath, Packing* particles)
     {
         vector<bool> rattlerMask(context.config->particlesCount);
         rattlerRemovalService->SetParticles(*particles);
-        const FLOAT_TYPE contractionRate = 1.0 - 1.0e-7;
+//        const FLOAT_TYPE contractionRate = 1.0 - 1.0e-7;
+//        const FLOAT_TYPE contractionRate = 1.0 - 1.0e-5;
+        const FLOAT_TYPE contractionRate = 1.0 / 1.5; //particles that have one radius between surfaces will become in contact
         rattlerRemovalService->FillRattlerMask(contractionRate, &rattlerMask);
         int nonRattlersCount = rattlerRemovalService->FindNonRattlersCount(rattlerMask);
         Packing nonRattlerParticles;
@@ -348,15 +491,173 @@ namespace Generation
         packingSerializer->SerializeStructureFactor(targetFilePath, structureFactor);
     }
 
+    void GenerationManager::GenerateLocalOrientationalDisorder(const ExecutionConfig& fullConfig, const ModellingContext& context, string targetFilePath, Packing* particles)
+    {
+        printf("Calculating local orientational disorder\n");
+
+        orderService->SetParticles(*particles);
+        OrderService::LocalOrientationalDisorder localOrientationalDisorder;
+        orderService->FillLocalOrientationalDisorder(&localOrientationalDisorder);
+        packingSerializer->SerializeLocalOrientationalDisorder(targetFilePath, localOrientationalDisorder);
+        packingSerializer->SerializeCloseNeighbors(Path::Append(fullConfig.generationConfig.baseFolder, "close_neighbors.txt"), localOrientationalDisorder);
+    }
+
+    void GenerationManager::CalculateImmediateMolecularDynamicsStatistics(const ExecutionConfig& fullConfig, const ModellingContext& context, string targetFilePath, Packing* particles)
+    {
+        printf("Calculating immediate molecular dynamics statistics\n");
+
+        molecularDynamicsService->SetGenerationConfig(fullConfig.generationConfig);
+        molecularDynamicsService->SetParticles(*particles);
+
+        MolecularDynamicsStatistics statistics = molecularDynamicsService->CalculateImmediateStatistics();
+        packingSerializer->SerializeMolecularDynamicsStatistics(targetFilePath, statistics);
+    }
+
+    void GenerationManager::CalculateNearestNeighbors(const Model::ExecutionConfig& fullConfig, const Model::ModellingContext& context, std::string targetFilePath, Model::Packing* particles)
+    {
+        printf("Calculating nearest neighbors\n");
+
+        distanceService->SetParticles(*particles);
+        vector<ParticlePair> closestPairs;
+        distanceService->FillClosestPairs(&closestPairs);
+
+        vector<bool> isImmobileMask(fullConfig.systemConfig.particlesCount);
+        vector<int> isImmobileIntMask(fullConfig.systemConfig.particlesCount);
+
+        VectorUtilities::InitializeWith(&isImmobileMask, false);
+        VectorUtilities::InitializeWith(&isImmobileIntMask, 0);
+
+        Model::Packing& particlesRef = *particles;
+        for (ParticleIndex i = 0; i < fullConfig.systemConfig.particlesCount; ++i)
+        {
+            isImmobileMask[i] = particlesRef[i].isImmobile;
+            isImmobileIntMask[i] = particlesRef[i].isImmobile ? 1 : 0;
+        }
+
+        vector<int> permutation;
+        StlUtilities::SortPermutation(isImmobileIntMask, &permutation);
+
+        vector<ParticlePair> sortedClosestPairs;
+        StlUtilities::Permute(closestPairs, permutation, &sortedClosestPairs);
+
+        vector<bool> sortedIsImmobileMask;
+        StlUtilities::Permute(isImmobileMask, permutation, &sortedIsImmobileMask);
+
+        packingSerializer->SerializeNearestNeighbors(targetFilePath, closestPairs, sortedIsImmobileMask);
+    }
+
+    void GenerationManager::CreateActiveConfig(const ExecutionConfig& fullConfig, FLOAT_TYPE contractionFactorByParticleCenters, SystemConfig* activeConfig, SpatialVector* shift) const
+    {
+        SystemConfig& activeConfigRef = *activeConfig;
+        activeConfigRef.Reset();
+        activeConfigRef.MergeWith(fullConfig.systemConfig);
+
+        FLOAT_TYPE meanParticleRadius = 0.5; // TODO: determine better
+        // contractionFactor is measured by the true radius of the bounding cylinder (i.e., by particle surfaces)
+        FLOAT_TYPE contractionFactor = ((activeConfigRef.packingSize[Axis::X] - 2.0 * meanParticleRadius) * contractionFactorByParticleCenters + 2.0 * meanParticleRadius) / activeConfigRef.packingSize[Axis::X];
+        SpatialVector contractionFactors;
+        VectorUtilities::InitializeWith(&contractionFactors, contractionFactor);
+
+//            contractionFactors[DIMENSIONS - 1] = 1.0; // For packings that are periodic by z. TODO: periodicity shall be specified in generation.conf. IGeometry shall include this information (as done in LatticeGeoetry)
+        contractionFactors[DIMENSIONS - 1] = (activeConfigRef.packingSize[DIMENSIONS - 1] - 8.0 * meanParticleRadius) / activeConfigRef.packingSize[DIMENSIONS - 1]; // Remove 2 diameters from each side
+        VectorUtilities::Multiply(activeConfigRef.packingSize, contractionFactors, &activeConfigRef.packingSize);
+
+        SpatialVector margins;
+        VectorUtilities::Subtract(fullConfig.systemConfig.packingSize, activeConfigRef.packingSize, &margins);
+        VectorUtilities::MultiplyByValue(margins, 0.5, shift);
+    }
+
+    void GenerationManager::GetActiveConfigWithParticlesCount(const ExecutionConfig& fullConfig, FLOAT_TYPE contractionFactorByParticleCenters, Packing* particles, SystemConfig* activeConfig, SpatialVector* shift) const
+    {
+        SystemConfig& activeConfigRef = *activeConfig;
+        // the default active area is 0.5 of the cylinder, if cylinder radius is measured by particle centers
+        CreateActiveConfig(fullConfig, contractionFactorByParticleCenters, activeConfig, shift);
+        boost::shared_ptr<IGeometry> activeGeometry = CreateGeometry(activeConfigRef, *shift);
+
+        ////////////////////
+        // Set active geometry
+
+        // NOTE: here I use a dirty hack and do not call SetContext for all the services, as I know, that non of the services caches the active geometry.
+        // TODO: extract setting context from ExecuteAlgorithm to a separate method, call here.
+
+        // Set correct isImmobile mask
+        SetActiveParticlesByActiveGeometry(fullConfig.systemConfig, *activeGeometry.get(), particles);
+
+        ////////////////////
+        // Determine the amount of active non-rattler particles
+
+        // Find the best contraction rate to get the expected coordination number
+//        FLOAT_TYPE expectedCoordinationNumber = GetExpectedCoordinationNumber(fullConfig, context, targetFilePath, particles);
+//        FLOAT_TYPE contractionRate = insertionRadiiGenerator->GetContractionRateForCoordinationNumber(contractionEnergyService, expectedCoordinationNumber);
+        FLOAT_TYPE contractionRate = 1.0 - 1e-7;
+
+        vector<bool> rattlerMask;
+        rattlerRemovalService->SetParticles(*particles);
+        rattlerRemovalService->FillRattlerMask(contractionRate, &rattlerMask);
+
+        int activeNonRattlersCount = 0;
+        Packing& particlesRef = *particles;
+        for (ParticleIndex i = 0; i < fullConfig.systemConfig.particlesCount; ++i)
+        {
+//            if (!particlesRef[i].isImmobile && !rattlerMask[i])
+            if (!particlesRef[i].isImmobile)
+            {
+                activeNonRattlersCount++;
+            }
+        }
+
+        activeConfigRef.particlesCount = activeNonRattlersCount;
+    }
+
+    void GenerationManager::FindActiveConfigForActiveParticlesCount(const ExecutionConfig& fullConfig, int activeParticlesCount, Packing* particles, SystemConfig* activeConfig, SpatialVector* shift) const
+    {
+        GetActiveParticlesCountFunctor getActiveParticlesCountFunctor(*this, fullConfig, particles, activeConfig, shift);
+        StlUtilities::DoBinarySearch(0.0, 1.0, activeParticlesCount, 0, 1e-7, getActiveParticlesCountFunctor);
+    }
+
+    void GenerationManager::CalculateActiveGeometry(const ExecutionConfig& fullConfig, const ModellingContext& context, string targetFilePath, Packing* particles)
+    {
+        printf("Calculating active geometry\n");
+
+        SpatialVector shift;
+        SystemConfig activeConfig;
+
+        // NOTE: this is a dirty hack. I'm using insertionRadiiCount parameter to store expectedActiveParticlesCount
+        // TODO: add a separate config parameter
+        int expectedActiveParticlesCount = fullConfig.generationConfig.insertionRadiiCount;
+
+        // The usual workflow is the following:
+        // 1. run CalculateActiveGeometry without an expectedActiveParticlesCount to determine approximate amount of particles inside the active geometry.
+        // 2. select the min amount of activeParticlesCount
+        // 3. rename the old active configs
+        // 4. run CalculateActiveGeometry with expectedActiveParticlesCount = this min number
+        // It ensures that all the active geometries have equal amount of active particles.
+        // It will make the entropy and compactivity calculations easier
+        // (actually, i'm not sure how to calculate compactivity and how to account for rattlers if the amount of particles varies).
+        // TODO: extract this entire procedure to a separate method (it's hard currently,
+        // as requires processing of several packings at once, which is completely unsupported by the architecture)
+        if (expectedActiveParticlesCount == -1)
+        {
+            // the default active area is 0.5 of the cylinder, if cylinder radius is measured by particle centers
+            FLOAT_TYPE contractionFactorByParticleCenters = 0.5;
+            GetActiveConfigWithParticlesCount(fullConfig, contractionFactorByParticleCenters, particles, &activeConfig, &shift);
+        }
+        else
+        {
+            FindActiveConfigForActiveParticlesCount(fullConfig, expectedActiveParticlesCount, particles, &activeConfig, &shift);
+        }
+
+        packingSerializer->SerializeActiveConfig(targetFilePath, activeConfig, shift);
+    }
+
     void GenerationManager::FillContractionRatios(vector<FLOAT_TYPE>* contractionRatios) const
     {
         contractionRatios->clear();
         AddLogContractionRatios(contractionRatios);
-        AddLinearContractionRatios(contractionRatios);
-        contractionRatios->push_back(0.999); // predefined value
+//        AddLinearContractionRatios(contractionRatios);
+        contractionRatios->push_back(0.9999999); // predefined value
 
-        StlUtilities::ResizeToUnique(contractionRatios);
-        StlUtilities::Sort(contractionRatios);
+        StlUtilities::SortAndResizeToUnique(contractionRatios);
     }
 
     void GenerationManager::AddLogContractionRatios(vector<FLOAT_TYPE>* contractionRatios) const
@@ -398,21 +699,9 @@ namespace Generation
         fullConfig->MergeWith(fileConfig);
     }
 
-    boost::shared_ptr<IGeometry> GenerationManager::CreateGeometry(const SystemConfig& config) const
+    boost::shared_ptr<IGeometry> GenerationManager::CreateGeometry(const SystemConfig& config, const Core::SpatialVector& shift) const
     {
-        printf("\n\n\n");
-
-        bool unknownBoundariesMode = (config.boundariesMode != BoundariesMode::Bulk) &&
-                (config.boundariesMode != BoundariesMode::Ellipse) &&
-                (config.boundariesMode != BoundariesMode::Rectangle) &&
-                (config.boundariesMode != BoundariesMode::Trapezoid);
-
-        if (unknownBoundariesMode)
-        {
-            printf("Right now boundaries modes 1 (periodic XYZ), 2 (periodic Z, circle XY (Y is diameter) ), 3 (periodic Z, rectangle XY), or 4 (periodic Z, trapezoid XY) are supported  only\n");
-            throw InvalidOperationException("Incorrect boundary mode.");
-        }
-
+        // TODO: use shift in all non-bulk geometries and may be add a template parameter to all of them <TSupportsShift>.
         boost::shared_ptr<IGeometry> geometry;
         switch (config.boundariesMode)
         {
@@ -420,7 +709,7 @@ namespace Generation
             geometry.reset(new BulkGeometry(config));
             break;
         case BoundariesMode::Ellipse:
-            geometry.reset(new CircleGeometry(config));
+            geometry.reset(new CircleGeometry(config, shift));
             break;
         case BoundariesMode::Rectangle:
             geometry.reset(new RectangleGeometry(config));
@@ -433,6 +722,13 @@ namespace Generation
         }
 
         return geometry;
+    }
+
+    boost::shared_ptr<IGeometry> GenerationManager::CreateGeometry(const SystemConfig& config) const
+    {
+        SpatialVector shift;
+        VectorUtilities::InitializeWith(&shift, 0.0);
+        return CreateGeometry(config, shift);
     }
 
     void GenerationManager::ReadOrCreatePacking(const ExecutionConfig& fullConfig, const ModellingContext& context, bool shouldAlwaysReadPacking, Packing* particles) const
@@ -454,6 +750,52 @@ namespace Generation
         {
             ReadOrCreatePacking(fullConfig, context, particles);
         }
+
+        // Setting immobile particles in different ways
+
+        Nullable<bool> shouldSuppressCrystallization = fullConfig.generationConfig.shouldSuppressCrystallization;
+        if (shouldSuppressCrystallization.hasValue && shouldSuppressCrystallization.value)
+        {
+            immobileParticlesService->SetContext(context);
+            immobileParticlesService->SetAndArrangeImmobileParticles(particles);
+        }
+
+        string immobileParticlesPath = Path::Append(fullConfig.generationConfig.baseFolder, IMMOBILE_PARTICLES_FILE_NAME);
+        if (Path::Exists(immobileParticlesPath))
+        {
+            vector<ParticleIndex> immobileParticleIndexes;
+            packingSerializer->ReadImmobileParticleIndexes(immobileParticlesPath, &immobileParticleIndexes);
+            for (std::size_t immobileParticleIndexIndex = 0; immobileParticleIndexIndex < immobileParticleIndexes.size(); ++immobileParticleIndexIndex)
+            {
+                ParticleIndex immobileParticleIndex = immobileParticleIndexes[immobileParticleIndexIndex];
+                particlesRef[immobileParticleIndex].isImmobile = true;
+            }
+        }
+
+        if (context.activeGeometry != NULL)
+        {
+            SetActiveParticlesByActiveGeometry(fullConfig.systemConfig, *context.activeGeometry, particles);
+        }
+    }
+
+    void GenerationManager::SetActiveParticlesByActiveGeometry(const SystemConfig& systemConfig, const IGeometry& activeGeometry, Packing* particles) const
+    {
+        Packing& particlesRef = *particles;
+
+        int immobileParticlesCount = 0;
+        for (ParticleIndex i = 0; i < systemConfig.particlesCount; ++i)
+        {
+            particlesRef[i].isImmobile = !activeGeometry.IsSphereInside(particlesRef[i].coordinates, particlesRef[i].diameter * 0.5);
+            if (particlesRef[i].isImmobile)
+            {
+                immobileParticlesCount++;
+            }
+        }
+
+        if (immobileParticlesCount > 0)
+        {
+            printf("mobileParticlesCount = %d, immobileParticlesCount = %d\n", systemConfig.particlesCount - immobileParticlesCount, immobileParticlesCount);
+        }
     }
 
     void GenerationManager::ReadOrCreatePacking(const ExecutionConfig& fullConfig, const ModellingContext& context, Packing* particles) const
@@ -462,12 +804,13 @@ namespace Generation
         int particlesCount = fullConfig.systemConfig.particlesCount;
         particles->resize(particlesCount);
 
-        if (fullConfig.generationConfig.generationStart)
+        if (fullConfig.generationConfig.shouldStartGeneration.hasValue && fullConfig.generationConfig.shouldStartGeneration.value)
         {
             packingSerializer->ReadParticleDiameters(Path::Append(baseFolder, DIAMETERS_FILE_NAME), particles);
 
             if (fullConfig.generationConfig.initialParticleDistribution == InitialParticleDistribution::Poisson)
             {
+                // TODO: create PoissonGenerator PoissonInCellsGenerator for all geometries, just call IsSphereInside for the given geometry until the sphere is in the geometry.
                 BulkPoissonGenerator initialGenerator;
                 CreateInitialPacking(fullConfig, context, particles, &initialGenerator);
             }
@@ -476,6 +819,9 @@ namespace Generation
                 BulkPoissonInCellsGenerator initialGenerator;
                 CreateInitialPacking(fullConfig, context, particles, &initialGenerator);
             }
+
+//            HcpGenerator initialGenerator;
+//            CreateInitialPacking(fullConfig, context, particles, &initialGenerator);
 
             packingSerializer->SerializePacking(Path::Append(baseFolder, INIT_PACKING_FILE_NAME), *particles);
         }

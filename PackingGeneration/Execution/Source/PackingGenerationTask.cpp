@@ -10,6 +10,7 @@
 #include "Generation/PackingServices/Headers/PackingSerializer.h"
 #include "Generation/PackingServices/Headers/MathService.h"
 #include "Generation/PackingServices/Headers/GeometryService.h"
+#include "Generation/PackingServices/Headers/ImmobileParticlesService.h"
 #include "Generation/PackingServices/DistanceServices/Headers/VerletListNeighborProvider.h"
 #include "Generation/PackingServices/DistanceServices/Headers/CellListNeighborProvider.h"
 #include "Generation/PackingServices/DistanceServices/Headers/ClosestPairProvider.h"
@@ -36,6 +37,7 @@
 // Other steps
 #include "Generation/PackingGenerators/LubachevsckyStillinger/Headers/LubachevsckyStillingerStep.h"
 #include "Generation/PackingGenerators/Headers/BezrukovJodreyToryStep.h"
+#include "Generation/PackingGenerators/Headers/ClosestJammingStep.h"
 #include "Generation/PackingGenerators/Headers/OriginalJodreyToryStep.h"
 #include "Generation/PackingGenerators/Headers/KhirevichJodreyToryStep.h"
 #include "Generation/PackingGenerators/Headers/MonteCarloStep.h"
@@ -51,9 +53,10 @@ using namespace Core;
 
 namespace Execution
 {
-    PackingGenerationTask::PackingGenerationTask(string baseFolder)
+    PackingGenerationTask::PackingGenerationTask(string baseFolder, int id)
     {
         userConfig.generationConfig.baseFolder = baseFolder;
+        this->id = id;
     }
 
     PackingGenerationTask::~PackingGenerationTask()
@@ -63,6 +66,11 @@ namespace Execution
     FLOAT_TYPE PackingGenerationTask::GetWeight() const
     {
         return 1.0;
+    }
+
+    int PackingGenerationTask::GetId() const
+    {
+        return id;
     }
 
     void PackingGenerationTask::Execute()
@@ -86,7 +94,7 @@ namespace Execution
 //        EnergyService contractionEnergyService(&mathService, &neighborProvider);
         RattlerRemovalService rattlerRemovalServiceForEnergy(&mathService, &neighborProvider);
         NoRattlersEnergyService contractionEnergyService(&mathService, &neighborProvider, &rattlerRemovalServiceForEnergy);
-        LubachevsckyStillingerStep lubachevsckyStillingerStep(&geometryService, &neighborProvider, &distanceService, &mathService);
+        LubachevsckyStillingerStep lubachevsckyStillingerStep(&geometryService, &neighborProvider, &distanceService, &mathService, &packingSerializer, &contractionEnergyService);
 
         // Post-processing services
         OrderService orderService(&mathService, &neighborProvider);
@@ -96,12 +104,15 @@ namespace Execution
         RattlerRemovalService rattlerRemovalService(&mathService, &neighborProvider);
         HessianService hessianService(&mathService, &neighborProvider, &rattlerRemovalService);
 
-        contractionEnergyService.SetMinNeighborsCount(4);
-        rattlerRemovalService.SetMinNeighborsCount(4);
+        int minContactsCount = 3;
+        contractionEnergyService.SetMinNeighborsCount(minContactsCount);
+        rattlerRemovalService.SetMinNeighborsCount(minContactsCount);
 
         BezrukovPotential bezrukovPotential;
         HarmonicPotential harmonicPotential(2.0);
         ImpermeableAttractionPotential impermeableAttractionPotential(&harmonicPotential);
+
+        ImmobileParticlesService immobileParticlesService(&mathService, &geometryService, &neighborProvider);
 
         boost::shared_ptr<IPackingStep> packingStep = CreatePackingStep(&geometryService,
                 &neighborProvider,
@@ -109,9 +120,11 @@ namespace Execution
                 &mathService,
                 &closestPairProvider,
                 &generationEnergyService,
+                &contractionEnergyService,
                 &bezrukovPotential,
                 &impermeableAttractionPotential,
-                &harmonicPotential);
+                &harmonicPotential,
+                &packingSerializer);
 
         PackingGenerator generator(&packingSerializer, &geometryService, &mathService, packingStep.get());
 
@@ -124,7 +137,8 @@ namespace Execution
                 &hessianService,
                 &pressureService,
                 &molecularDynamicsService,
-                &rattlerRemovalService);
+                &rattlerRemovalService,
+                &immobileParticlesService);
 
         CallCorrectMethod(&generationManager);
     }
@@ -134,19 +148,23 @@ namespace Execution
             DistanceService* distanceService,
             MathService* mathService,
             IClosestPairProvider* closestPairProvider,
-            EnergyService* generationEnergyService,
+            IEnergyService* generationEnergyService,
+            IEnergyService* contractionEnergyService,
             IPairPotential* bezrukovPotential,
             IPairPotential* impermeableAttractionPotential,
-            IPairPotential* pairPotential) const
+            IPairPotential* pairPotential,
+            PackingSerializer* packingSerializer) const
     {
         boost::shared_ptr<IPackingStep> packingStep;
 
         const GenerationConfig& generationConfig = userConfig.generationConfig;
         if (generationConfig.generationAlgorithm == PackingGenerationAlgorithm::LubachevskyStillingerSimple ||
                 generationConfig.generationAlgorithm == PackingGenerationAlgorithm::LubachevskyStillingerGradualDensification ||
-                generationConfig.generationAlgorithm == PackingGenerationAlgorithm::LubachevskyStillingerEquilibrationBetweenCompressions)
+                generationConfig.generationAlgorithm == PackingGenerationAlgorithm::LubachevskyStillingerEquilibrationBetweenCompressions ||
+                generationConfig.generationAlgorithm == PackingGenerationAlgorithm::LubachevskyStillingerConstantPower ||
+                generationConfig.generationAlgorithm == PackingGenerationAlgorithm::LubachevskyStillingerBiazzo)
         {
-            packingStep.reset(new LubachevsckyStillingerStep(geometryService, neighborProvider, distanceService, mathService));
+            packingStep.reset(new LubachevsckyStillingerStep(geometryService, neighborProvider, distanceService, mathService, packingSerializer, contractionEnergyService));
         }
         else if (generationConfig.generationAlgorithm == PackingGenerationAlgorithm::ForceBiasedAlgorithm)
         {
@@ -163,6 +181,10 @@ namespace Execution
         else if (generationConfig.generationAlgorithm == PackingGenerationAlgorithm::MonteCarlo)
         {
             packingStep.reset(new MonteCarloStep(geometryService, distanceService, mathService));
+        }
+        else if (generationConfig.generationAlgorithm == PackingGenerationAlgorithm::ClosestJammingSearch)
+        {
+            packingStep.reset(new ClosestJammingStep(geometryService, neighborProvider, closestPairProvider, mathService));
         }
         else if (generationConfig.generationAlgorithm == PackingGenerationAlgorithm::ConjugateGradient)
         {
@@ -186,6 +208,14 @@ namespace Execution
         if (generationConfig.executionMode == ExecutionMode::InsertionRadiiGeneration)
         {
             generationManager->GenerateInsertionRadii(userConfig);
+        }
+        else if (generationConfig.executionMode == ExecutionMode::DistancesToClosestSurfacesCalculation)
+        {
+            generationManager->CalculateDistancesToClosestSurfaces(userConfig);
+        }
+        else if (generationConfig.executionMode == ExecutionMode::ContactNumberDistributionCalculation)
+        {
+            generationManager->CalculateContactNumberDistribution(userConfig);
         }
         else if (generationConfig.executionMode == ExecutionMode::EntropyCalculation)
         {
@@ -230,6 +260,22 @@ namespace Execution
         else if (generationConfig.executionMode == ExecutionMode::StructureFactorCalculation)
         {
             generationManager->CalculateStructureFactor(userConfig);
+        }
+        else if (generationConfig.executionMode == ExecutionMode::LocalOrientationalDisorder)
+        {
+            generationManager->GenerateLocalOrientationalDisorder(userConfig);
+        }
+        else if (generationConfig.executionMode == ExecutionMode::ImmediateMolecularDynamicsCalculation)
+        {
+            generationManager->CalculateImmediateMolecularDynamicsStatistics(userConfig);
+        }
+        else if (generationConfig.executionMode == ExecutionMode::NearestNeighborsCalculation)
+        {
+            generationManager->CalculateNearestNeighbors(userConfig);
+        }
+        else if (generationConfig.executionMode == ExecutionMode::ActiveGeometryCalculation)
+        {
+            generationManager->CalculateActiveGeometry(userConfig);
         }
         else
         {

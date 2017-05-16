@@ -44,5 +44,10 @@ namespace Geometries
 //
 //        EnsureVerticalPeriodicityAfterRepulsion(movedParticle->coordinates[Axis::Z]);
     }
+
+    bool RectangleGeometry::IsSphereInside(const Core::SpatialVector& sphereCenter, Core::FLOAT_TYPE sphereRadius) const
+    {
+        throw NotImplementedException("Implement");
+    }
 }
 

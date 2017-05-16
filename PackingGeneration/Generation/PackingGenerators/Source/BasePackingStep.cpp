@@ -2,6 +2,7 @@
 // Distributed under the MIT software license
 // See the accompanying file License.txt or http://opensource.org/licenses/MIT
 
+#include <cmath>
 #include "../Headers/BasePackingStep.h"
 #include "Generation/PackingServices/Headers/MathService.h"
 #include "Generation/PackingServices/Headers/GeometryService.h"
@@ -39,7 +40,6 @@ namespace PackingGenerators
 
     BasePackingStep::~BasePackingStep()
     {
-
     }
 
     void BasePackingStep::SetGenerationConfig(const GenerationConfig& generationConfig)
@@ -95,27 +95,11 @@ namespace PackingGenerators
     {
         const FLOAT_TYPE MIN_DISTANCE = (2.0 - TOLERANCE);
 
-        // Don't write through logical expressions, as will be too complicated
         if (isOuterDiameterChanging)
         {
-            if (outerDiameterRatio <= innerDiameterRatio)
-            {
-                return false;
-            }
-            else
-            {
-                if (!generationConfig->stopOnTheoreticalDensity)
-                {
-                    return true;
-                }
-//                else
-//                {
-//                    go to CanOvercomeTheoreticalDensity() block
-//                }
-            }
+            return (outerDiameterRatio > innerDiameterRatio);
         }
 
-        // Get here if outer diameter is not changing or if we should stop on theoretical density
         if (canOvercomeTheoreticalDensity)
         {
             return innerDiameterRatio < 1.0;
@@ -133,7 +117,7 @@ namespace PackingGenerators
 
     FLOAT_TYPE BasePackingStep::CalculateCurrentPorosity(FLOAT_TYPE diameterRatio) const
     {
-        FLOAT_TYPE calculatedPorosity = 1.0 - (particlesVolume * diameterRatio * diameterRatio * diameterRatio) / totalVolume;
+        FLOAT_TYPE calculatedPorosity = 1.0 - (particlesVolume * std::pow(diameterRatio, DIMENSIONS)) / totalVolume;
         return calculatedPorosity;
     }
 }

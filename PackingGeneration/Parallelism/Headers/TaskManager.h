@@ -5,28 +5,56 @@
 #ifndef Parallelism_Headers_TaskManager_h
 #define Parallelism_Headers_TaskManager_h
 
+#include <vector>
+#include <boost/shared_ptr.hpp>
 #include "ITaskManager.h"
 #include "Core/Headers/Macros.h"
+#include "Core/Headers/Types.h"
+namespace Parallelism { class ITask; }
 
 namespace Parallelism
 {
     // Implements a default load balancer to split tasks per process in a random manner, thus minimizing execution time deviation.
-    class TaskManager : public ITaskManager
+    class TaskManager : public virtual ITaskManager
     {
     private:
         ITaskFactory* taskFactory;
-        ILoadBalancer* loadBalancer;
+        std::vector<boost::shared_ptr<ITask> > tasks;
+
+        // Values used only in single-process environment to avoid writing to the file system and file locking.
+        int startedTasksCount;
+        int finishedTasksCount;
+
+        static const std::string syncFolderName;
+        static const std::string finishedTasksFileName;
+        static const std::string startedTasksFileName;
 
     public:
-        TaskManager(ITaskFactory* taskFactory, ILoadBalancer* loadBalancer);
+        TaskManager(ITaskFactory* taskFactory);
 
         OVERRIDE ITaskFactory* GetTaskFactory() const;
-
-        OVERRIDE ILoadBalancer* GetLoadBalancer() const;
 
         OVERRIDE void SubmitTasks();
 
     private:
+        ITask* GetFirstTask(const std::vector<boost::shared_ptr<ITask> >& tasks) const;
+
+        void LogTaskFinish();
+
+        void LogInitialValues();
+
+        ITask* GetNextTaskAndLogStart();
+
+        bool AllTasksFinished();
+
+        void ClearLogs();
+
+        std::string GetSyncFolderPath();
+
+        std::string GetFinishedTasksPath();
+
+        std::string GetStartedTasksPath();
+
         DISALLOW_COPY_AND_ASSIGN(TaskManager);
     };
 }

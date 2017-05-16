@@ -7,8 +7,8 @@
 
 #include "Core/Headers/Macros.h"
 #include "Generation/Model/Headers/Types.h"
-namespace PackingServices { class MathService; }
-namespace PackingGenerators { class MovingParticle; }
+namespace PackingServices { struct MathService; }
+namespace PackingGenerators { struct MovingParticle; }
 
 namespace PackingGenerators
 {
@@ -32,6 +32,12 @@ namespace PackingGenerators
         Core::FLOAT_TYPE FillVelocitiesAfterCollision(Core::FLOAT_TYPE currentTime, const MovingParticle& firstParticle, const MovingParticle& secondParticle, Core::SpatialVector* firstVelocity, Core::SpatialVector* secondVelocity) const;
 
     private:
+        Core::FLOAT_TYPE FillVelocitiesAfterCollisionBothMobile(Core::FLOAT_TYPE currentTime, const MovingParticle& firstParticle, const MovingParticle& secondParticle,
+                Core::SpatialVector* firstVelocity, Core::SpatialVector* secondVelocity) const;
+
+        Core::FLOAT_TYPE FillVelocitiesAfterCollisionOneImmobile(Core::FLOAT_TYPE currentTime, const MovingParticle& firstParticle, const MovingParticle& secondParticle,
+                Core::SpatialVector* firstVelocity, Core::SpatialVector* secondVelocity) const;
+
         Core::FLOAT_TYPE GetCollisionTime(Core::FLOAT_TYPE currentTime, Core::FLOAT_TYPE a, Core::FLOAT_TYPE b, Core::FLOAT_TYPE c) const;
 
         // Returns parallel vector length

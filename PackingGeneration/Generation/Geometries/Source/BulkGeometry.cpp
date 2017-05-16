@@ -34,14 +34,17 @@ namespace Geometries
         }
     }
 
-    //This function will not work properly for compiler optimizations O2 or O3 (for some reason):
-    //the code will simply be omitted. If you put some dummy printf in the function, everything will work.
     void BulkGeometry::EnsureBoundaries(const Model::DomainParticle& initialParticle, Model::DomainParticle* movedParticle, FLOAT_TYPE minNormalizedDistance) const
     {
         for (int i = 0; i < DIMENSIONS; ++i)
         {
             EnsureVerticalPeriodicityAfterRepulsion(&movedParticle->coordinates, i);
         }
+    }
+
+    bool BulkGeometry::IsSphereInside(const Core::SpatialVector& sphereCenter, Core::FLOAT_TYPE sphereRadius) const
+    {
+        return true;
     }
 }
 

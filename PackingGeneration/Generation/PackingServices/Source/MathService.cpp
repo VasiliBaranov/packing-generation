@@ -57,6 +57,13 @@ namespace PackingServices
         return VectorUtilities::GetSelfDotProduct(difference);
     }
 
+    void MathService::FillDirection(const SpatialVector& to, const SpatialVector& from, SpatialVector* direction) const
+    {
+        FillDistance(to, from, direction);
+        FLOAT_TYPE length = VectorUtilities::GetLength(*direction);
+        VectorUtilities::DivideByValue(*direction, length, direction);
+    }
+
     void MathService::FillDistance(const SpatialVector& to, const SpatialVector& from, SpatialVector* difference) const
     {
         // When we subtract "2" from "1", the vector is from "1" to "2"

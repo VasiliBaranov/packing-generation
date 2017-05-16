@@ -13,6 +13,9 @@ namespace Parallelism
     class ITask
     {
     public:
+
+        virtual int GetId() const = 0;
+
         //Gets the estimated difficulty of task execution, i.e. its weight in the tasks list.
         virtual Core::FLOAT_TYPE GetWeight() const = 0;
 

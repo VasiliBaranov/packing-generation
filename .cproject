@@ -31,6 +31,7 @@
 								<option id="gnu.cpp.compiler.option.debugging.level.420234862" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.include.paths.117842938" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="../Externals/Boost"/>
+									<listOptionValue builtIn="false" value="../Externals/Eigen"/>
 									<listOptionValue builtIn="false" value="../PackingGeneration"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.699907147" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
@@ -91,6 +92,7 @@
 							<tool id="cdt.managedbuild.tool.gnu.archiver.cygwin.base.796146321" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.cygwin.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.cygwin.base.1439580303" name="Cygwin C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.cygwin.base">
 								<option id="gnu.cpp.compiler.option.include.paths.809084964" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="../Externals/Eigen"/>
 									<listOptionValue builtIn="false" value="../Externals/Boost"/>
 									<listOptionValue builtIn="false" value="../PackingGeneration"/>
 								</option>
@@ -99,6 +101,7 @@
 								<option id="gnu.cpp.compiler.option.optimization.flags.1285655547" name="Other optimization flags" superClass="gnu.cpp.compiler.option.optimization.flags" value="-funroll-loops" valueType="string"/>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.582578" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="BOOST_DISABLE_ASSERTS"/>
+									<listOptionValue builtIn="false" value="NDEBUG"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.cygwin.1082233120" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input.cygwin"/>
 							</tool>
@@ -154,6 +157,7 @@
 								<option id="gnu.cpp.compiler.option.debugging.level.1496319647" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.include.paths.168442962" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="../Externals/Boost"/>
+									<listOptionValue builtIn="false" value="../Externals/Eigen"/>
 									<listOptionValue builtIn="false" value="../PackingGeneration"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.736443663" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
@@ -214,12 +218,14 @@
 							<tool command="mpiicpc" id="cdt.managedbuild.tool.gnu.cpp.compiler.cygwin.base.196265842" name="Cygwin C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.cygwin.base">
 								<option id="gnu.cpp.compiler.option.include.paths.1683803336" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="../Externals/Boost"/>
+									<listOptionValue builtIn="false" value="../Externals/Eigen"/>
 									<listOptionValue builtIn="false" value="../PackingGeneration"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.optimization.level.1057555245" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.debugging.level.171634378" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.660875803" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="PARALLEL"/>
+									<listOptionValue builtIn="false" value="NDEBUG"/>
 									<listOptionValue builtIn="false" value="MPICH_IGNORE_CXX_SEEK"/>
 									<listOptionValue builtIn="false" value="BOOST_DISABLE_ASSERTS"/>
 									<listOptionValue builtIn="false" value="MPICH_SKIP_MPICXX"/>
@@ -284,6 +290,7 @@
 								<option id="gnu.cpp.compiler.option.debugging.level.1139848246" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.include.paths.1686368051" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="../Externals/Boost"/>
+									<listOptionValue builtIn="false" value="../Externals/Eigen"/>
 									<listOptionValue builtIn="false" value="../PackingGeneration"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.1448173136" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
@@ -345,6 +352,7 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.cygwin.base.1142523017" name="Cygwin C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.cygwin.base">
 								<option id="gnu.cpp.compiler.option.include.paths.498886064" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="../Externals/Boost"/>
+									<listOptionValue builtIn="false" value="../Externals/Eigen"/>
 									<listOptionValue builtIn="false" value="../PackingGeneration"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.optimization.level.1348656817" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
@@ -352,6 +360,7 @@
 								<option id="gnu.cpp.compiler.option.optimization.flags.767362372" name="Other optimization flags" superClass="gnu.cpp.compiler.option.optimization.flags" value="-funroll-loops" valueType="string"/>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.1314501347" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="BOOST_DISABLE_ASSERTS"/>
+									<listOptionValue builtIn="false" value="NDEBUG"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.cygwin.53207465" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input.cygwin"/>
 							</tool>

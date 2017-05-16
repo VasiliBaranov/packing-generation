@@ -18,12 +18,11 @@ namespace Tests
     {
     public:
         template<class T>
-        static void AreAlmostEqual(T actualValue, T expectedValue, std::string callerName)
+        static void AreAlmostEqual(T actualValue, T expectedValue, std::string callerName, double epsilon = 1e-5)
         {
-            const float epsilon = 1e-5;
             if ((actualValue != actualValue) ||
                     (expectedValue != expectedValue) ||
-                    std::abs(actualValue - expectedValue) > epsilon)
+                    std::abs(actualValue - expectedValue) > epsilon * (std::abs(actualValue) + std::abs(expectedValue)) * 0.5) // both can not be zero
             {
                 std::cout << "Assertion failed for " << callerName << ".\n";
                 exit(EXIT_FAILURE);

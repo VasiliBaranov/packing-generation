@@ -5,7 +5,7 @@
 #include "../Headers/ByteUtilityTests.h"
 #include <string>
 #include "../Headers/Assert.h"
-#include "Core/Headers/ByteUtility.h"
+#include "Core/Headers/Utilities.h"
 
 using namespace Core;
 
@@ -14,24 +14,24 @@ namespace Tests
     void ByteUtilityTests::SwapBytes_FloatsTwice_NumbersEqual()
     {
         float x = 5.3;
-        float result = ByteUtility::DoByteSwap<float>(x);
-        result = ByteUtility::DoByteSwap<float>(result);
+        float result = Utilities::DoByteSwap<float>(x);
+        result = Utilities::DoByteSwap<float>(result);
         Assert::AreEqual(x, result, "SwapBytes_FloatsTwice_NumbersEqual");
     }
 
     void ByteUtilityTests::SwapBytes_IntsTwice_NumbersEqual()
     {
         int x = 5;
-        int result = ByteUtility::DoByteSwap<int>(x);
-        result = ByteUtility::DoByteSwap<int>(result);
+        int result = Utilities::DoByteSwap<int>(x);
+        result = Utilities::DoByteSwap<int>(result);
         Assert::AreEqual(x, result, "SwapBytes_IntsTwice_NumbersEqual");
     }
 
     void ByteUtilityTests::SwapBytes_DoublesTwice_NumbersEqual()
     {
         double x = 5.3;
-        double result = ByteUtility::DoByteSwap<double>(x);
-        result = ByteUtility::DoByteSwap<double>(result);
+        double result = Utilities::DoByteSwap<double>(x);
+        result = Utilities::DoByteSwap<double>(result);
         Assert::AreEqual(x, result, "SwapBytes_DoublesTwice_NumbersEqual");
     }
 

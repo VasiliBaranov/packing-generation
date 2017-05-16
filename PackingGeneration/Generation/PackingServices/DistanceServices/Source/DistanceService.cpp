@@ -1,9 +1,11 @@
 // Copyright (c) 2013 Vasili Baranau
 // Distributed under the MIT software license
 // See the accompanying file License.txt or http://opensource.org/licenses/MIT
-
 #include "../Headers/DistanceService.h"
+
+#include <cstdio>
 #include <complex>
+
 #include "Core/Headers/Constants.h"
 #include "Core/Headers/VectorUtilities.h"
 #include "Core/Headers/StlUtilities.h"
@@ -62,6 +64,30 @@ namespace PackingServices
         }
 
         return minDistance;
+    }
+
+    void DistanceService::FillDistancesToClosestSurfaces(const Core::SpatialVector& point, vector<FLOAT_TYPE>* distancesToClosestSurfaces) const
+    {
+        const Packing& particlesRef = *particles;
+        vector<FLOAT_TYPE>& distancesToClosestSurfacesRef = *distancesToClosestSurfaces;
+
+        ParticleIndex neighborsCount;
+        const ParticleIndex* neighborIndexes = neighborProvider->GetNeighborIndexes(point, &neighborsCount);
+
+//        int expectedDistancesCount = distancesToClosestSurfacesRef.size();
+        distancesToClosestSurfacesRef.resize(neighborsCount);
+
+        for (ParticleIndex i = 0; i < neighborsCount; ++i)
+        {
+            const DomainParticle* neighbor = &particlesRef[neighborIndexes[i]];
+            FLOAT_TYPE distance = mathService->GetDistanceLength(point, neighbor->coordinates) - neighbor->diameter * 0.5;
+            distancesToClosestSurfacesRef[i] = distance;
+        }
+
+//        if (expectedDistancesCount < neighborsCount)
+//        {
+//            distancesToClosestSurfacesRef.resize(expectedDistancesCount);
+//        }
     }
 
     FLOAT_TYPE DistanceService::GetDistanceToNearestSurface(ParticleIndex particleIndex) const
@@ -204,22 +230,61 @@ namespace PackingServices
             pairCorrelationFunction->binParticleCounts[binIndex] = particlesCount;
 
             FLOAT_TYPE distance = pairCorrelationFunction->binLeftEdges[binIndex] + step * 0.5;
-            FLOAT_TYPE sphereSurface = 4.0 * PI * distance * distance;
+            FLOAT_TYPE sphereSurface;
+            if (DIMENSIONS == 3)
+            {
+                sphereSurface = 4.0 * PI * distance * distance;
+            }
+            if (DIMENSIONS == 2)
+            {
+                sphereSurface = 2.0 * PI * distance;
+            }
             pairCorrelationFunction->pairCorrelationFunctionValues[binIndex] = particlesCount / sphereSurface / step / config->particlesCount;
         }
     }
 
     // See http://en.wikipedia.org/wiki/Structure_factor, cf. (4) or (5).
+    // TODO: Make static or move to another service!
     void DistanceService::FillStructureFactor(StructureFactor* structureFactor) const
     {
+        if (DIMENSIONS == 2)
+        {
+            throw NotImplementedException("2D structure factor not implemented");
+        }
+
+        vector<Core::SpatialVector> periodicWaveVectors;
+        vector<Core::FLOAT_TYPE> waveVectorLengths;
+        FillPeriodicWaveVectorsUpToPeak(*config, &periodicWaveVectors, &waveVectorLengths);
+
+        vector<FLOAT_TYPE> structureFactorValues;
+        FillStructureFactorForWaveVectors(*config, *particles, periodicWaveVectors, &structureFactorValues);
+
+        vector<int> permutation;
+        StlUtilities::SortPermutation(waveVectorLengths, &permutation);
+
+        structureFactor->waveVectorLengths.resize(waveVectorLengths.size());
+        structureFactor->structureFactorValues.resize(waveVectorLengths.size());
+        for (size_t i = 0; i < waveVectorLengths.size(); ++i)
+        {
+            structureFactor->waveVectorLengths[i] = waveVectorLengths[permutation[i]];
+            structureFactor->structureFactorValues[i] = structureFactorValues[permutation[i]];
+        }
+    }
+
+    void DistanceService::FillPeriodicWaveVectorsUpToPeak(const SystemConfig& config,
+                            vector<SpatialVector>* periodicWaveVectors, vector<FLOAT_TYPE>* waveVectorLengths) const
+    {
+        if (DIMENSIONS == 2)
+        {
+            throw NotImplementedException("2D structure factor not implemented");
+        }
+
         // I'm using the equation from "Perfect Crystals" section, as it is faster, though may have worse precision (as doesn't use all the info from the particles).
         // It is also used in Jiao and Torquato (2011) Maximally random jammed packings of platonic solids, cf. 3.
-        // For this code also Xu and Ching (2010) Effects of particle-size ratio on jamming of binary mixtures at zero temperature
+        // For this code see also Xu and Ching (2010) Effects of particle-size ratio on jamming of binary mixtures at zero temperature
         // "Due to the periodic boundary conditions, the wave vector must be chosen as..."
-        structureFactor->waveVectorLengths.clear();
-        structureFactor->structureFactorValues.clear();
-
-        vector<StructureFactorPair> result;
+        vector<SpatialVector>& periodicWaveVectorsRef = *periodicWaveVectors;
+        vector<FLOAT_TYPE>& waveVectorLengthsRef = *waveVectorLengths;
 
         const int acceptableVectorsCount = 70000; // determined empirically
         const int maxDiscreteCoordinate = 12;
@@ -237,9 +302,9 @@ namespace PackingServices
                     }
 
                     SpatialVector waveVector;
-                    waveVector[Axis::X] = i * 2.0 * PI / config->packingSize[Axis::X];
-                    waveVector[Axis::Y] = j * 2.0 * PI / config->packingSize[Axis::Y];
-                    waveVector[Axis::Z] = k * 2.0 * PI / config->packingSize[Axis::Z];
+                    waveVector[Axis::X] = i * 2.0 * PI / config.packingSize[Axis::X];
+                    waveVector[Axis::Y] = j * 2.0 * PI / config.packingSize[Axis::Y];
+                    waveVector[Axis::Z] = k * 2.0 * PI / config.packingSize[Axis::Z];
 
                     FLOAT_TYPE waveVectorLength = VectorUtilities::GetLength(waveVector);
 
@@ -253,31 +318,218 @@ namespace PackingServices
                         }
                     }
 
-                    complex<FLOAT_TYPE> complexSum(0.0, 0.0);
-                    complex<FLOAT_TYPE> imaginaryUnit(0.0, 1.0);
-                    for (ParticleIndex particleIndex = 0; particleIndex < config->particlesCount; ++particleIndex)
-                    {
-                        const Packing& particlesRef = *particles;
-                        FLOAT_TYPE dotProduct = VectorUtilities::GetDotProduct(waveVector, particlesRef[particleIndex].coordinates);
-                        complexSum += exp(imaginaryUnit * dotProduct);
-                    }
-
-                    StructureFactorPair pair;
-                    pair.waveVectorLength = waveVectorLength;
-                    pair.structureFactorValue = norm(complexSum) / config->particlesCount;
-                    result.push_back(pair);
+                    periodicWaveVectorsRef.push_back(waveVector);
+                    waveVectorLengthsRef.push_back(waveVectorLength);
                 }
             }
         }
+    }
 
-        StlUtilities::Sort(&result);
-
-        for (vector<StructureFactorPair>::const_iterator it = result.begin(); it != result.end(); ++it)
+    void DistanceService::FillPeriodicWaveVectors(const SystemConfig& config, FLOAT_TYPE expectedWaveVectorLength, FLOAT_TYPE waveVectorHalfWidth,
+            vector<SpatialVector>* periodicWaveVectors, vector<FLOAT_TYPE>* waveVectorLengths) const
+    {
+        if (DIMENSIONS == 2)
         {
-            StructureFactorPair pair = *it;
+            throw NotImplementedException("2D structure factor not implemented");
+        }
 
-            structureFactor->waveVectorLengths.push_back(pair.waveVectorLength);
-            structureFactor->structureFactorValues.push_back(pair.structureFactorValue);
+        // I'm using the equation from "Perfect Crystals" section, as it is faster, though may have worse precision (as doesn't use all the info from the particles).
+        // It is also used in Jiao and Torquato (2011) Maximally random jammed packings of platonic solids, cf. 3.
+        // For this code see also Xu and Ching (2010) Effects of particle-size ratio on jamming of binary mixtures at zero temperature
+        // "Due to the periodic boundary conditions, the wave vector must be chosen as..."
+
+        vector<SpatialVector>& periodicWaveVectorsRef = *periodicWaveVectors;
+        vector<FLOAT_TYPE>& waveVectorLengthsRef = *waveVectorLengths;
+
+        periodicWaveVectorsRef.clear();
+        waveVectorLengthsRef.clear();
+
+        FLOAT_TYPE maxPackingSize = VectorUtilities::GetMaxValue(config.packingSize);
+        int maxDiscreteCoordinate = std::ceil((expectedWaveVectorLength + waveVectorHalfWidth) * maxPackingSize / (2.0 * PI));
+
+        // Scattering function is symmetrical with respect to wave vectors. Can leave only half of them. That's why start at zero in the first loop.
+        // Can't start at one, because for zero values there may be significant wave vectors
+        for (int i = 0; i <= maxDiscreteCoordinate; ++i)
+        {
+            for (int j = -maxDiscreteCoordinate; j <= maxDiscreteCoordinate; ++j)
+            {
+                for (int k = -maxDiscreteCoordinate; k <= maxDiscreteCoordinate; ++k)
+                {
+                    if (i == 0 && j == 0 && k == 0)
+                    {
+                        continue;
+                    }
+
+                    SpatialVector waveVector;
+                    waveVector[Axis::X] = i * 2.0 * PI / config.packingSize[Axis::X];
+                    waveVector[Axis::Y] = j * 2.0 * PI / config.packingSize[Axis::Y];
+                    waveVector[Axis::Z] = k * 2.0 * PI / config.packingSize[Axis::Z];
+
+                    FLOAT_TYPE waveVectorLength = VectorUtilities::GetLength(waveVector);
+
+                    bool vectorHasCorrectLength = (waveVectorLength >= expectedWaveVectorLength - waveVectorHalfWidth) && (waveVectorLength <= expectedWaveVectorLength + waveVectorHalfWidth);
+                    if (!vectorHasCorrectLength)
+                    {
+                        continue;
+                    }
+
+                    // Can't omit this check, because in the YZ plane (with X == 0) there still may be several symmetrical wave vectors
+                    SpatialVector reflectedWaveVector;
+                    VectorUtilities::MultiplyByValue(waveVector, -1, &reflectedWaveVector);
+                    bool symmetricVectorExists = StlUtilities::Exists(periodicWaveVectorsRef, reflectedWaveVector);
+                    if (symmetricVectorExists)
+                    {
+                        continue;
+                    }
+
+                    periodicWaveVectorsRef.push_back(waveVector);
+                    waveVectorLengthsRef.push_back(waveVectorLength);
+                }
+            }
+        }
+    }
+
+    void DistanceService::FillStructureFactorForWaveVectors(const SystemConfig& config, const Packing& particles,
+            const vector<SpatialVector>& waveVectors, vector<FLOAT_TYPE>* structureFactors) const
+    {
+        vector<FLOAT_TYPE> selfPartValues; // TODO: support passing null and omitting the self-part computation!
+        FillIntermediateScatteringFunctionForWaveVectors(config, particles, particles, waveVectors, structureFactors, &selfPartValues);
+    }
+
+    void DistanceService::FillIntermediateScatteringFunctionForWaveVectors(const SystemConfig& config, const Packing& firstPacking, const Packing& secondPacking,
+            const vector<SpatialVector>& waveVectors, vector<FLOAT_TYPE>* intermediateScatteringFunctionValues, vector<FLOAT_TYPE>* selfPartValues) const
+    {
+        if (DIMENSIONS == 2)
+        {
+            throw NotImplementedException("2D structure factor not implemented");
+        }
+
+        vector<FLOAT_TYPE>& intermediateScatteringFunctionValuesRef = *intermediateScatteringFunctionValues;
+        vector<FLOAT_TYPE>& selfPartValuesRef = *selfPartValues;
+        intermediateScatteringFunctionValuesRef.resize(waveVectors.size());
+        selfPartValuesRef.resize(waveVectors.size());
+
+        for (size_t i = 0; i < waveVectors.size(); ++i)
+        {
+            const SpatialVector& waveVector = waveVectors[i];
+            // Can't compute structure factor with the logic as in Perez-Angel, et al, 2011, Equilibration of concentrated hard-sphere fluids; Berthier, Witten, 2009 (this is the self-part ISF)
+            // Use logic as everywhere else: van Megen, Underwood, 1994; Martinez et al 2014; Williams, van Megen, 2001; Pusey, 2008 (full ISF)
+            // I wanted to use this function for computing structure factor as well, so implemented the full ISF.
+            // Disadvantage: no known fit form. For the self-part--stretched exponent (Kohlrausch form).
+            complex<FLOAT_TYPE> firstComplexSum(0.0, 0.0);
+            complex<FLOAT_TYPE> secondComplexSum(0.0, 0.0);
+            complex<FLOAT_TYPE> selfPartValue(0.0, 0.0);
+            complex<FLOAT_TYPE> imaginaryUnit(0.0, 1.0);
+            for (ParticleIndex particleIndex = 0; particleIndex < config.particlesCount; ++particleIndex)
+            {
+                FLOAT_TYPE firstDotProduct = VectorUtilities::GetDotProduct(waveVector, firstPacking[particleIndex].coordinates);
+                complex<FLOAT_TYPE> firstExponent = exp(imaginaryUnit * firstDotProduct);
+                firstComplexSum += firstExponent;
+
+                if (&firstPacking != &secondPacking)
+                {
+                    FLOAT_TYPE secondDotProduct = VectorUtilities::GetDotProduct(waveVector, secondPacking[particleIndex].coordinates);
+                    complex<FLOAT_TYPE> secondExponent = exp(imaginaryUnit * secondDotProduct);
+                    secondComplexSum += secondExponent;
+
+                    // exp(imaginaryUnit * (firstDotProduct - secondDotProduct)) = exp(imaginaryUnit * waveVector.*(firstCoordinates - secondCoordinates))
+                    complex<FLOAT_TYPE> secondExponentConjugate = std::conj(secondExponent); //complex<FLOAT_TYPE> secondExponentConjugate(secondExponent.real(), -secondExponent.imag());
+                    selfPartValue += (firstExponent * secondExponentConjugate);
+
+                    // NOTE: i don't select best periodic images, because the discrete Fourier transform assumes infinite repeated system.
+                    // In other words, my wave vectors are constructed in such a way that adding any Lx*n*ex + Ly*m*ey+Lz*k*ez to particle coordinates will not change complex sums,
+                    // because wave vectors have the form 2 pi * (ex*p/Lx + ey*p/Ly + ez*q/Lz).
+                }
+            }
+
+            if (&firstPacking == &secondPacking)
+            {
+                secondComplexSum = firstComplexSum;
+
+                selfPartValue = config.particlesCount;
+            }
+
+            complex<FLOAT_TYPE> secondComplexSumConjugate = std::conj(secondComplexSum);
+            FLOAT_TYPE intermediateScatteringFunctionValue = (firstComplexSum * secondComplexSumConjugate).real(); // In case both sums were initially equal, the result is the norm (squared length)
+            intermediateScatteringFunctionValuesRef[i] = intermediateScatteringFunctionValue / config.particlesCount; // If the first and second packings are equal, returns structure factor
+            selfPartValuesRef[i] = selfPartValue.real() / config.particlesCount;
+        }
+    }
+
+    void DistanceService::FillNeighborVectorSums(vector<FLOAT_TYPE>* neighborVectorSumsNorms, FLOAT_TYPE contractionRate) const
+    {
+        const Packing& particlesRef = *particles;
+        vector<FLOAT_TYPE>& neighborVectorSumsNormsRef = *neighborVectorSumsNorms;
+        neighborVectorSumsNormsRef.resize(config->particlesCount);
+        VectorUtilities::InitializeWith(neighborVectorSumsNorms, 0.0);
+        int nonRattlersCount = 0;
+        int contactsCount = 0;
+
+        for (ParticleIndex particleIndex = 0; particleIndex < config->particlesCount; ++particleIndex)
+        {
+            const DomainParticle* particle = &particlesRef[particleIndex];
+            SpatialVector neighborVectorsSum;
+            VectorUtilities::InitializeWith(&neighborVectorsSum, 0.0);
+
+            ParticleIndex neighborsCount;
+            const ParticleIndex* neighborIndexes = neighborProvider->GetNeighborIndexes(particleIndex, &neighborsCount);
+
+            bool hasNeighbors = false;
+            for (ParticleIndex i = 0; i < neighborsCount; ++i)
+            {
+                ParticleIndex currentNeighborIndex = neighborIndexes[i];
+                const DomainParticle* neighbor = &particlesRef[currentNeighborIndex];
+
+                SpatialVector neighborVector;
+                mathService->FillDistance(particle->coordinates, neighbor->coordinates, &neighborVector);
+                FLOAT_TYPE distanceSquare = VectorUtilities::GetSelfDotProduct(neighborVector);
+
+                FLOAT_TYPE normalizedDistanceSquare = distanceSquare * 4.0 / (particle->diameter + neighbor->diameter) / (particle->diameter + neighbor->diameter);
+                FLOAT_TYPE contractedNormalizedDistanceSquare = contractionRate * contractionRate * normalizedDistanceSquare;
+                if (contractedNormalizedDistanceSquare <= 1.0)
+                {
+                    VectorUtilities::Add(neighborVectorsSum, neighborVector, &neighborVectorsSum);
+                    hasNeighbors = true;
+                    contactsCount++;
+                }
+            }
+
+            if (hasNeighbors)
+            {
+                nonRattlersCount++;
+            }
+
+            neighborVectorSumsNormsRef[particleIndex] = VectorUtilities::GetLength(neighborVectorsSum);
+        }
+
+        FLOAT_TYPE coordinationNumber = static_cast<FLOAT_TYPE>(contactsCount) / nonRattlersCount;
+        printf("Coordination number estimate: %g\n", coordinationNumber);
+    }
+
+    FLOAT_TYPE DistanceService::GetMaxNeighborVectorSumForNonRattlers(const vector<bool>& rattlerMask, const vector<FLOAT_TYPE>& neighborVectorSumsNorms) const
+    {
+        FLOAT_TYPE maxNeighborVectorSumNorm = 0.0;
+        for (ParticleIndex particleIndex = 0; particleIndex < config->particlesCount; ++particleIndex)
+        {
+            if (!rattlerMask[particleIndex] && neighborVectorSumsNorms[particleIndex] > maxNeighborVectorSumNorm)
+            {
+                maxNeighborVectorSumNorm = neighborVectorSumsNorms[particleIndex];
+            }
+        }
+
+        return maxNeighborVectorSumNorm;
+    }
+
+    void DistanceService::FillClosestPairs(vector<ParticlePair>* closestPairs) const
+    {
+        vector<ParticlePair>& closestPairsRef = *closestPairs;
+
+        closestPairsRef.resize(config->particlesCount);
+
+        for (ParticleIndex particleIndex = 0; particleIndex < config->particlesCount; ++particleIndex)
+        {
+            ParticlePair closestPair = FindClosestNeighbor(particleIndex);
+            closestPairsRef[particleIndex] = closestPair;
         }
     }
 }

@@ -7,6 +7,7 @@
 
 #include <vector>
 #include "Core/Headers/Types.h"
+#include "Core/Headers/Exceptions.h"
 
 // The basic project structure is from the Domain-Driven Design: Model (merely data transfer objects) and Services (see Domain-Driven Design Quickly).
 // Several model types are included in this file (Types.h) for simplicity, services include PackingGenerators and PackingServices (i.e. services over packings).
@@ -61,21 +62,24 @@ namespace Model
     {
         // Defines global index in the particle list
         ParticleIndex index;
+        bool isImmobile; // denotes fixed particles or particles outside the active geometry
 
         DomainParticle()
         {
-
+            isImmobile = false;
         }
 
         DomainParticle(ParticleIndex index, Core::FLOAT_TYPE diameter, const Core::SpatialVector& coordinates) : Particle(diameter, coordinates)
         {
             this->index = index;
+            isImmobile = false;
         }
 
         // Don't make it virtual, as it is much better to have strongly typed methods in each subclass.
         void CopyTo(DomainParticle* target) const
         {
             target->index = index;
+            target->isImmobile = isImmobile;
             Particle::CopyTo(target);
         }
     };
@@ -100,6 +104,22 @@ namespace Model
             this->firstParticleIndex = firstParticleIndex;
             this->secondParticleIndex = secondParticleIndex;
             this->normalizedDistanceSquare = normalizedDistanceSquare;
+        }
+
+        ParticleIndex GetOtherIndex(ParticleIndex particleIndex) const
+        {
+            if (particleIndex == firstParticleIndex)
+            {
+                return secondParticleIndex;
+            }
+            else if (particleIndex == secondParticleIndex)
+            {
+                return firstParticleIndex;
+            }
+            else
+            {
+                throw Core::InvalidOperationException("particleIndex should be one of the pair indexes.");
+            }
         }
     };
 
@@ -140,7 +160,11 @@ namespace Model
             OriginalJodreyTory = 5,
             KhirevichJodreyTory = 6, // See dissertation by S. Khirevich and his papers
             MonteCarlo = 7,
-            ConjugateGradient = 8
+            ConjugateGradient = 8,
+            ClosestJammingSearch = 9,
+
+            LubachevskyStillingerConstantPower = 10,
+            LubachevskyStillingerBiazzo = 11
         };
     };
 
@@ -161,7 +185,13 @@ namespace Model
             MolecularDynamicsCalculation = 9,
             RattlerRemoval = 10,
             PairCorrelationCalculation = 11,
-            StructureFactorCalculation = 12
+            StructureFactorCalculation = 12,
+            LocalOrientationalDisorder = 13,
+            ImmediateMolecularDynamicsCalculation = 14,
+            DistancesToClosestSurfacesCalculation = 15,
+            ContactNumberDistributionCalculation = 16,
+            NearestNeighborsCalculation = 17,
+            ActiveGeometryCalculation = 18
         };
     };
 
@@ -176,7 +206,7 @@ namespace Model
         bool collisionErrorsExisted;
 
         // Needed just for gathering MD statistics for existing packings
-        int equilibrationEventsCount;
+        unsigned long long equilibrationEventsCount;
     };
 
     struct PressureData
@@ -195,7 +225,6 @@ namespace Model
         Core::FLOAT_TYPE tolerance;
         Core::FLOAT_TYPE totalTime;
         unsigned long long iterationsCount;
-        int runsCount;
     };
 
     // Represents a plane that can only be perpendicular to Cartesian axes
@@ -210,6 +239,7 @@ namespace Model
     {
         static const int wallsCount = DIMENSIONS * 2;
         Model::SimplePlane walls[wallsCount];
+        int oppositWallIndexes[wallsCount];
 
         void Initialize(const Core::SpatialVector& minVertexCoordinate, const Core::SpatialVector& boxSize)
         {
@@ -224,6 +254,9 @@ namespace Model
                 walls[normalIndex].perpendicularAxis = static_cast<Core::Axis::Type>(dimension);
                 walls[normalIndex].outerNormalDirection = -1;
                 walls[normalIndex].coordinateOnAxis = minVertexCoordinate[dimension];
+
+                oppositWallIndexes[normalIndex - 1] = normalIndex;
+                oppositWallIndexes[normalIndex] = normalIndex - 1;
             }
         }
     };

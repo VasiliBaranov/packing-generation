@@ -38,8 +38,14 @@ namespace PackingGenerators
         FLOAT_TYPE heightBetweenLayers = radius * 2.0 * sqrt(6.0) / 3.0;
         FLOAT_TYPE layerBShiftByY = radius / sqrt(3.0);
 
-        SpatialVector firstParticleCenter = {{0.0, 0.0, 0.0}};
+        SpatialVector firstParticleCenter;
+        firstParticleCenter.assign(0);
         AddLayerA(&firstParticleCenter);
+
+        if (DIMENSIONS == 2)
+        {
+            return;
+        }
 
         firstParticleCenter[0] = radius;
         firstParticleCenter[1] = layerBShiftByY;
@@ -145,8 +151,14 @@ namespace PackingGenerators
     void HcpGenerator::FillExpectedSize(FLOAT_TYPE particleDiameter, SpatialVector* expectedSize)
     {
         FLOAT_TYPE radius = particleDiameter * 0.5;
-        SpatialVector result = {{6.0 * radius, 4.0 * sqrt(3.0) * radius, 8.0 * sqrt(6.0) / 3.0 * radius}};
-        *expectedSize = result;
+        SpatialVector& expectedSizeRef = *expectedSize;
+
+        expectedSizeRef[Axis::X] = 6.0 * radius;
+        expectedSizeRef[Axis::Y] = 4.0 * sqrt(3.0) * radius;
+        if (DIMENSIONS == 3)
+        {
+            expectedSizeRef[Axis::Z] = 8.0 * sqrt(6.0) / 3.0 * radius;
+        }
     }
 
     HcpGenerator::~HcpGenerator()

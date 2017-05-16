@@ -24,7 +24,7 @@ namespace PackingGenerators
         int currentParticleIndex;
         Core::FLOAT_TYPE radius;
 
-        static const int expectedParticlesCount = 48;
+        static const int expectedParticlesCount = (DIMENSIONS == 3) ? 48 : 12;
 
     public:
         HcpGenerator();

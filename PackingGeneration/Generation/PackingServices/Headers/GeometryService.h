@@ -35,9 +35,13 @@ namespace PackingServices
 
         Core::FLOAT_TYPE GetMeanParticleDiameter(const Model::Packing& particles) const;
 
+        Core::FLOAT_TYPE GetParticleDiameterStd(const Model::Packing& particles) const;
+
         Core::FLOAT_TYPE GetScalingFactor(Core::FLOAT_TYPE currentDensity, Core::FLOAT_TYPE targetDensity) const;
 
         Core::FLOAT_TYPE GetScalingFactorByPorosity(Core::FLOAT_TYPE currentPorosity, Core::FLOAT_TYPE targetPorosity) const;
+
+        Model::ParticlePair GetMinNormalizedDistanceNaive(const Model::Packing& particles) const;
 
         virtual ~GeometryService();
 

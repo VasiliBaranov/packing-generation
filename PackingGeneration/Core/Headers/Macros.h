@@ -31,6 +31,13 @@
 #define FLOAT_FORMAT "%lf"
 #endif
 
+// See http://stackoverflow.com/questions/15610053/correct-printf-format-specifier-for-size-t-zu-or-iu . For gnu: http://stackoverflow.com/questions/2524611/how-to-print-size-t-variable-portably
+#ifdef WINDOWS
+#define SIZE_T_FORMAT "%Iu"
+#else
+#define SIZE_T_FORMAT "%zu"
+#endif
+
 // A macro to disallow the copy constructor and operator= functions.
 // See http://google-styleguide.googlecode.com/svn/trunk/cppguide.xml?showone=Copy_Constructors#Copy_Constructors
 // This should be used in the "private:" declarations for a class

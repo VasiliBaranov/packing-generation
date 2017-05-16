@@ -15,6 +15,8 @@
 typedef int MPI_Comm;
 
 typedef int MPI_Datatype;
+#define MPI_INT            ((MPI_Datatype)6)
+#define MPI_BYTE           ((MPI_Datatype)3)
 
 typedef struct MPI_Status {
     int count;
@@ -40,35 +42,40 @@ namespace Core
         int processID;
         bool initialized;
         MPI_Comm communicator;
-    public:
 
-        ///Singleton pattern.
+    public:
+        static const int MaxCommunicationDurationInMinutes = 5;
+
+    public:
+        // Singleton pattern.
         static MpiManager* GetInstance();
 
-        /// Initializes the mpi manager.
+        // Initializes the mpi manager.
         void Initialize(int *argc, char ***argv);
 
         void Finalize();
 
-        /// Returns the number of processes.
+        // Returns the number of processes.
         int GetNumberOfProcesses() const;
 
-        /// Returns the process ID.
+        // Returns the process ID.
         int GetCurrentRank() const;
 
-        /// Returns process ID of main processor.
+        // Returns process ID of main processor.
         int GetMasterRank() const;
 
-        /// Tells whether current processor is main processor.
+        // Tells whether current processor is main processor.
         bool IsMaster() const;
 
-        /// Returns a universal MPI-time in seconds.
+        bool IsParallel() const;
+
+        // Returns a universal MPI-time in seconds.
         FLOAT_TYPE GetTime() const;
 
-        //Mpi wrappers. All of them use the internal topology communicator. 
-        //See MPI reference for method descriptions.
+        // Mpi wrappers. All of them use the internal topology communicator.
+        // See MPI reference for method descriptions.
 
-        ///Wrapper over Mpi send-receive.
+        // A wrapper over Mpi send-receive.
         int SendReceive(void* sendBuffer, int sendCount, MPI_Datatype sendType,
                          int destinationRank, int sendTag, void* receiveBuffer, int receiveCount,
                          MPI_Datatype receiveType, int sourceRank, int receiveTag, MPI_Status* status);
@@ -82,9 +89,12 @@ namespace Core
         int Gather(void* sendBuffer, int sendCount, MPI_Datatype sendType,
                     void* receiveBuffer, int receiveCount, MPI_Datatype receiveType, int root);
 
-        //a wrapper over MPI_GatherV function
+        // A wrapper over MPI_GatherV function
         int GatherVaryingBuffers(void* sendBuffer, int sendCount, MPI_Datatype sendType,
                     void* receiveBuffer, int* receiveCounts, MPI_Datatype receiveType, int root);
+
+        // A wrapper over IProbe
+        int ProbeNonBlocking(int source, int tag, bool* flag, MPI_Status* status);
 
         int Barrier();
 

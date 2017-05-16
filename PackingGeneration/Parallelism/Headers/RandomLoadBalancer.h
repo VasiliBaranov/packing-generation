@@ -11,7 +11,7 @@
 namespace Parallelism
 {
     // Implements a default load balancer to split tasks per process in a random manner, thus minimizing execution time deviation.
-    class RandomLoadBalancer : public ILoadBalancer
+    class RandomLoadBalancer : public virtual ILoadBalancer
     {
     public:
         RandomLoadBalancer();

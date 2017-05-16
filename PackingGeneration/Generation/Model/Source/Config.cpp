@@ -54,18 +54,20 @@ namespace Model
 
     void GenerationConfig::Reset()
     {
-        generationStart = -1;
+        shouldStartGeneration.hasValue = false;
+        shouldStartGeneration.value = false;
         seed = -1;
         stepsToWrite = -1;
         baseFolder = "";
         executionMode = ExecutionMode::Unknown;
         initialParticleDistribution = InitialParticleDistribution::Unknown;
 
+        shouldSuppressCrystallization.hasValue = false;
+        shouldSuppressCrystallization.value = false;
+
         contractionRate = -1;
-        maxIterations = -1;
-        maxRunsCount = -1;
-        minRunsCount = -1;
-        stopOnTheoreticalDensity = false;
+        finalContractionRate = -1;
+        contractionRateDecreaseFactor = -1;
         generationAlgorithm = PackingGenerationAlgorithm::Unknown;
 
         insertionRadiiCount = -1;
@@ -73,9 +75,14 @@ namespace Model
 
     void GenerationConfig::MergeWith(const GenerationConfig& config)
     {
-        if (generationStart < 0)
+        if (!shouldStartGeneration.hasValue)
         {
-            generationStart = config.generationStart;
+            shouldStartGeneration = config.shouldStartGeneration;
+        }
+
+        if (!shouldSuppressCrystallization.hasValue)
+        {
+            shouldSuppressCrystallization = config.shouldSuppressCrystallization;
         }
 
         if (seed < 0)
@@ -108,29 +115,19 @@ namespace Model
             generationAlgorithm = config.generationAlgorithm;
         }
 
-        if (maxIterations < 0)
-        {
-            maxIterations = config.maxIterations;
-        }
-
-        if (maxRunsCount < 0)
-        {
-            maxRunsCount = config.maxRunsCount;
-        }
-
-        if (minRunsCount < 0)
-        {
-            minRunsCount = config.minRunsCount;
-        }
-
-        if (!stopOnTheoreticalDensity)
-        {
-            stopOnTheoreticalDensity = config.stopOnTheoreticalDensity;
-        }
-
         if (contractionRate < 0)
         {
             contractionRate = config.contractionRate;
+        }
+
+        if (finalContractionRate < 0)
+        {
+            finalContractionRate = config.finalContractionRate;
+        }
+
+        if (contractionRateDecreaseFactor < 0)
+        {
+            contractionRateDecreaseFactor = config.contractionRateDecreaseFactor;
         }
 
         if (insertionRadiiCount < 0)
@@ -159,10 +156,11 @@ namespace Model
         generationConfig.MergeWith(config.generationConfig);
     }
 
-    ModellingContext::ModellingContext(SystemConfig* config, IGeometry* geometry)
+    ModellingContext::ModellingContext(SystemConfig* config, IGeometry* geometry, IGeometry* activeGeometry)
     {
         this->config = config;
         this->geometry = geometry;
+        this->activeGeometry = activeGeometry;
     }
 }
 

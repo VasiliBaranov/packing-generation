@@ -17,7 +17,8 @@ using namespace std;
 namespace PackingServices
 {
     CellListNeighborProvider::CellListNeighborProvider(GeometryService* geometryService, GeometryCollisionService* geometryCollisionService)
-    : latticeIndexingProvider(&lattice, &linearIndexingProvider)
+    : lattice(DIMENSIONS),
+      latticeIndexingProvider(&lattice, &linearIndexingProvider)
     {
         this->geometryService = geometryService;
         this->geometryCollisionService = geometryCollisionService;
@@ -108,14 +109,13 @@ namespace PackingServices
         for (int i = 0; i < totalCellCount; ++i)
         {
             Cell* cell = &domainCells[i];
-            cell->particleIndexesPermutation.resize(config->particlesCount);
 
             DiscreteSpatialVector latticePoint;
             linearIndexingProvider.FillMultidimensionalIndexes(i, &latticePoint);
             latticeIndexingProvider.FillCellNodeIndexes(latticePoint, &cell->neighborCellIndexes);
 
             // Neighbor cell indexes may not be unique in the only case: if the cells count at least by one dimension is less than 3.
-            StlUtilities::ResizeToUnique(&cell->neighborCellIndexes);
+            StlUtilities::SortAndResizeToUnique(&cell->neighborCellIndexes);
 
             SpatialVector minVertexCoordinates;
             VectorUtilities::Multiply(latticePoint, cellSize, &minVertexCoordinates);
@@ -240,7 +240,7 @@ namespace PackingServices
     {
         ParticleIndex indexInCell = cell->particleIndexesPermutation[particleIndex];
 
-        if (indexInCell < cell->particleIndexes.size() - 1)
+        if (indexInCell < static_cast<int>(cell->particleIndexes.size() - 1))
         {
             StlUtilities::QuicklyRemoveAt(&cell->particleIndexes, indexInCell);
 
@@ -248,12 +248,12 @@ namespace PackingServices
             // Just one (the last one) particle will be moved to the deleted particle position.
             ParticleIndex movedParticleIndex = cell->particleIndexes[indexInCell];
             cell->particleIndexesPermutation[movedParticleIndex] = indexInCell;
-            cell->particleIndexesPermutation[particleIndex] = -1;
+            cell->particleIndexesPermutation.erase(particleIndex);
         }
         else // indexInCell is the last particle, so we can simply remove it
         {
             cell->particleIndexes.pop_back();
-            cell->particleIndexesPermutation[particleIndex] = -1;
+            cell->particleIndexesPermutation.erase(particleIndex);
         }
     }
 }

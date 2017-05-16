@@ -64,6 +64,11 @@ namespace Core
         return processID == 0;
     }
 
+    bool MpiManager::IsParallel() const
+    {
+        return numberOfProcesses > 1;
+    }
+
     FLOAT_TYPE MpiManager::GetTime() const
     {
         CheckInitialization();
@@ -107,7 +112,7 @@ namespace Core
                             receiveBuffer, receiveCount, receiveType, root, communicator);
     }
 
-    //a wrapper over MPI_GatherV function
+    // A wrapper over MPI_GatherV function
     int MpiManager::GatherVaryingBuffers(void* sendBuffer, int sendCount, MPI_Datatype sendType,
                     void* receiveBuffer, int* receiveCounts, MPI_Datatype receiveType, int root)
     {
@@ -132,6 +137,16 @@ namespace Core
         CheckInitialization();
 
         return MPI_Barrier(communicator);
+    }
+
+    int MpiManager::ProbeNonBlocking(int source, int tag, bool* flag, MPI_Status* status)
+    {
+        CheckInitialization();
+
+        int intFlag = 0;
+        int result = MPI_Iprobe(source, tag, communicator, &intFlag, status);
+        *flag = static_cast<int>(intFlag);
+        return result;
     }
 
     void MpiManager::CheckInitialization() const
@@ -184,7 +199,12 @@ namespace Core
 
     bool MpiManager::IsMaster() const
     {
-        return processID == 0;
+        return true;
+    }
+
+    bool MpiManager::IsParallel() const
+    {
+        return false;
     }
 
     FLOAT_TYPE MpiManager::GetTime() const
@@ -227,6 +247,12 @@ namespace Core
     int MpiManager::GatherVaryingBuffers(void* sendBuffer, int sendCount, MPI_Datatype sendType,
                     void* receiveBuffer, int* receiveCounts, MPI_Datatype receiveType, int root)
     {
+        return 0;
+    }
+
+    int MpiManager::ProbeNonBlocking(int source, int tag, bool* flag, MPI_Status* status)
+    {
+        *flag = false;
         return 0;
     }
 

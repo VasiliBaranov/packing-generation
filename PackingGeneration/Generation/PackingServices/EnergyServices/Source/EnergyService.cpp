@@ -78,6 +78,37 @@ namespace PackingServices
         return energiesResult;
     }
 
+    // TODO: Merge with GetContractionEnergies!!!!
+    OVERRIDE void EnergyService::GetContractionEnergiesPerParticle(const vector<FLOAT_TYPE>& contractionRatios, const vector<const IPairPotential*>& pairPotentials, vector<IEnergyService::EnergiesPerParticle>* energiesPerParticle)
+    {
+        size_t energyTypesCount = contractionRatios.size();
+        vector<IEnergyService::EnergiesPerParticle>& energiesPerParticleRef = *energiesPerParticle;
+        energiesPerParticleRef.resize(energyTypesCount);
+        for (size_t energyTypeIndex = 0; energyTypeIndex < energyTypesCount; ++energyTypeIndex)
+        {
+            energiesPerParticleRef[energyTypeIndex].contractionEnergiesPerParticle.resize(config->particlesCount);
+            energiesPerParticleRef[energyTypeIndex].rattlerMask.resize(config->particlesCount);
+        }
+
+        vector<int> currentParticleNeighborsCounts(energyTypesCount);
+        vector<FLOAT_TYPE> currentParticleEnergies(energyTypesCount);
+
+        for (ParticleIndex particleIndex = 0; particleIndex < config->particlesCount; ++particleIndex)
+        {
+            FillDistancesToNeighbors(particleIndex);
+
+            FilterCloseNeighbors();
+
+            FillCurrentParticleEnergies(particleIndex, contractionRatios, pairPotentials, &currentParticleEnergies, &currentParticleNeighborsCounts);
+
+            for (size_t energyTypeIndex = 0; energyTypeIndex < energyTypesCount; ++energyTypeIndex)
+            {
+                energiesPerParticleRef[energyTypeIndex].contractionEnergiesPerParticle[particleIndex] = currentParticleEnergies[energyTypeIndex];
+                energiesPerParticleRef[energyTypeIndex].rattlerMask[particleIndex] = currentParticleNeighborsCounts[energyTypeIndex] < minNeighborsCount;
+            }
+        }
+    }
+
     ParticlePair EnergyService::FillParticleForces(FLOAT_TYPE contractionRatio, const IPairPotential& pairPotential, vector<SpatialVector>* particleForces)
     {
         ParticlePair closestPair;
@@ -129,9 +160,6 @@ namespace PackingServices
         closeNeighborsMask.resize(neighborsCount);
         VectorUtilities::InitializeWith(&closeNeighborsMask, false);
 
-        sortingPermutation.resize(neighborsCount);
-        VectorUtilities::FillLinearScale(0, &sortingPermutation);
-
         distancesToNeighborSurfaces.resize(neighborsCount);
         for (ParticleIndex i = 0; i < neighborsCount; ++i)
         {
@@ -145,8 +173,7 @@ namespace PackingServices
         // NOTE: Here we compare distances to neighbor sphere surfaces, not normalized distances,
         // as we would like to treat small and large particles equally while energy minimization (to ensure isostaticity as early as possible).
         // TODO: this is algorithm-specific, so we may extract it later into a separate IParticleEnergyService or add IPotentialCutoffService.
-        IndexesComparer<FLOAT_TYPE> comparer(distancesToNeighborSurfaces);
-        StlUtilities::SortByNthElement(&sortingPermutation, maxCloseNeighborsCount - 1, comparer);
+        StlUtilities::FindNthElementPermutation(distancesToNeighborSurfaces, maxCloseNeighborsCount - 1, &sortingPermutation);
 
         for (ParticleIndex i = 0; i < maxCloseNeighborsCount; ++i)
         {

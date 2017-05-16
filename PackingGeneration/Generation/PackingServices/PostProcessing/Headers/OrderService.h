@@ -20,10 +20,30 @@ namespace PackingServices
 
         typedef std::vector<NeighborDirection> NeighborDirections;
 
+        // See Jin, Makse (2010) A first-order phase transition defines the random close packing of hard spheres
         struct Order
         {
             Core::FLOAT_TYPE globalOrder;
             Core::FLOAT_TYPE localOrder;
+        };
+
+        // See Jin, Makse (2010) A first-order phase transition defines the random close packing of hard spheres
+        // and Bargiel, Tory (2001) Packing fraction and measures of disorder of ultradense irregular packings of equal spheres. II. Transition from dense random packing
+        struct LocalOrientationalDisorder
+        {
+            std::vector<std::string> referenceLatticeNames;
+            std::vector<std::vector<Core::FLOAT_TYPE> > disordersPerParticle;
+            std::vector<std::vector<Model::ParticleIndex> > closeNeighborsPerParticle;
+        };
+
+    private:
+        struct ReferenceLattice
+        {
+            std::string name;
+            int latticeVectorsCount;
+            std::vector<Core::FLOAT_TYPE> sortedAngles;
+
+            ReferenceLattice(std::string name, int latticeVectorsCount, const Core::FLOAT_TYPE uniqueAnglesInDegrees[], const int uniqueAnglesCounts[], int arraySize);
         };
 
     public:
@@ -37,12 +57,16 @@ namespace PackingServices
 
         Order GetOrder(int l) const; // l is the spherical harmonics index. See Song, Wang, Makse "First order phase transition"
 
+        void FillLocalOrientationalDisorder(LocalOrientationalDisorder* localOrientationalDisorder) const;
+
     private:
         Core::FLOAT_TYPE GetGlobalOrder(const std::vector<NeighborDirections>& particleDirections, int l) const;
 
         Core::FLOAT_TYPE GetLocalOrder(const std::vector<NeighborDirections>& particleDirections, int l) const;
 
         Core::FLOAT_TYPE GetParticleOrder(const std::vector<NeighborDirection>& neighborDirections, int l) const;
+
+        void FillLocalOrientationalDisorder(const std::vector<const ReferenceLattice*>& referenceLattices, LocalOrientationalDisorder* localOrientationalDisorder) const;
 
         DISALLOW_COPY_AND_ASSIGN(OrderService);
     };

@@ -45,7 +45,7 @@ namespace Tests
 
     Packing HessianServiceTests::particles;
     int HessianServiceTests::particlesCount = 4;
-    SpatialVector HessianServiceTests::boxSize = {{10.0, 10.0, 10.0}};
+    SpatialVector HessianServiceTests::boxSize = REMOVE_LAST_DIMENSION_IF_NEEDED(10.0, 10.0, 10.0);
 
     void HessianServiceTests::SetUp()
     {
@@ -344,6 +344,7 @@ namespace Tests
         FillEigenvalues_ForTestMatrixTwoDimensional_EigenvaluesCorrect();
         FillEigenvalues_ForTestMatrixAsPackedThreeDimensional_EigenvaluesCorrect();
         FillEigenvalues_ForTestMatrixThreeDimensional_EigenvaluesCorrect();
+
         FillHessianEigenvalues_ForJammedPacking_NoExtraZeroEigenvalues();
         FillHessian_ForJammedPacking_HessianSymmetric();
         FillHessian_ForJammedPacking_RowsHaveZeroSum();

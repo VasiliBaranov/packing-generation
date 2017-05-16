@@ -35,6 +35,8 @@ namespace PackingServices
 
         void FillDistance(const Core::SpatialVector& to, const Core::SpatialVector& from, Core::SpatialVector* difference) const;
 
+        void FillDirection(const Core::SpatialVector& to, const Core::SpatialVector& from, Core::SpatialVector* direction) const;
+
         void FillClosestPeriodicImagePosition(const Core::SpatialVector& stablePoint, const Core::SpatialVector& movablePoint, Core::SpatialVector* periodicImage) const;
 
         Core::FLOAT_TYPE GetDistanceSquare(const Core::SpatialVector& firstPoint, const Core::SpatialVector& secondPoint) const;

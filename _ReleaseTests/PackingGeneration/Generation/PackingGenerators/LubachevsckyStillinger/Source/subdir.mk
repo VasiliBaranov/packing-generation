@@ -68,7 +68,7 @@ CPP_DEPS += \
 PackingGeneration/Generation/PackingGenerators/LubachevsckyStillinger/Source/%.o: ../PackingGeneration/Generation/PackingGenerators/LubachevsckyStillinger/Source/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: Cygwin C++ Compiler'
-	g++ -DBOOST_DISABLE_ASSERTS -I../Externals/Boost -I../PackingGeneration -O3 -funroll-loops -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	g++ -DBOOST_DISABLE_ASSERTS -DNDEBUG -I../Externals/Boost -I../Externals/Eigen -I../PackingGeneration -O3 -funroll-loops -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

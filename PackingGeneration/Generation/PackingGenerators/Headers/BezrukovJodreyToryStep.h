@@ -8,6 +8,7 @@
 #include "BasePackingStep.h"
 namespace PackingServices { class IEnergyService; }
 namespace PackingServices { class IPairPotential; }
+namespace PackingServices { class ImmobileParticlesService; }
 
 namespace PackingGenerators
 {
@@ -15,12 +16,12 @@ namespace PackingGenerators
     class BezrukovJodreyToryStep : public BasePackingStep
     {
     private:
+        PackingServices::IEnergyService* energyService;
+        PackingServices::IPairPotential* pairPotential;
+
         // Working variables
         Core::FLOAT_TYPE initialOuterDiameterRatio;
         std::vector<Core::SpatialVector> particleForces;
-
-        PackingServices::IEnergyService* energyService;
-        PackingServices::IPairPotential* pairPotential;
 
         static const Core::FLOAT_TYPE NOMINAL_DENSITY_RATIO;
         static const Core::FLOAT_TYPE FORCE_SCALING_FACTOR;

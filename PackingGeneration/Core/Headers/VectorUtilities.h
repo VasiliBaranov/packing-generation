@@ -7,6 +7,7 @@
 
 #include <cmath>
 #include <algorithm>
+#include "Core/Headers/Math.h"
 
 // Provides static utility methods for dealing with vectors.
 
@@ -172,6 +173,17 @@ namespace Core
             for (std::size_t i = 0; i < size; ++i)
             {
                 resultRef[i] = std::floor(vector[i]);
+            }
+        }
+
+        template<class TContainer, class TContainerResult>
+        static void Round(const TContainer& vector, TContainerResult* result)
+        {
+            const std::size_t size = vector.size();
+            TContainerResult& resultRef = *result;
+            for (std::size_t i = 0; i < size; ++i)
+            {
+                resultRef[i] = Math::Round(vector[i]);
             }
         }
 

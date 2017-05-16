@@ -17,8 +17,6 @@ namespace Parallelism
         // Do not simply pass the list of tasks to the manager, as task creation logic may become more complicated (e.g. create first ten tasks, wait for completion, create next ten tasks, etc).
         virtual ITaskFactory* GetTaskFactory() const = 0;
 
-        virtual ILoadBalancer* GetLoadBalancer() const = 0;
-
         virtual void SubmitTasks() = 0;
 
         virtual ~ITaskManager(){};

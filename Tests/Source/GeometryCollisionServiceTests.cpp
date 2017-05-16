@@ -33,8 +33,8 @@ namespace Tests
         wall.outerNormalDirection = 1;
         wall.coordinateOnAxis = 2;
 
-        SpatialVector velocity = {{1.0, 2.0, 0.5}};
-        SpatialVector position = {{0.0, 0.0, 0.0}};
+        SpatialVector velocity = REMOVE_LAST_DIMENSION_IF_NEEDED(1.0, 2.0, 0.0);
+        SpatialVector position = REMOVE_LAST_DIMENSION_IF_NEEDED(0.0, 0.0, 0.0);
 
         FLOAT_TYPE time = collisionService->GetPlaneIntersectionTime(position, velocity, wall);
         FLOAT_TYPE expectedTime = wall.coordinateOnAxis / velocity[Axis::X];

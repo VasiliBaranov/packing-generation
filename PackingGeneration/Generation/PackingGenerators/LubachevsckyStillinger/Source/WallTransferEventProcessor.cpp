@@ -17,7 +17,8 @@ namespace PackingGenerators
     {
         this->config = &config;
 
-        const SpatialVector minVertexCoordinates = {{0.0, 0.0, 0.0}};
+        SpatialVector minVertexCoordinates;
+        minVertexCoordinates.assign(0);
         box.Initialize(minVertexCoordinates, config.packingSize);
     }
 

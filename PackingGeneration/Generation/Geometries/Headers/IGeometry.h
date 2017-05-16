@@ -19,6 +19,8 @@ namespace Geometries
 
         virtual void EnsureBoundaries(const Model::DomainParticle& initialParticle, Model::DomainParticle* movedParticle, Core::FLOAT_TYPE minNormalizedDistance) const = 0;
 
+        virtual bool IsSphereInside(const Core::SpatialVector& sphereCenter, Core::FLOAT_TYPE sphereRadius) const = 0;
+
         virtual ~IGeometry(){ };
     };
 }

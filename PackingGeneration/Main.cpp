@@ -53,9 +53,7 @@ int main (int argc, char **argv)
 //#endif
 
     PackingTaskFactory packingTaskFactory(Path::GetCurrentWorkingFolder(), argc, argv);
-    RandomLoadBalancer loadBalancer;
-
-    TaskManager taskManager(&packingTaskFactory, &loadBalancer);
+    TaskManager taskManager(&packingTaskFactory);
 
     taskManager.SubmitTasks();
 

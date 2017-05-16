@@ -16,15 +16,20 @@ namespace Tests
     void ColumnMajorIndexingProviderTests::TestGettingSimpleLinearIndex()
     {
         GeometryParameters parameters;
-        parameters.SetSystemSize(Axis::X, 10); parameters.SetSystemSize(Axis::Y, 10); parameters.SetSystemSize(Axis::Z, 10);
+        parameters.SetSystemSize(Axis::X, 10);
+        parameters.SetSystemSize(Axis::Y, 10);
+        if (DIMENSIONS == 3)
+        {
+            parameters.SetSystemSize(Axis::Z, 10);
+        }
 
         ColumnMajorIndexingProvider simpleProvider;
         simpleProvider.SetGeometryParameters(&parameters);
 
-        DiscreteSpatialVector multidimensionalIndexes = {{7, 6, 8}};
+        DiscreteSpatialVector multidimensionalIndexes = REMOVE_LAST_DIMENSION_IF_NEEDED(7, 6, 8);
         int actualLinearIndex = simpleProvider.GetLinearIndex(multidimensionalIndexes);
 
-        int expectedLinearIndex = 867;
+        int expectedLinearIndex = (DIMENSIONS == 3) ? 867 : 67;
 
         Assert::AreEqual(actualLinearIndex, expectedLinearIndex, "TestGettingSimpleLinearIndex");
     }
@@ -32,12 +37,17 @@ namespace Tests
     void ColumnMajorIndexingProviderTests::TestGettingComplexLinearIndex()
     {
         GeometryParameters parameters;
-        parameters.SetSystemSize(Axis::X, 10); parameters.SetSystemSize(Axis::Y, 100); parameters.SetSystemSize(Axis::Z, 1);
+        parameters.SetSystemSize(Axis::X, 10);
+        parameters.SetSystemSize(Axis::Y, 100);
+        if (DIMENSIONS == 3)
+        {
+            parameters.SetSystemSize(Axis::Z, 1);
+        }
 
         ColumnMajorIndexingProvider complexProvider;
         complexProvider.SetGeometryParameters(&parameters);
 
-        DiscreteSpatialVector multidimensionalIndexes = {{9, 99, 0}};
+        DiscreteSpatialVector multidimensionalIndexes = REMOVE_LAST_DIMENSION_IF_NEEDED(9, 99, 0);
         int actualLinearIndex = complexProvider.GetLinearIndex(multidimensionalIndexes);
 
         int expectedLinearIndex = 10 * 100 - 1;
@@ -48,12 +58,18 @@ namespace Tests
     void ColumnMajorIndexingProviderTests::TestGettingSimpleMultidimensionalIndex()
     {
         GeometryParameters parameters;
-        parameters.SetSystemSize(Axis::X, 10); parameters.SetSystemSize(Axis::Y, 10); parameters.SetSystemSize(Axis::Z, 10);
+        parameters.SetSystemSize(Axis::X, 10);
+        parameters.SetSystemSize(Axis::Y, 10);
+        if (DIMENSIONS == 3)
+        {
+            parameters.SetSystemSize(Axis::Z, 10);
+        }
+
         ColumnMajorIndexingProvider simpleProvider;
         simpleProvider.SetGeometryParameters(&parameters);
 
         DiscreteSpatialVector multidimensionalIndexes;
-        int linearIndex = 867;
+        int linearIndex = (DIMENSIONS == 3) ? 867 : 67;
         simpleProvider.FillMultidimensionalIndexes(linearIndex, &multidimensionalIndexes);
 
         Assert::AreEqual(multidimensionalIndexes[0], 7, "TestGettingSimpleMultidimensionalIndex");
@@ -62,7 +78,13 @@ namespace Tests
     void ColumnMajorIndexingProviderTests::TestGettingComplexMultidimensionalIndex()
     {
         GeometryParameters parameters;
-        parameters.SetSystemSize(Axis::X, 10); parameters.SetSystemSize(Axis::Y, 100); parameters.SetSystemSize(Axis::Z, 1);
+        parameters.SetSystemSize(Axis::X, 10);
+        parameters.SetSystemSize(Axis::Y, 100);
+        if (DIMENSIONS == 3)
+        {
+            parameters.SetSystemSize(Axis::Z, 1);
+        }
+
         ColumnMajorIndexingProvider complexProvider;
         complexProvider.SetGeometryParameters(&parameters);
 
@@ -76,7 +98,13 @@ namespace Tests
     void ColumnMajorIndexingProviderTests::TestPeriodicConditions()
     {
         GeometryParameters parameters;
-        parameters.SetSystemSize(Axis::X, 3); parameters.SetSystemSize(Axis::Y, 10); parameters.SetSystemSize(Axis::Z, 1);
+        parameters.SetSystemSize(Axis::X, 3);
+        parameters.SetSystemSize(Axis::Y, 10);
+        if (DIMENSIONS == 3)
+        {
+            parameters.SetSystemSize(Axis::Z, 1);
+        }
+
         parameters.SetPeriodicity(Axis::X, true);
         ColumnMajorIndexingProvider provider;
         provider.SetGeometryParameters(&parameters);
@@ -90,7 +118,7 @@ namespace Tests
     void ColumnMajorIndexingProviderTests::TestPeriodicConditionsBackwards(ColumnMajorIndexingProvider* provider)
     {
         //-1 should be transformed into 2
-        DiscreteSpatialVector multidimensionalIndexes = {{-1, 9, 0}};
+        DiscreteSpatialVector multidimensionalIndexes = REMOVE_LAST_DIMENSION_IF_NEEDED(-1, 9, 0);
         int actualLinearIndex = provider->GetLinearIndex(multidimensionalIndexes);
 
         int expectedLinearIndex = 3 * 10 - 1;
@@ -101,7 +129,7 @@ namespace Tests
     void ColumnMajorIndexingProviderTests::TestPeriodicConditionsLongBackwards(ColumnMajorIndexingProvider* provider)
     {
         //-3 should be transformed into 0
-        DiscreteSpatialVector multidimensionalIndexes = {{-3, 0, 0}};
+        DiscreteSpatialVector multidimensionalIndexes = REMOVE_LAST_DIMENSION_IF_NEEDED(-3, 0, 0);
         int actualLinearIndex = provider->GetLinearIndex(multidimensionalIndexes);
 
         int expectedLinearIndex = 0;
@@ -112,7 +140,7 @@ namespace Tests
     void ColumnMajorIndexingProviderTests::TestPeriodicConditionsForward(ColumnMajorIndexingProvider* provider)
     {
         //3 should be transformed into 0
-        DiscreteSpatialVector multidimensionalIndexes = {{3, 0, 0}};
+        DiscreteSpatialVector multidimensionalIndexes = REMOVE_LAST_DIMENSION_IF_NEEDED(3, 0, 0);
         int actualLinearIndex = provider->GetLinearIndex(multidimensionalIndexes);
 
         int expectedLinearIndex = 0;
@@ -123,36 +151,12 @@ namespace Tests
     void ColumnMajorIndexingProviderTests::TestPeriodicConditionsLongForward(ColumnMajorIndexingProvider* provider)
     {
         //7 should be transformed into 1
-        DiscreteSpatialVector multidimensionalIndexes = {{7, 0, 0}};
+        DiscreteSpatialVector multidimensionalIndexes = REMOVE_LAST_DIMENSION_IF_NEEDED(7, 0, 0);
         int actualLinearIndex = provider->GetLinearIndex(multidimensionalIndexes);
 
         int expectedLinearIndex = 1;
 
         Assert::AreEqual(actualLinearIndex, expectedLinearIndex, "TestPeriodicConditionsLongForward");
-    }
-
-    void ColumnMajorIndexingProviderTests::DisplaySampleIndexing()
-    {
-        GeometryParameters parameters; //2 rows, 3 columns
-        parameters.SetSystemSize(Axis::X, 2); parameters.SetSystemSize(Axis::Y, 3); parameters.SetSystemSize(Axis::Z, 1);
-        ColumnMajorIndexingProvider complexProvider;
-        complexProvider.SetGeometryParameters(&parameters);
-
-        DiscreteSpatialVector multidimensionalIndexes;
-
-        cout<<"Sample row-major linear indexer output:\n";
-        for (int i = 0; i < parameters.GetSystemSize(Axis::X); i++)
-        {
-            for (int j = 0; j < parameters.GetSystemSize(Axis::Y); j++)
-            {
-                multidimensionalIndexes[0] = i;
-                multidimensionalIndexes[1] = j;
-                multidimensionalIndexes[2] = 0;
-                int linearIndex = complexProvider.GetLinearIndex(multidimensionalIndexes);
-                cout<<linearIndex<<" ";
-            }
-            cout<<"\n";
-        }
     }
 
     void ColumnMajorIndexingProviderTests::RunTests()
@@ -162,7 +166,5 @@ namespace Tests
         TestGettingSimpleMultidimensionalIndex();
         TestGettingComplexMultidimensionalIndex();
         TestPeriodicConditions();
-
-        DisplaySampleIndexing();
     }
 }

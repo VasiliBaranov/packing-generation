@@ -72,7 +72,7 @@ namespace PackingGenerators
     void SimpleConjugateGradientStep::ResetOuterDiameterRatio()
     {
         FLOAT_TYPE expectedDensity = 0.6522;
-        outerDiameterRatio = pow(expectedDensity / (1.0 - theoreticalPorosity), 1.0 / 3.0);
+        outerDiameterRatio = pow(expectedDensity / (1.0 - theoreticalPorosity), 1.0 / DIMENSIONS);
     }
 }
 

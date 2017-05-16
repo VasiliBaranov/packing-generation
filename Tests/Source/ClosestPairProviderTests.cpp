@@ -43,9 +43,8 @@ namespace Tests
         closestPairProvider.reset(new ClosestPairProvider(mathService.get(), neighborProvider.get()));
 
         config.reset(new SystemConfig());
-        config->packingSize[Axis::X] = 10;
-        config->packingSize[Axis::Y] = 10;
-        config->packingSize[Axis::Z] = 10;
+        SpatialVector packignSize = REMOVE_LAST_DIMENSION_IF_NEEDED(10, 10, 10);
+        config->packingSize = packignSize;
         config->particlesCount = 4;
         config->boundariesMode = BoundariesMode::Bulk;
 
@@ -72,7 +71,7 @@ namespace Tests
                 (expectedPair.firstParticleIndex == actualPair.firstParticleIndex && expectedPair.secondParticleIndex == actualPair.secondParticleIndex) ||
                 (expectedPair.firstParticleIndex == actualPair.secondParticleIndex && expectedPair.secondParticleIndex == actualPair.firstParticleIndex);
         Assert::IsTrue(particleCorrect, functionName);
-        Assert::AreAlmostEqual<FLOAT_TYPE>(expectedPair.normalizedDistanceSquare, actualPair.normalizedDistanceSquare, functionName);
+        Assert::AreAlmostEqual<FLOAT_TYPE>(expectedPair.normalizedDistanceSquare, actualPair.normalizedDistanceSquare, functionName, 1e-4);
     }
 
     void ClosestPairProviderTests::GetNearestNeighbor_ForThreeParticles_ReturnNearest()
@@ -81,10 +80,10 @@ namespace Tests
 
         // Closest pair is 2-3 with distance 0.5
         const FLOAT_TYPE diameter = 1.0;
-        const SpatialVector c0 = {{5, 5, 5}};
-        const SpatialVector c1 = {{6, 5, 5}};
-        const SpatialVector c2 = {{5, 8, 5}};
-        const SpatialVector c3 = {{5.5, 8, 5}};
+        const SpatialVector c0 = REMOVE_LAST_DIMENSION_IF_NEEDED(5, 5, 5);
+        const SpatialVector c1 = REMOVE_LAST_DIMENSION_IF_NEEDED(6, 5, 5);
+        const SpatialVector c2 = REMOVE_LAST_DIMENSION_IF_NEEDED(5, 8, 5);
+        const SpatialVector c3 = REMOVE_LAST_DIMENSION_IF_NEEDED(5.5, 8, 5);
         particles[0] = DomainParticle(0, diameter, c0);
         particles[1] = DomainParticle(1, diameter, c1);
         particles[2] = DomainParticle(2, diameter, c2);
@@ -105,10 +104,10 @@ namespace Tests
 
         //Closest pair is 2-3 with distance 0.5
         const FLOAT_TYPE diameter = 1.0;
-        const SpatialVector c0 = {{5, 5, 5}};
-        const SpatialVector c1 = {{6, 5, 5}};
-        const SpatialVector c2 = {{0, 8, 5}};
-        const SpatialVector c3 = {{9.5, 8, 5}};
+        const SpatialVector c0 = REMOVE_LAST_DIMENSION_IF_NEEDED(5, 5, 5);
+        const SpatialVector c1 = REMOVE_LAST_DIMENSION_IF_NEEDED(6, 5, 5);
+        const SpatialVector c2 = REMOVE_LAST_DIMENSION_IF_NEEDED(0, 8, 5);
+        const SpatialVector c3 = REMOVE_LAST_DIMENSION_IF_NEEDED(9.5, 8, 5);
         particles[0] = DomainParticle(0, diameter, c0);
         particles[1] = DomainParticle(1, diameter, c1);
         particles[2] = DomainParticle(2, diameter, c2);
@@ -129,10 +128,10 @@ namespace Tests
 
         //Closest pair is 2-3 with distance 0.5
         const FLOAT_TYPE diameter = 1.0;
-        const SpatialVector c0 = {{5, 5, 5}};
-        const SpatialVector c1 = {{5.9, 5, 5}};
-        const SpatialVector c2 = {{5, 8, 5}};
-        const SpatialVector c3 = {{5.5, 8, 5}};
+        const SpatialVector c0 = REMOVE_LAST_DIMENSION_IF_NEEDED(5, 5, 5);
+        const SpatialVector c1 = REMOVE_LAST_DIMENSION_IF_NEEDED(5.9, 5, 5);
+        const SpatialVector c2 = REMOVE_LAST_DIMENSION_IF_NEEDED(5, 8, 5);
+        const SpatialVector c3 = REMOVE_LAST_DIMENSION_IF_NEEDED(5.5, 8, 5);
         particles[0] = DomainParticle(0, diameter, c0);
         particles[1] = DomainParticle(1, diameter, c1);
         particles[2] = DomainParticle(2, diameter, c2);
@@ -155,10 +154,10 @@ namespace Tests
 
         //Closest pair is 2-3 with distance 0.5
         const FLOAT_TYPE diameter = 1.0;
-        const SpatialVector c0 = {{5, 5, 5}};
-        const SpatialVector c1 = {{5.9, 5, 5}};
-        const SpatialVector c2 = {{5, 8, 5}};
-        const SpatialVector c3 = {{5.5, 8, 5}};
+        const SpatialVector c0 = REMOVE_LAST_DIMENSION_IF_NEEDED(5, 5, 5);
+        const SpatialVector c1 = REMOVE_LAST_DIMENSION_IF_NEEDED(5.9, 5, 5);
+        const SpatialVector c2 = REMOVE_LAST_DIMENSION_IF_NEEDED(5, 8, 5);
+        const SpatialVector c3 = REMOVE_LAST_DIMENSION_IF_NEEDED(5.5, 8, 5);
         particles[0] = DomainParticle(0, diameter, c0);
         particles[1] = DomainParticle(1, diameter, c1);
         particles[2] = DomainParticle(2, diameter, c2);
@@ -182,10 +181,10 @@ namespace Tests
 
         //Closest pair is 2-3 with distance 0.5
         const FLOAT_TYPE diameter = 1.0;
-        const SpatialVector c0 = {{5, 5, 5}};
-        const SpatialVector c1 = {{5.9, 5, 5}};
-        const SpatialVector c2 = {{5, 8, 5}};
-        const SpatialVector c3 = {{5.5, 8, 5}};
+        const SpatialVector c0 = REMOVE_LAST_DIMENSION_IF_NEEDED(5, 5, 5);
+        const SpatialVector c1 = REMOVE_LAST_DIMENSION_IF_NEEDED(5.9, 5, 5);
+        const SpatialVector c2 = REMOVE_LAST_DIMENSION_IF_NEEDED(5, 8, 5);
+        const SpatialVector c3 = REMOVE_LAST_DIMENSION_IF_NEEDED(5.5, 8, 5);
         particles[0] = DomainParticle(0, diameter, c0);
         particles[1] = DomainParticle(1, diameter, c1);
         particles[2] = DomainParticle(2, diameter, c2);
@@ -209,10 +208,10 @@ namespace Tests
 
         //Closest pair is 2-3 with distance 0.5
         const FLOAT_TYPE diameter = 1.0;
-        const SpatialVector c0 = {{5, 5, 5}};
-        const SpatialVector c1 = {{5.5, 5, 5}};
-        const SpatialVector c2 = {{5, 8, 5}};
-        const SpatialVector c3 = {{5.5, 8, 5}};
+        const SpatialVector c0 = REMOVE_LAST_DIMENSION_IF_NEEDED(5, 5, 5);
+        const SpatialVector c1 = REMOVE_LAST_DIMENSION_IF_NEEDED(5.5, 5, 5);
+        const SpatialVector c2 = REMOVE_LAST_DIMENSION_IF_NEEDED(5, 8, 5);
+        const SpatialVector c3 = REMOVE_LAST_DIMENSION_IF_NEEDED(5.5, 8, 5);
         particles[0] = DomainParticle(0, diameter, c0);
         particles[1] = DomainParticle(1, diameter, c1);
         particles[2] = DomainParticle(2, diameter, c2);
@@ -236,10 +235,10 @@ namespace Tests
 
         //Closest pair is 2-3 with distance 0.5
         const FLOAT_TYPE diameter = 1.0;
-        const SpatialVector c0 = {{5, 5, 5}};
-        const SpatialVector c1 = {{5.9, 5, 5}};
-        const SpatialVector c2 = {{5, 8, 5}};
-        const SpatialVector c3 = {{5.5, 8, 5}};
+        const SpatialVector c0 = REMOVE_LAST_DIMENSION_IF_NEEDED(5, 5, 5);
+        const SpatialVector c1 = REMOVE_LAST_DIMENSION_IF_NEEDED(5.9, 5, 5);
+        const SpatialVector c2 = REMOVE_LAST_DIMENSION_IF_NEEDED(5, 8, 5);
+        const SpatialVector c3 = REMOVE_LAST_DIMENSION_IF_NEEDED(5.5, 8, 5);
         particles[0] = DomainParticle(0, diameter, c0);
         particles[1] = DomainParticle(1, diameter, c1);
         particles[2] = DomainParticle(2, diameter, c2);

@@ -11,6 +11,7 @@
 #include "Core/Headers/ScopedFile.h"
 #include "Generation/PackingGenerators/InitialGenerators/Headers/HcpGenerator.h"
 #include "Generation/PackingServices/Headers/MathService.h"
+#include "Generation/PackingServices/Headers/GeometryService.h"
 #include "Generation/Geometries/Headers/BulkGeometry.h"
 #include "Generation/Model/Headers/Config.h"
 
@@ -94,10 +95,11 @@ namespace Tests
         SetUp();
 
         FLOAT_TYPE boxVolume = VectorUtilities::GetProduct(context->config->packingSize);
-        FLOAT_TYPE particlesVolume = context->config->particlesCount * PI * diameter * diameter * diameter / 6.0;
+        GeometryService geometryService(mathService.get());
+        FLOAT_TYPE particlesVolume = geometryService.GetParticlesVolume(particles, *(context->config)); // context->config->particlesCount * PI * diameter * diameter * diameter / 6.0;
 
         FLOAT_TYPE density = particlesVolume / boxVolume;
-        FLOAT_TYPE expectedDensity = PI / 3.0 / sqrt(2.0);
+        FLOAT_TYPE expectedDensity = (DIMENSIONS == 3) ? PI / 3.0 / sqrt(2.0) : PI / 2.0 / sqrt(3.0);
 
         Assert::AreAlmostEqual(expectedDensity, density, "ArrangePacking_ForHcp_DensityCorrect");
 

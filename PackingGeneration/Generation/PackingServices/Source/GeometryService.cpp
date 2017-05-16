@@ -41,7 +41,18 @@ namespace PackingServices
         FLOAT_TYPE particlesVolume = 0.0;
         for (ParticleIndex i = 0; i < config.particlesCount; ++i)
         {
-            particlesVolume += (PI * particles[i].diameter * particles[i].diameter * particles[i].diameter / 6.0);
+            FLOAT_TYPE currentVolume;
+            // It can be written through a single simple formula, but it is a coincidence. In general we need to use the gamma function.
+            if (DIMENSIONS == 3)
+            {
+                currentVolume = PI * particles[i].diameter * particles[i].diameter * particles[i].diameter / 6.0;
+            }
+            if (DIMENSIONS == 2)
+            {
+                currentVolume = PI * particles[i].diameter * particles[i].diameter / 4.0;
+            }
+
+            particlesVolume += currentVolume;
         }
 
         return particlesVolume;
@@ -91,6 +102,19 @@ namespace PackingServices
         return meanDiameter / config->particlesCount;
     }
 
+    FLOAT_TYPE GeometryService::GetParticleDiameterStd(const Packing& particles) const
+    {
+        FLOAT_TYPE diameterSquareSum = 0.0;
+        for (ParticleIndex i = 0; i < config->particlesCount; ++i)
+        {
+            diameterSquareSum += particles[i].diameter * particles[i].diameter;
+        }
+
+        FLOAT_TYPE meanDiameter = GetMeanParticleDiameter(particles);
+        FLOAT_TYPE variance = (diameterSquareSum - meanDiameter * meanDiameter * config->particlesCount) / (config->particlesCount - 1.0);
+        return sqrt(variance);
+    }
+
     void GeometryService::ScaleDiameters(Packing* particles, Core::FLOAT_TYPE scalingFactor) const
     {
         Packing& particlesRef = *particles;
@@ -103,13 +127,36 @@ namespace PackingServices
 
     FLOAT_TYPE GeometryService::GetScalingFactor(Core::FLOAT_TYPE currentDensity, Core::FLOAT_TYPE targetDensity) const
     {
-        double contractionRate = pow(currentDensity / targetDensity, 1.0 / 3.0);
+        double contractionRate = pow(currentDensity / targetDensity, 1.0 / DIMENSIONS);
         return contractionRate;
     }
 
     FLOAT_TYPE GeometryService::GetScalingFactorByPorosity(Core::FLOAT_TYPE currentPorosity, Core::FLOAT_TYPE targetPorosity) const
     {
         return GetScalingFactor(1.0 - currentPorosity, 1.0 - targetPorosity);
+    }
+
+    ParticlePair GeometryService::GetMinNormalizedDistanceNaive(const Packing& particles) const
+    {
+        FLOAT_TYPE minDistanceSquare = MAX_FLOAT_VALUE;
+        FLOAT_TYPE currentDistanceSquare = 0;
+        ParticleIndex firstIndex = 0;
+        ParticleIndex secondIndex = 0;
+        for (ParticleIndex i = 0; i < config->particlesCount - 1; ++i)
+        {
+            for (ParticleIndex j = i + 1; j < config->particlesCount; ++j)
+            {
+                currentDistanceSquare = mathService->GetNormalizedDistanceSquare(i, j, particles);
+                if (currentDistanceSquare < minDistanceSquare)
+                {
+                    minDistanceSquare = currentDistanceSquare;
+                    firstIndex = i;
+                    secondIndex = j;
+                }
+            }
+        }
+
+        return ParticlePair(firstIndex, secondIndex, minDistanceSquare);
     }
 }
 

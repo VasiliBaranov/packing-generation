@@ -28,6 +28,8 @@ namespace Geometries
 
         OVERRIDE void EnsureBoundaries(const Model::DomainParticle& initialParticle, Model::DomainParticle* movedParticle, Core::FLOAT_TYPE minNormalizedDistance) const;
 
+        OVERRIDE bool IsSphereInside(const Core::SpatialVector& sphereCenter, Core::FLOAT_TYPE sphereRadius) const;
+
         virtual ~TrapezoidGeometry();
 
     private:

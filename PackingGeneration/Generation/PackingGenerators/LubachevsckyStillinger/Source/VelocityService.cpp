@@ -22,17 +22,18 @@ namespace PackingGenerators
 
     void VelocityService::RescaleVelocities(FLOAT_TYPE currentTime, FLOAT_TYPE actualKineticEnergy, vector<MovingParticle>* particles) const
     {
+        // Rescale factor is chosen to reestablish the temperature of the system
+        FLOAT_TYPE expectedKineticEnergy = GetExpectedKineticEnergy(*particles);
+        FLOAT_TYPE rescaleFactor = sqrt(expectedKineticEnergy / actualKineticEnergy);
+
         int particlesCount = particles->size();
         vector<MovingParticle>& particlesRef = *particles;
-
-        // Rescale factor is chosen to reestablish temperature of the system
-        FLOAT_TYPE expectedKineticEnergy = GetExpectedKineticEnergy(particlesCount);
-        FLOAT_TYPE rescaleFactor = sqrt(expectedKineticEnergy / actualKineticEnergy);
         for (ParticleIndex i = 0; i < particlesCount; ++i)
         {
             MovingParticle* particle = &particlesRef[i];
 
             // As far as we update velocities, we should synchronize particles with the current time.
+            // Don't check for immobility, as zero velocities will be rescaled to zero velocities.
             SynchronizeParticleWithCurrentTime(currentTime, particle);
             VectorUtilities::MultiplyByValue(particle->velocity, rescaleFactor, &particle->velocity);
         }
@@ -42,6 +43,7 @@ namespace PackingGenerators
     {
         SpatialVector displacement;
 
+        // Don't check for immobility, as immobile particles have zero velocities and won't be moved.
         VectorUtilities::MultiplyByValue(particle->velocity, currentTime - particle->lastEventTime, &displacement);
         VectorUtilities::Add(particle->coordinates, displacement, &particle->coordinates);
 
@@ -55,6 +57,7 @@ namespace PackingGenerators
         FLOAT_TYPE kineticEnergy = 0;
         for (ParticleIndex i = 0; i < particlesCount; ++i)
         {
+            // Don't check for immobility, as immobile particles have zero velocities and won't influence kinetic energy.
             // E += 0.5*s[i].m*s[i].v.norm_squared();
             const MovingParticle& particle = particles[i];
             FLOAT_TYPE velocitySquare = VectorUtilities::GetSelfDotProduct(particle.velocity);
@@ -78,30 +81,57 @@ namespace PackingGenerators
         }
     }
 
+    int VelocityService::GetMobileParticlesCount(const std::vector<MovingParticle>& particles) const
+    {
+        int particlesCount = particles.size();
+        int mobileParticlesCount = 0;
+        for (ParticleIndex particleIndex = 0; particleIndex < particlesCount; ++particleIndex)
+        {
+            const MovingParticle& movingParticle = particles[particleIndex];
+            if (!movingParticle.isImmobile)
+            {
+                mobileParticlesCount++;
+            }
+        }
+
+        return mobileParticlesCount;
+    }
+
     void VelocityService::FillVelocities(vector<MovingParticle>* particles) const
     {
+        int mobileParticlesCount = GetMobileParticlesCount(*particles);
         int particlesCount = particles->size();
+
         vector<MovingParticle>& particlesRef = *particles;
+
         SpatialVector totalImpetus;
         VectorUtilities::InitializeWith(&totalImpetus, 0.0);
 
         for (ParticleIndex particleIndex = 0; particleIndex < particlesCount; ++particleIndex)
         {
              MovingParticle& movingParticle = particlesRef[particleIndex];
-             FillInitialVelocity(&movingParticle.velocity);
 
-             SpatialVector impetus;
-             VectorUtilities::MultiplyByValue(movingParticle.velocity, mass, &impetus);
-             VectorUtilities::Add(totalImpetus, impetus, &totalImpetus);
+             if (movingParticle.isImmobile)
+             {
+                 VectorUtilities::InitializeWith(&movingParticle.velocity, 0.0);
+             }
+             else
+             {
+                 FillInitialVelocity(&movingParticle.velocity);
+
+                 SpatialVector impetus;
+                 VectorUtilities::MultiplyByValue(movingParticle.velocity, mass, &impetus);
+                 VectorUtilities::Add(totalImpetus, impetus, &totalImpetus);
+             }
         }
 
         SpatialVector centerOfMassVelocity;
-        VectorUtilities::DivideByValue(totalImpetus, mass * particlesCount, &centerOfMassVelocity);
+        VectorUtilities::DivideByValue(totalImpetus, mass * mobileParticlesCount, &centerOfMassVelocity);
         // printf("Velocity of center of mass: %f %f %f\n", centerMassVelocity[Axis::X], centerMassVelocity[Axis::Y], centerMassVelocity[Axis::Z]);
 
         FLOAT_TYPE centerOfMassVelocityLength = VectorUtilities::GetLength(centerOfMassVelocity);
         // TODO: calculate max acceptable center mass velocity better (confidence intervals by std; std depends on temperature)
-        if (centerOfMassVelocityLength > 500.0 / mass / particlesCount)
+        if (centerOfMassVelocityLength > 500.0 / mass / mobileParticlesCount)
         {
             printf("WARNING: Velocity of center of mass not zero.\n");
         }
@@ -110,7 +140,10 @@ namespace PackingGenerators
         for (ParticleIndex particleIndex = 0; particleIndex < particlesCount; ++particleIndex)
         {
              MovingParticle& movingParticle = particlesRef[particleIndex];
-             VectorUtilities::Subtract(movingParticle.velocity, centerOfMassVelocity, &movingParticle.velocity);
+             if (!movingParticle.isImmobile)
+             {
+                 VectorUtilities::Subtract(movingParticle.velocity, centerOfMassVelocity, &movingParticle.velocity);
+             }
         }
 
         // Ensure exact temperature (it may not be exact due to random generator noise; and due to the change of the system of reference).
@@ -121,16 +154,18 @@ namespace PackingGenerators
     }
 
     // E = N i k T / 2, where N - number of particles, i - degrees of freedom
-    FLOAT_TYPE VelocityService::GetActualTemperature(FLOAT_TYPE kineticEnergy, int particlesCount) const
+    FLOAT_TYPE VelocityService::GetActualTemperature(FLOAT_TYPE kineticEnergy, const std::vector<MovingParticle>& particles) const
     {
-        const FLOAT_TYPE degreeOfFreedom = 3;
-        return 2.0 * kineticEnergy / particlesCount / degreeOfFreedom / boltzmannConstant;
+        int mobileParticlesCount = GetMobileParticlesCount(particles);
+        const FLOAT_TYPE degreeOfFreedom = DIMENSIONS;
+        return 2.0 * kineticEnergy / mobileParticlesCount / degreeOfFreedom / boltzmannConstant;
     }
 
-    FLOAT_TYPE VelocityService::GetExpectedKineticEnergy(int particlesCount) const
+    FLOAT_TYPE VelocityService::GetExpectedKineticEnergy(const std::vector<MovingParticle>& particles) const
     {
-        const FLOAT_TYPE degreeOfFreedom = 3;
-        return particlesCount * degreeOfFreedom * boltzmannConstant * temperature / 2.0;
+        int mobileParticlesCount = GetMobileParticlesCount(particles);
+        const FLOAT_TYPE degreeOfFreedom = DIMENSIONS;
+        return mobileParticlesCount * degreeOfFreedom * boltzmannConstant * temperature / 2.0;
     }
 }
 

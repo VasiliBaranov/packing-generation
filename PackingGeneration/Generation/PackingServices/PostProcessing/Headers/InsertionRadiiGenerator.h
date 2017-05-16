@@ -8,8 +8,12 @@
 #include "Core/Headers/Macros.h"
 #include "Generation/Model/Headers/Types.h"
 #include "Generation/PackingServices/Headers/IContextDependentService.h"
+#include "Generation/PackingServices/EnergyServices/Headers/IEnergyService.h"
+
 namespace PackingServices { class GeometryService; }
 namespace PackingServices { class DistanceService; }
+namespace PackingServices { class PackingSerializer; }
+namespace PackingServices { class IPairPotential; }
 namespace Geometries { class IGeometry; }
 namespace Model { class SystemConfig; }
 namespace Model { class ModellingContext; }
@@ -24,6 +28,7 @@ namespace PackingServices
         GeometryService* geometryService;
         const Geometries::IGeometry* geometry;
         const Model::SystemConfig* config;
+        const Model::ModellingContext* context;
 
     public:
         InsertionRadiiGenerator(DistanceService* distanceProvider, GeometryService* geometryService);
@@ -34,14 +39,42 @@ namespace PackingServices
 
         Core::FLOAT_TYPE CalculateEntropy(const Model::Packing& particles, int insertionRadiiCount) const;
 
+        void FillDistancesToSurfaces(const Model::Packing& particles, int samplePointsCount, const std::vector<int>& sortedSurfaceIndexes, std::string distancesFolderPath, const PackingSerializer& packingSerializer) const;
+
+        // These functions will be used primarily for calculation of entropy with fixed coordination number
+        Core::FLOAT_TYPE GetContractionRateForCoordinationNumber(IEnergyService* energyService, Core::FLOAT_TYPE expectedAverageCoordinationNumber);
+
+        Core::FLOAT_TYPE GetContactNumberDistribution(const Model::Packing& particles, IEnergyService* energyService, Core::FLOAT_TYPE contractionRate, std::vector<int>* neighborCounts, std::vector<int>* neighborCountFrequencies) const;
+
         virtual ~InsertionRadiiGenerator();
 
     private:
-        Core::FLOAT_TYPE GetLargePoresDensity(const Model::Packing& particles, int insertionRadiiCount, Core::FLOAT_TYPE minPoreRadius) const;
-
-        Core::FLOAT_TYPE CalculateLocalEntropy(const Core::SpatialVector& point, Core::FLOAT_TYPE meanDiameter) const;
+        void FillRandomPoint(Core::SpatialVector* point) const;
 
         DISALLOW_COPY_AND_ASSIGN(InsertionRadiiGenerator);
+
+        class GetContractionEnergyFunctor
+        {
+        private:
+            const std::vector<const IPairPotential*>& potentials;
+            IEnergyService* energyService;
+
+        public:
+            GetContractionEnergyFunctor(const std::vector<const IPairPotential*>& potentialsParam,
+                    IEnergyService* energyServiceParam) :
+                        potentials(potentialsParam),
+                        energyService(energyServiceParam)
+            {
+            };
+
+            Core::FLOAT_TYPE operator()(Core::FLOAT_TYPE negativeContractionRatio)
+            {
+                std::vector<Core::FLOAT_TYPE> contractionRatios(1, -negativeContractionRatio);
+                IEnergyService::EnergiesResult result = energyService->GetContractionEnergies(contractionRatios, potentials);
+                Core::FLOAT_TYPE coordinationNumber = result.contractionEnergies[0] / result.nonRattlersCounts[0];
+                return coordinationNumber;
+            };
+        };
     };
 }
 

@@ -8,6 +8,15 @@
 #include <vector>
 #include "Types.h"
 
+#ifdef WINDOWS
+#define NOMINMAX
+#include <windows.h>
+#undef DeleteFile
+#undef GetMessage
+#else
+#include <unistd.h>
+#endif
+
 namespace Core
 {
     // Implements math utility methods.

@@ -23,7 +23,7 @@ CPP_DEPS += \
 PackingGeneration/Generation/PackingGenerators/InitialGenerators/Source/%.o: ../PackingGeneration/Generation/PackingGenerators/InitialGenerators/Source/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: Cygwin C++ Compiler'
-	g++ -DDEBUG -I../Externals/Boost -I../PackingGeneration -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	g++ -DDEBUG -I../Externals/Boost -I../Externals/Eigen -I../PackingGeneration -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

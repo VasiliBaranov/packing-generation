@@ -28,10 +28,10 @@ namespace Tests
         particles.resize(particlesCount);
 
         const FLOAT_TYPE diameter = 1.0;
-        const SpatialVector c0 = {{5, 5, 5}};
-        const SpatialVector c1 = {{5.9, 5, 5}};
-        const SpatialVector c2 = {{5, 8, 5}};
-        const SpatialVector c3 = {{5.5, 8, 5}};
+        const SpatialVector c0 = REMOVE_LAST_DIMENSION_IF_NEEDED(5, 5, 5);
+        const SpatialVector c1 = REMOVE_LAST_DIMENSION_IF_NEEDED(5.9, 5, 5);
+        const SpatialVector c2 = REMOVE_LAST_DIMENSION_IF_NEEDED(5, 8, 5);
+        const SpatialVector c3 = REMOVE_LAST_DIMENSION_IF_NEEDED(5.5, 8, 5);
         particles[0] = DomainParticle(0, diameter, c0);
         particles[1] = DomainParticle(1, diameter, c1);
         particles[2] = DomainParticle(2, diameter, c2);

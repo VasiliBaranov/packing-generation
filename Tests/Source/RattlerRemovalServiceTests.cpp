@@ -35,7 +35,7 @@ namespace Tests
 
     Packing RattlerRemovalServiceTests::particles;
     int RattlerRemovalServiceTests::particlesCount = 4;
-    SpatialVector RattlerRemovalServiceTests::boxSize = {{10.0, 10.0, 10.0}};
+    SpatialVector RattlerRemovalServiceTests::boxSize = REMOVE_LAST_DIMENSION_IF_NEEDED(10.0, 10.0, 10.0);
 
     void RattlerRemovalServiceTests::SetUp()
     {
@@ -73,10 +73,10 @@ namespace Tests
 
         // All particles contact each other
         const FLOAT_TYPE diameter = 1.0;
-        const SpatialVector c0 = {{4, 4, 0}};
-        const SpatialVector c1 = {{4, 5, 0}};
-        const SpatialVector c2 = {{5, 4, 0}};
-        const SpatialVector c3 = {{5, 5, 0}};
+        const SpatialVector c0 = REMOVE_LAST_DIMENSION_IF_NEEDED(4, 4, 0);
+        const SpatialVector c1 = REMOVE_LAST_DIMENSION_IF_NEEDED(4, 5, 0);
+        const SpatialVector c2 = REMOVE_LAST_DIMENSION_IF_NEEDED(5, 4, 0);
+        const SpatialVector c3 = REMOVE_LAST_DIMENSION_IF_NEEDED(5, 5, 0);
         particles[0] = DomainParticle(0, diameter, c0);
         particles[1] = DomainParticle(1, diameter, c1);
         particles[2] = DomainParticle(2, diameter, c2);
@@ -99,10 +99,10 @@ namespace Tests
 
         // The second particle is outside
         const FLOAT_TYPE diameter = 1.0;
-        const SpatialVector c0 = {{4, 4, 0}};
-        const SpatialVector c1 = {{7, 7, 0}};
-        const SpatialVector c2 = {{5, 4, 0}};
-        const SpatialVector c3 = {{5, 5, 0}};
+        const SpatialVector c0 = REMOVE_LAST_DIMENSION_IF_NEEDED(4, 4, 0);
+        const SpatialVector c1 = REMOVE_LAST_DIMENSION_IF_NEEDED(7, 7, 0);
+        const SpatialVector c2 = REMOVE_LAST_DIMENSION_IF_NEEDED(5, 4, 0);
+        const SpatialVector c3 = REMOVE_LAST_DIMENSION_IF_NEEDED(5, 5, 0);
         particles[0] = DomainParticle(0, diameter, c0);
         particles[1] = DomainParticle(1, diameter, c1);
         particles[2] = DomainParticle(2, diameter, c2);
@@ -125,10 +125,10 @@ namespace Tests
 
         // Diameter of each particle is very small
         const FLOAT_TYPE diameter = 0.1;
-        const SpatialVector c0 = {{4, 4, 0}};
-        const SpatialVector c1 = {{4, 5, 0}};
-        const SpatialVector c2 = {{5, 4, 0}};
-        const SpatialVector c3 = {{5, 5, 0}};
+        const SpatialVector c0 = REMOVE_LAST_DIMENSION_IF_NEEDED(4, 4, 0);
+        const SpatialVector c1 = REMOVE_LAST_DIMENSION_IF_NEEDED(4, 5, 0);
+        const SpatialVector c2 = REMOVE_LAST_DIMENSION_IF_NEEDED(5, 4, 0);
+        const SpatialVector c3 = REMOVE_LAST_DIMENSION_IF_NEEDED(5, 5, 0);
         particles[0] = DomainParticle(0, diameter, c0);
         particles[1] = DomainParticle(1, diameter, c1);
         particles[2] = DomainParticle(2, diameter, c2);

@@ -6,6 +6,8 @@
 
 #include <cmath>
 #include "Core/Headers/Path.h"
+#include "Core/Headers/StlUtilities.h"
+#include "Core/Headers/MpiManager.h"
 #include "../Headers/IPackingStep.h"
 #include "Generation/Model/Headers/Config.h"
 #include "Generation/Geometries/Headers/IGeometry.h"
@@ -58,6 +60,7 @@ namespace PackingGenerators
         packingStep->SetContext(context);
     }
 
+    // TODO: Refactor!
     void PackingGenerator::ArrangePacking(Packing* particles)
     {
         this->config = config;
@@ -67,20 +70,19 @@ namespace PackingGenerators
         unsigned long long iterationIndex = 0L;
         clock_t startTime = clock();
         clock_t delay = 0.0;
-        int runsCount = 0;
-        bool shouldContinue;
+        bool shouldContinue = true;
 
         Initialize();
 
-        if (!packingStep->ShouldContinue() && generationConfig->minRunsCount <= 0)
+        if (!packingStep->ShouldContinue())
         {
             printf("Packing is correct, generation not started.\n");
-            CheckInnerDiameterNaive();
-            Finish(0, 0, 0);
+            CheckIntersectionsNaive();
+            Finish(0, 0);
             return;
         }
 
-        while (1)
+        while (shouldContinue)
         {
             packingStep->DisplaceParticles();
             shouldContinue = packingStep->ShouldContinue();
@@ -101,47 +103,14 @@ namespace PackingGenerators
                 delay = delay + currentDelay;
             }
 
-            if (!shouldContinue)
-            {
-                shouldContinue = Check();
-                if (!shouldContinue)
-                {
-                    runsCount++;
-                    bool shouldBreak = runsCount >= generationConfig->minRunsCount;
-                    if (shouldBreak)
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        printf("Restarting generation...\n");
-                        packingStep->ResetGeneration();
-                    }
-                }
-                else
-                {
-                    runsCount++;
-                    if (generationConfig->maxRunsCount > 0 && runsCount >= generationConfig->maxRunsCount)
-                    {
-                        printf("Max runs count %d reached.\n", generationConfig->maxRunsCount);
-                        break;
-                    }
-                    packingStep->ResetGeneration();
-                }
-            }
-
             iterationIndex++;
-            // I try to avoid unsigned types as much as possible (see Google C++ style guide), that's why generationConfig->maxIterations is int.
-            // But iterationIndex has to be unsigned, otherwise overflows may occur.
-            if (generationConfig->maxIterations > 0 && iterationIndex >= static_cast<unsigned int>(generationConfig->maxIterations))
-            {
-                printf("Max iterations count %d reached.\n", generationConfig->maxIterations);
-                break;
-            }
         }
 
+        DisplayPorosity();
+        CheckIntersectionsNaive();
+
         clock_t totalTime = clock() - startTime - delay;
-        Finish(totalTime, iterationIndex, runsCount);
+        Finish(totalTime, iterationIndex);
     }
 
     FLOAT_TYPE PackingGenerator::GetFinalInnerDiameterRatio() const
@@ -149,21 +118,10 @@ namespace PackingGenerators
         return innerDiameterRatio;
     }
 
-    bool PackingGenerator::Check() const
-    {
-        bool shouldContinue = CheckPorosity();
-        if (!shouldContinue)
-        {
-            CheckInnerDiameterNaive();
-        }
-
-        return shouldContinue;
-    }
-
-    void PackingGenerator::CheckInnerDiameterNaive() const
+    void PackingGenerator::CheckIntersectionsNaive() const
     {
         printf("Checking min particle distance in a naive way...\n");
-        ParticlePair closestPair = GetMinNormalizedDistanceNaive();
+        ParticlePair closestPair = geometryService->GetMinNormalizedDistanceNaive(*particles);
         FLOAT_TYPE minNormalizedDistance = sqrt(closestPair.normalizedDistanceSquare);
 
         if (std::abs(minNormalizedDistance - innerDiameterRatio) > EPSILON)
@@ -174,53 +132,16 @@ namespace PackingGenerators
         }
     }
 
-    ParticlePair PackingGenerator::GetMinNormalizedDistanceNaive() const
-    {
-        FLOAT_TYPE minDistanceSquare = MAX_FLOAT_VALUE;
-        FLOAT_TYPE currentDistanceSquare = 0;
-        ParticleIndex firstIndex = 0;
-        ParticleIndex secondIndex = 0;
-        for (ParticleIndex i = 0; i < config->particlesCount - 1; ++i)
-        {
-            for (ParticleIndex j = i + 1; j < config->particlesCount; ++j)
-            {
-                currentDistanceSquare = mathService->GetNormalizedDistanceSquare(i, j, *particles);
-                if (currentDistanceSquare < minDistanceSquare)
-                {
-                    minDistanceSquare = currentDistanceSquare;
-                    firstIndex = i;
-                    secondIndex = j;
-                }
-            }
-        }
-
-//        printf("Closes pair: %d, %d\n", firstIndex, secondIndex);
-
-        return ParticlePair(firstIndex, secondIndex, minDistanceSquare);
-    }
-
-    bool PackingGenerator::CheckPorosity() const
+    void PackingGenerator::DisplayPorosity() const
     {
         FLOAT_TYPE currentPorosity = CalculateCurrentPorosity(innerDiameterRatio);
-        bool shoulContinue = currentPorosity > TOLERANCE * theoreticalPorosity;
 
         printf("Checking...\n");
         printf("Calc. porosity is %g\n", currentPorosity);
         printf("Theoretical porosity is %g\n", theoreticalPorosity);
-
-        if (!shoulContinue)
-        {
-            printf("Checking successful\n");
-        }
-        else
-        {
-            printf("Rerun is needed\n");
-        }
-
-        return shoulContinue;
     }
 
-    void PackingGenerator::Finish(clock_t totalTime, unsigned long long iterationCounter, int runsCount) const
+    void PackingGenerator::Finish(clock_t totalTime, unsigned long long iterationCounter) const
     {
         FLOAT_TYPE currentPorosity = CalculateCurrentPorosity(innerDiameterRatio);
         string infoFilePath = Path::Append(generationConfig->baseFolder, PACKING_FILE_NAME_NFO);
@@ -230,14 +151,13 @@ namespace PackingGenerators
         info.tolerance = TOLERANCE;
         info.totalTime = totalTime / static_cast<double>(CLOCKS_PER_SEC);
         info.iterationsCount = iterationCounter;
-        info.runsCount = runsCount;
         packingSerializer->SerializePackingInfo(infoFilePath, *config, info);
 
         printf("Finish:\n");
         printf("Calc. porosity is %16.15g\n", currentPorosity);
         printf("Theoretical porosity is %g\n", theoreticalPorosity);
         printf("Inner diameter ratio is %17.15g\n", innerDiameterRatio);
-        printf("Time: %g s, iterations are %llu, runs count: %d\n", info.totalTime, iterationCounter, runsCount);
+        printf("Time: %g s, iterations are %llu\n", info.totalTime, iterationCounter);
     }
 
     clock_t PackingGenerator::Log(unsigned long long iterationCounter) const
@@ -246,8 +166,20 @@ namespace PackingGenerators
         printf("Step %llu. Inner diameter ratio is %1.15f. Outer diameter ratio is %1.15f. Writing int. packing state...", iterationCounter, innerDiameterRatio, outerDiameterRatio);
         printf("Contraction rate: %e\n", generationConfig->contractionRate);
 
-        packingSerializer->SerializePacking(Path::Append(generationConfig->baseFolder, PACKING_FILE_NAME), *particles);
-        // packingSerializer->AppendPacking(Path::Append(config->baseFolder, PACKING_HISTORY_FILE_NAME), particles);
+        string packingFilePath = Path::Append(generationConfig->baseFolder, PACKING_FILE_NAME);
+        // Renaming the previously saved packing. Though all IO is set up to flush the buffer immediately,
+        // packing files may be empty, when the program is terminated (at least by the MPI timeout).
+        // May be I should switch to MPI IO?
+        if (Path::Exists(packingFilePath))
+        {
+            string previousPackingFilePath = Path::Append(generationConfig->baseFolder, PREVIOUS_PACKING_FILE_NAME);
+            if (Path::Exists(packingFilePath))
+            {
+                Path::DeleteFile(previousPackingFilePath);
+            }
+            Path::Rename(packingFilePath, previousPackingFilePath);
+        }
+        packingSerializer->SerializePacking(packingFilePath, *particles);
 
         printf("done.\n");
         return clock() - startTime;
@@ -260,7 +192,7 @@ namespace PackingGenerators
 
     FLOAT_TYPE PackingGenerator::CalculateCurrentPorosity(FLOAT_TYPE diameterRatio) const
     {
-        FLOAT_TYPE calculatedPorosity = 1.0 - (particlesVolume * diameterRatio * diameterRatio * diameterRatio) / totalVolume;
+        FLOAT_TYPE calculatedPorosity = 1.0 - (particlesVolume * std::pow(diameterRatio, DIMENSIONS)) / totalVolume;
         return calculatedPorosity;
     }
 

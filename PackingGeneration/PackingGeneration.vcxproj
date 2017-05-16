@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="DebugTests|Win32">
       <Configuration>DebugTests</Configuration>
@@ -27,23 +27,27 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugTests|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseTests|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -66,7 +70,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\Externals\Boost;.\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Externals\Boost;.\;..\Externals\Eigen</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WINDOWS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -79,7 +83,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\Externals\Boost;.\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Externals\Boost;.\;..\Externals\Eigen</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WINDOWS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -92,7 +96,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\Externals\Boost;.\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Externals\Boost;.\;..\Externals\Eigen</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WINDOWS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -109,7 +113,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\Externals\Boost;.\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Externals\Boost;.\;..\Externals\Eigen</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WINDOWS;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -139,9 +143,12 @@
     <ClInclude Include="Core\Headers\SphericalHarmonicsComputer.h" />
     <ClInclude Include="Core\Headers\StlUtilities.h" />
     <ClInclude Include="Core\Headers\Types.h" />
+    <ClInclude Include="Core\Headers\Utilities.h" />
     <ClInclude Include="Core\Headers\VectorUtilities.h" />
     <ClInclude Include="Core\Lattice\Headers\ColumnMajorIndexingProvider.h" />
+    <ClInclude Include="Core\Lattice\Headers\D2Q9Lattice.h" />
     <ClInclude Include="Core\Lattice\Headers\D3Q27Lattice.h" />
+    <ClInclude Include="Core\Lattice\Headers\GenericLattice.h" />
     <ClInclude Include="Core\Lattice\Headers\ILattice.h" />
     <ClInclude Include="Core\Lattice\Headers\ILatticeIndexingProvider.h" />
     <ClInclude Include="Core\Lattice\Headers\ILinearIndexingProvider.h" />
@@ -161,6 +168,7 @@
     <ClInclude Include="Generation\PackingGenerators\Headers\BaseConjugateGradientStep.h" />
     <ClInclude Include="Generation\PackingGenerators\Headers\BasePackingStep.h" />
     <ClInclude Include="Generation\PackingGenerators\Headers\BezrukovJodreyToryStep.h" />
+    <ClInclude Include="Generation\PackingGenerators\Headers\ClosestJammingStep.h" />
     <ClInclude Include="Generation\PackingGenerators\Headers\DecreasingConjugateGradientStep.h" />
     <ClInclude Include="Generation\PackingGenerators\Headers\DensificationStep.h" />
     <ClInclude Include="Generation\PackingGenerators\Headers\IncreasingConjugateGradientStep.h" />
@@ -195,6 +203,7 @@
     <ClInclude Include="Generation\PackingGenerators\LubachevsckyStillinger\Headers\WallTransferEventProcessor.h" />
     <ClInclude Include="Generation\PackingGenerators\LubachevsckyStillinger\Headers\WallTransferEventProvider.h" />
     <ClInclude Include="Generation\PackingServices\DistanceServices\Headers\BaseDistanceService.h" />
+    <ClInclude Include="Generation\PackingServices\DistanceServices\Headers\BondsProvider.h" />
     <ClInclude Include="Generation\PackingServices\DistanceServices\Headers\CellListNeighborProvider.h" />
     <ClInclude Include="Generation\PackingServices\DistanceServices\Headers\ClosestPairProvider.h" />
     <ClInclude Include="Generation\PackingServices\DistanceServices\Headers\DistanceService.h" />
@@ -209,18 +218,28 @@
     <ClInclude Include="Generation\PackingServices\EnergyServices\Headers\ImpermeableAttractionPotential.h" />
     <ClInclude Include="Generation\PackingServices\EnergyServices\Headers\IPairPotential.h" />
     <ClInclude Include="Generation\PackingServices\EnergyServices\Headers\NoRattlersEnergyService.h" />
+    <ClInclude Include="Generation\PackingServices\Headers\ClosestJammingVelocityProvider.h" />
     <ClInclude Include="Generation\PackingServices\Headers\GeometryCollisionService.h" />
     <ClInclude Include="Generation\PackingServices\Headers\GeometryService.h" />
     <ClInclude Include="Generation\PackingServices\Headers\IContextDependentService.h" />
+    <ClInclude Include="Generation\PackingServices\Headers\ImmobileParticlesService.h" />
     <ClInclude Include="Generation\PackingServices\Headers\IParticleService.h" />
     <ClInclude Include="Generation\PackingServices\Headers\MathService.h" />
     <ClInclude Include="Generation\PackingServices\Headers\PackingSerializer.h" />
+    <ClInclude Include="Generation\PackingServices\PostProcessing\Headers\EquilibrationPressureProcessor.h" />
+    <ClInclude Include="Generation\PackingServices\PostProcessing\Headers\ErrorRateProcessor.h" />
     <ClInclude Include="Generation\PackingServices\PostProcessing\Headers\HessianService.h" />
+    <ClInclude Include="Generation\PackingServices\PostProcessing\Headers\IEquilibrationStatisticsGatherer.h" />
     <ClInclude Include="Generation\PackingServices\PostProcessing\Headers\InsertionRadiiGenerator.h" />
+    <ClInclude Include="Generation\PackingServices\PostProcessing\Headers\IntermediateScatteringFunctionProcessor.h" />
+    <ClInclude Include="Generation\PackingServices\PostProcessing\Headers\MinIterationsProcessor.h" />
     <ClInclude Include="Generation\PackingServices\PostProcessing\Headers\MolecularDynamicsService.h" />
     <ClInclude Include="Generation\PackingServices\PostProcessing\Headers\OrderService.h" />
     <ClInclude Include="Generation\PackingServices\PostProcessing\Headers\PressureService.h" />
     <ClInclude Include="Generation\PackingServices\PostProcessing\Headers\RattlerRemovalService.h" />
+    <ClInclude Include="Generation\PackingServices\PostProcessing\Headers\ScatterAndDiffusionProcessor.h" />
+    <ClInclude Include="Generation\PackingServices\PostProcessing\Headers\SelfDiffusionProcessor.h" />
+    <ClInclude Include="Parallelism\Headers\FileLock.h" />
     <ClInclude Include="Parallelism\Headers\ILoadBalancer.h" />
     <ClInclude Include="Parallelism\Headers\ITask.h" />
     <ClInclude Include="Parallelism\Headers\ITaskFactory.h" />
@@ -231,16 +250,29 @@
   <ItemGroup>
     <ClCompile Include="Core\Geometry\Source\GeometryParameters.cpp" />
     <ClCompile Include="Core\Lattice\Source\ColumnMajorIndexingProvider.cpp" />
+    <ClCompile Include="Core\Lattice\Source\D2Q9Lattice.cpp" />
     <ClCompile Include="Core\Lattice\Source\D3Q27Lattice.cpp" />
+    <ClCompile Include="Core\Lattice\Source\GenericLattice.cpp" />
     <ClCompile Include="Core\Lattice\Source\LatticeIndexingProvider.cpp" />
     <ClCompile Include="Core\Source\EndiannessProvider.cpp" />
     <ClCompile Include="Core\Source\Exceptions.cpp" />
     <ClCompile Include="Core\Source\Math.cpp" />
     <ClCompile Include="Core\Source\MpiManager.cpp" />
     <ClCompile Include="Core\Source\Path.cpp" />
+    <ClCompile Include="Core\Source\Utilities.cpp" />
     <ClCompile Include="Core\Source\VectorUtilities.cpp" />
     <ClCompile Include="Execution\Source\PackingGenerationTask.cpp" />
     <ClCompile Include="Execution\Source\PackingTaskFactory.cpp" />
+    <ClCompile Include="Generation\PackingGenerators\Source\ClosestJammingStep.cpp" />
+    <ClCompile Include="Generation\PackingServices\DistanceServices\Source\BondsProvider.cpp" />
+    <ClCompile Include="Generation\PackingServices\PostProcessing\Source\EquilibrationPressureProcessor.cpp" />
+    <ClCompile Include="Generation\PackingServices\PostProcessing\Source\ErrorRateProcessor.cpp" />
+    <ClCompile Include="Generation\PackingServices\PostProcessing\Source\IntermediateScatteringFunctionProcessor.cpp" />
+    <ClCompile Include="Generation\PackingServices\PostProcessing\Source\MinIterationsProcessor.cpp" />
+    <ClCompile Include="Generation\PackingServices\PostProcessing\Source\ScatterAndDiffusionProcessor.cpp" />
+    <ClCompile Include="Generation\PackingServices\PostProcessing\Source\SelfDiffusionProcessor.cpp" />
+    <ClCompile Include="Generation\PackingServices\Source\ClosestJammingVelocityProvider.cpp" />
+    <ClCompile Include="Generation\PackingServices\Source\ImmobileParticlesService.cpp" />
     <ClCompile Include="Main.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugTests|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseTests|Win32'">true</ExcludedFromBuild>
@@ -305,6 +337,7 @@
     <ClCompile Include="Generation\PackingServices\Source\GeometryService.cpp" />
     <ClCompile Include="Generation\PackingServices\Source\MathService.cpp" />
     <ClCompile Include="Generation\PackingServices\Source\PackingSerializer.cpp" />
+    <ClCompile Include="Parallelism\Source\FileLock.cpp" />
     <ClCompile Include="Parallelism\Source\RandomLoadBalancer.cpp" />
     <ClCompile Include="Parallelism\Source\TaskManager.cpp" />
   </ItemGroup>

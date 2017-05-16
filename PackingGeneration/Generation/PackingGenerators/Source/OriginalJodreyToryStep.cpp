@@ -131,7 +131,7 @@ namespace PackingGenerators
 
     void OriginalJodreyToryStep::ResetOuterDiameterRatio()
     {
-        outerDiameterRatio = pow(totalVolume / particlesVolume, 1.0 / 3.0);
+        outerDiameterRatio = pow(totalVolume / particlesVolume, 1.0 / DIMENSIONS);
     }
 }
 

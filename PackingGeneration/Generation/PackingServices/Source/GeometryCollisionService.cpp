@@ -22,22 +22,77 @@ namespace PackingServices
     // The dot products are optimized to account for perpendicular walls.
     FLOAT_TYPE GeometryCollisionService::GetPlaneIntersectionTime(const Core::SpatialVector& point, const Core::SpatialVector& velocity, const SimplePlane& plane) const
     {
-        FLOAT_TYPE velocityProjection = velocity[plane.perpendicularAxis];
-        if (velocityProjection == 0.0)
-        {
-            return -1;
-        }
+//        FLOAT_TYPE velocityProjection = velocity[plane.perpendicularAxis];
+//        if (velocityProjection == 0.0)
+//        {
+//            return -1;
+//        }
+//
+//        FLOAT_TYPE particleCoordinateOnAxis = point[plane.perpendicularAxis];
+//        FLOAT_TYPE differenceProjection = plane.coordinateOnAxis - particleCoordinateOnAxis;
+//        FLOAT_TYPE transferTime = differenceProjection / velocityProjection;
+//
+//        return transferTime;
+
+
+        // Assume that particles can be outside the box only due to finite precision errors after periodic shifts.
+        // We search only for intersections which make particle leave the cube.
+        // I.e., particle velocity shall have a component in the direction of the outer normal of the plane (i.e., non-zero, of the same sign).
 
         FLOAT_TYPE particleCoordinateOnAxis = point[plane.perpendicularAxis];
-        FLOAT_TYPE differenceProjection = plane.coordinateOnAxis - particleCoordinateOnAxis;
-        FLOAT_TYPE transferTime = differenceProjection / velocityProjection;
+        FLOAT_TYPE distanceToWallProjectionOnAxis = plane.coordinateOnAxis - particleCoordinateOnAxis;
+        FLOAT_TYPE velocityProjectionOnAxis = velocity[plane.perpendicularAxis];
 
-//        if (transferTime < 0.0)
-//        {
-//            transferTime += context->config->packingSize[plane.perpendicularAxis] / std::abs(velocityProjection);
-//        }
+        FLOAT_TYPE distanceToWallProjectionOnOuterNormal = distanceToWallProjectionOnAxis * plane.outerNormalDirection;
 
-        return transferTime;
+        // Particle is on a plane or outside the box
+        if (distanceToWallProjectionOnOuterNormal <= 0)
+        {
+            FLOAT_TYPE velocityProjectionOnOuterNormal = velocityProjectionOnAxis * plane.outerNormalDirection;
+
+            // Particle is outside the box
+            if (distanceToWallProjectionOnOuterNormal < 0)
+            {
+                // Should not return every time when the particle is outside the box.
+                // Imagine the case:
+                // 1. the particle is inside the box, is directed outside the box
+                // 2. it crosses the boundary, is periodically shifted
+                // 3. due to roundoff errors it may be slightly outside the box, but its velocity direction is now inside the box
+                // 4. if we once again try shift it periodically, we may once again appear outside the box, and enter the infinite loop.
+                // This loop may still happen for immobile particles. TODO: think, maybe to update the code?
+                // NOTE: currently the wall to which the particle was shifted is excluded from searching the intersections,
+                // so even if we enter the infinite loop for immobile particles, collisions will be processed,
+                // and the particle will finally obtain a non-zero velocity through collisions
+
+                // Moving outside the box or immobile - return 0; moving inside the box - return -1
+                bool movingOutsideBoxOrImmobile = velocityProjectionOnOuterNormal >= 0;
+                FLOAT_TYPE collisionTime = movingOutsideBoxOrImmobile ? 0 : -1;
+                return collisionTime;
+            }
+            // Particle is on a plane
+            else
+            {
+                // Moving outside the box - return 0; moving inside the box or immobile - return -1
+                bool movingOutsideBox = velocityProjectionOnOuterNormal > 0;
+                FLOAT_TYPE collisionTime = movingOutsideBox ? 0 : -1;
+                return collisionTime;
+            }
+        }
+        // Inside the box
+        else
+        {
+            // Velocity projection zero - return -1
+            if (velocityProjectionOnAxis == 0.0)
+            {
+                return -1;
+            }
+            // Non-zero velocity - return computation result
+            else
+            {
+                FLOAT_TYPE transferTime = distanceToWallProjectionOnAxis / velocityProjectionOnAxis;
+                return transferTime;
+            }
+        }
     }
 
     FLOAT_TYPE GeometryCollisionService::GetPlaneIntersectionTime(const SpatialVector& point, const SpatialVector& velocity, const Model::Plane& plane) const
@@ -110,7 +165,8 @@ namespace PackingServices
             Core::FLOAT_TYPE currentIntersectionTime = GetPlaneIntersectionTime(point, velocity, box.walls[i]);
 
             // A particle may cross a wall and also a continuation of another wall plane outside the box, that's why we can't return the first encountered transfer time.
-            if (currentIntersectionTime > 0.0 && currentIntersectionTime < intersectionTimeRef)
+            if (currentIntersectionTime >= 0.0 && currentIntersectionTime < intersectionTimeRef)
+//            if (currentIntersectionTime > 0.0 && currentIntersectionTime < intersectionTimeRef)
             {
                 intersectionTimeRef = currentIntersectionTime;
                 intersectionWallIndexRef = i;

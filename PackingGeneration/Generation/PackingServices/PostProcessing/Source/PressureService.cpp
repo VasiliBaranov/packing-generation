@@ -78,7 +78,7 @@ namespace PackingServices
             }
         }
 
-        FLOAT_TYPE packingVolume = VectorUtilities::GetProduct(config->packingSize) * pow(contractionRatio, 3.0);
+        FLOAT_TYPE packingVolume = VectorUtilities::GetProduct(config->packingSize) * pow(contractionRatio, DIMENSIONS);
         // Divide by 2 in contrast to the original paper, as they iterate over distinct particle pairs,
         // and we do over all pairs, taking symmetric pairs twice (though we use nearest neighbors lists, so it's much faster).
         FLOAT_TYPE normalizationFactor = - 1.0 / packingVolume / 2.0;

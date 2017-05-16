@@ -14,11 +14,14 @@ namespace Generation
 
     const std::string CONFIG_FILE_NAME = "generation.conf";
     const std::string PACKING_FILE_NAME = "packing.xyzd";
+    const std::string PREVIOUS_PACKING_FILE_NAME = "packing_prev.xyzd";
     const std::string PACKING_HISTORY_FILE_NAME = "packing_hist.xyzd";
     const std::string PACKING_FILE_NAME_NFO = "packing.nfo";
     const std::string DIAMETERS_FILE_NAME = "diameters.txt";
     const std::string INIT_PACKING_FILE_NAME = "packing_init.xyzd";
     const std::string INSERTION_RADII_FILE_NAME = "insertion_radii.txt";
+    const std::string DISTANCES_TO_CLOSEST_SURFACES_FOLDER_NAME = "distances_to_closest_surfaces";
+    const std::string CONTACT_NUMBER_DISTRIBUTION_FILE_NAME = "contact_number_distribution.txt";
     const std::string ENTROPY_FILE_NAME = "entropy.txt";
     const std::string PARTICLE_DIRECTIONS_FILE_NAME = "particle_directions.txt";
     const std::string CONTRACTION_ENERGIES_FILE_NAME = "contraction_energies.txt";
@@ -29,6 +32,11 @@ namespace Generation
     const std::string MOLECULAR_DYNAMICS_STATISTICS_FILE_NAME = "molecular_dynamics_statistics.txt";
     const std::string PAIR_CORRELATION_FUNCTION_FILE_NAME = "pair_correlation_function.txt";
     const std::string STRUCTURE_FACTOR_FILE_NAME = "structure_factor.txt";
+    const std::string LOCAL_ORIENTATIONAL_DISORDER_FILE_NAME = "local_orientational_disorder.txt";
+    const std::string IMMEDIATE_MOLECULAR_DYNAMICS_STATISTICS_FILE_NAME = "immediate_molecular_dynamics_statistics.txt";
+    const std::string NEAREST_NEIGHBORS_FILE_NAME = "nearest_neighbors.txt";
+    const std::string ACTIVE_GEOMETRY_FILE_NAME = "active_geometry.conf";
+    const std::string IMMOBILE_PARTICLES_FILE_NAME = "immobileParticleIndexes.txt";
 }
 
 #endif /* Generation_Constants_h */

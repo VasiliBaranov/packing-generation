@@ -163,7 +163,7 @@ namespace PackingGenerators
             vector<VoronoiPlane>& particleVoronoiPlanes = *it;
             // This will still leave periodic images of Voronoi planes. It is intentional, as GeometryCollisionService doesn't impose periodicity when searching for intersections.
             // It makes the operation faster, because for most Voronoi cells periodic images will be far away from the box and not present, and particles will never reach such images between collisions.
-            StlUtilities::ResizeToUnique(&particleVoronoiPlanes);
+            StlUtilities::SortAndResizeToUnique(&particleVoronoiPlanes);
         }
     }
 
@@ -186,10 +186,15 @@ namespace PackingGenerators
 
     void VoronoiTesselationProvider::ReadPeriodicVoronoiPlanes(string path, vector<VoronoiPlane>* voronoiPlanes) const
     {
+        if (DIMENSIONS == 2)
+        {
+            throw NotImplementedException("TODO: check qhull in 2D, update this code.");
+        }
+
         voronoiPlanes->clear();
 
         // Read
-        ScopedFile<LogErrorHandler> file(path, "r");
+        ScopedFile<LogErrorHandler> file(path, FileOpenMode::Read);
         int voronoiPlanesCount;
         fscanf(file, "%d", &voronoiPlanesCount);
 
@@ -213,7 +218,7 @@ namespace PackingGenerators
     void VoronoiTesselationProvider::ReadPeriodicIndexesMap(string path, vector<ParticleIndex>* periodicIndexesMap) const
     {
         periodicIndexesMap->clear();
-        ScopedFile<LogErrorHandler> file(path, "r");
+        ScopedFile<LogErrorHandler> file(path, FileOpenMode::Read);
 
         int mappedIndex;
         fscanf(file, "%d\n", &mappedIndex);

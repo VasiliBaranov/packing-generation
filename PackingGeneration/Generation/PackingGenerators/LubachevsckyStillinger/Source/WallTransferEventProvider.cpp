@@ -21,7 +21,8 @@ namespace PackingGenerators
         this->velocityService = velocityService;
         this->geometryCollisionService = geometryCollisionService;
 
-        const SpatialVector minVertexCoordinates = {{0.0, 0.0, 0.0}};
+        SpatialVector minVertexCoordinates;
+        minVertexCoordinates.assign(0);
         box.Initialize(minVertexCoordinates, config.packingSize);
     }
 
@@ -32,8 +33,9 @@ namespace PackingGenerators
         // triggerEvent.wallIndex may be specified also for VoronoiTransfer events, so we should not use triggerEvent.wallIndex then
         if (triggerEvent.type == EventType::WallTransfer)
         {
-            // Do not search for collisions with the wall we are currently crossing
-            wallIndexToExclude = triggerEvent.wallIndex;
+            // Do not search for collisions with the wall we are currently on (after periodic reflection)
+            wallIndexToExclude = box.oppositWallIndexes[triggerEvent.wallIndex];
+//            wallIndexToExclude = triggerEvent.wallIndex;
         }
 
         vector<MovingParticle>& movingParticlesRef = *movingParticles;

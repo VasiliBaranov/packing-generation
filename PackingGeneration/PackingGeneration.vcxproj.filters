@@ -120,66 +120,6 @@
     <ClInclude Include="Execution\Headers\PackingTaskFactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PackingGeneration\Geometries\Headers\BaseGeometry.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PackingGeneration\Geometries\Headers\BulkGeometry.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PackingGeneration\Geometries\Headers\CircleGeometry.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PackingGeneration\Geometries\Headers\IGeometry.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PackingGeneration\Geometries\Headers\RectangleGeometry.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PackingGeneration\Geometries\Headers\TrapezoidGeometry.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PackingGeneration\Model\Headers\Config.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PackingGeneration\Model\Headers\Types.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PackingGeneration\PackingGenerators\Headers\BaseConjugateGradientStep.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PackingGeneration\PackingGenerators\Headers\BasePackingStep.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PackingGeneration\PackingGenerators\Headers\BezrukovJodreyToryStep.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PackingGeneration\PackingGenerators\Headers\DecreasingConjugateGradientStep.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PackingGeneration\PackingGenerators\Headers\DensificationStep.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PackingGeneration\PackingGenerators\Headers\IncreasingConjugateGradientStep.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PackingGeneration\PackingGenerators\Headers\IPackingGenerator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PackingGeneration\PackingGenerators\Headers\IPackingStep.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PackingGeneration\PackingGenerators\Headers\KhirevichJodreyToryStep.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PackingGeneration\PackingGenerators\Headers\MonteCarloStep.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PackingGeneration\PackingGenerators\Headers\OriginalJodreyToryStep.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PackingGeneration\PackingGenerators\Headers\PackingGenerator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Generation\PackingGenerators\Headers\SimpleConjugateGradientStep.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -337,6 +277,90 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Generation\GenerationManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Generation\Geometries\Headers\BaseGeometry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Generation\Geometries\Headers\BulkGeometry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Generation\Geometries\Headers\CircleGeometry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Generation\Geometries\Headers\IGeometry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Generation\Geometries\Headers\RectangleGeometry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Generation\Geometries\Headers\TrapezoidGeometry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Generation\Model\Headers\Config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Generation\Model\Headers\Types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Generation\PackingGenerators\Headers\BaseConjugateGradientStep.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Generation\PackingGenerators\Headers\BasePackingStep.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Generation\PackingGenerators\Headers\BezrukovJodreyToryStep.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Generation\PackingGenerators\Headers\DecreasingConjugateGradientStep.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Generation\PackingGenerators\Headers\DensificationStep.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Generation\PackingGenerators\Headers\IncreasingConjugateGradientStep.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Generation\PackingGenerators\Headers\IPackingGenerator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Generation\PackingGenerators\Headers\IPackingStep.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Generation\PackingGenerators\Headers\KhirevichJodreyToryStep.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Generation\PackingGenerators\Headers\MonteCarloStep.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Generation\PackingGenerators\Headers\OriginalJodreyToryStep.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Generation\PackingGenerators\Headers\PackingGenerator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Parallelism\Headers\FileLock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Headers\Utilities.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Lattice\Headers\D2Q9Lattice.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Lattice\Headers\GenericLattice.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Generation\PackingGenerators\Headers\ClosestJammingStep.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Generation\PackingServices\DistanceServices\Headers\BondsProvider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Generation\PackingServices\Headers\ClosestJammingVelocityProvider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Generation\PackingServices\Headers\ImmobileParticlesService.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -564,6 +588,30 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Parallelism\Source\FileLock.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Lattice\Source\D2Q9Lattice.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Lattice\Source\GenericLattice.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Source\Utilities.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Generation\PackingGenerators\Source\ClosestJammingStep.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Generation\PackingServices\DistanceServices\Source\BondsProvider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Generation\PackingServices\Source\ClosestJammingVelocityProvider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Generation\PackingServices\Source\ImmobileParticlesService.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

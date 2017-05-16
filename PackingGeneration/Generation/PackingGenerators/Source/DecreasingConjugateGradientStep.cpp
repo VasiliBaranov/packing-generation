@@ -81,7 +81,7 @@ namespace PackingGenerators
 
     void DecreasingConjugateGradientStep::ResetOuterDiameterRatio()
     {
-        outerDiameterRatio = pow(NOMINAL_DENSITY_RATIO, 1.0 / 3.0);
+        outerDiameterRatio = pow(NOMINAL_DENSITY_RATIO, 1.0 / DIMENSIONS);
         initialOuterDiameterRatio = outerDiameterRatio;
     }
 }

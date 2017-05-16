@@ -6,6 +6,7 @@
 
 #include <cstring>
 #include "Core/Headers/Path.h"
+#include "Core/Headers/Utilities.h"
 #include "../Headers/PackingGenerationTask.h"
 #include "Generation/Constants.h"
 
@@ -52,14 +53,20 @@ namespace Execution
         tasks->reserve(configFolders.size());
 
         // For each config create a task
+        int id = 0;
         for (vector<string>::iterator it = configFolders.begin(); it < configFolders.end(); ++it)
         {
+            // NOTE: don't use below
+            // PackingGenerationTask* packingGenerationTask = reinterpret_cast<PackingGenerationTask*>(task.get());
+            // It doesn't work under MCVS if virtual inheritance is used in
+            // class PackingGenerationTask : public virtual Parallelism::ITask
+
             string currentFolder = *it;
-            // Can not create a PackingGenerationTask with new, set user config, then put it into shared_ptr, because if MergeWith throws an exception, packingGenerationTask will not be deleted.
-            boost::shared_ptr<ITask> task(new PackingGenerationTask(currentFolder));
-            PackingGenerationTask* packingGenerationTask = reinterpret_cast<PackingGenerationTask*>(task.get());
+            boost::shared_ptr<ITask> task(new PackingGenerationTask(currentFolder, id));
+            boost::shared_ptr<PackingGenerationTask> packingGenerationTask = boost::dynamic_pointer_cast<PackingGenerationTask, ITask>(task);
             packingGenerationTask->userConfig.MergeWith(userConfig);
             tasks->push_back(task);
+            id++;
         }
     }
 
@@ -76,8 +83,6 @@ namespace Execution
 
         generationConfig->executionMode = ExecutionMode::PackingGeneration;
         generationConfig->insertionRadiiCount = 1e7;
-        generationConfig->maxRunsCount = 1;
-        generationConfig->stopOnTheoreticalDensity = false;
         generationConfig->generationAlgorithm = PackingGenerationAlgorithm::LubachevskyStillingerSimple;
 
         if (consoleArguments.size() > 0)
@@ -94,15 +99,28 @@ namespace Execution
             generationConfig->executionMode = ExecutionMode::InsertionRadiiGeneration;
             if (consoleArguments.size() > 1)
             {
-                generationConfig->insertionRadiiCount = atoi(consoleArguments[1].c_str());
+                generationConfig->insertionRadiiCount = Utilities::ParseInt(consoleArguments[1]);
             }
+        }
+        // Distances to surfaces
+        else if (consoleArguments[0] == "-disttosurf")
+        {
+            generationConfig->executionMode = ExecutionMode::DistancesToClosestSurfacesCalculation;
+            if (consoleArguments.size() > 1)
+            {
+                generationConfig->insertionRadiiCount = Utilities::ParseInt(consoleArguments[1]);
+            }
+        }
+        else if (consoleArguments[0] == "-connumdist")
+        {
+            generationConfig->executionMode = ExecutionMode::ContactNumberDistributionCalculation;
         }
         else if (consoleArguments[0] == "-entropy")
         {
             generationConfig->executionMode = ExecutionMode::EntropyCalculation;
             if (consoleArguments.size() > 1)
             {
-                generationConfig->insertionRadiiCount = atoi(consoleArguments[1].c_str());
+                generationConfig->insertionRadiiCount = Utilities::ParseInt(consoleArguments[1]);
             }
         }
         else if (consoleArguments[0] == "-directions")
@@ -129,6 +147,21 @@ namespace Execution
         else if (consoleArguments[0] == "-md")
         {
             generationConfig->executionMode = ExecutionMode::MolecularDynamicsCalculation;
+
+            // NOTE: this is a dirty hack. TODO: add minEquilibrationCycles parameter
+            generationConfig->insertionRadiiCount = -1;
+            if (consoleArguments.size() > 1)
+            {
+                if (consoleArguments[1] == "-suppress")
+                {
+                    generationConfig->shouldSuppressCrystallization.value = true;
+                    generationConfig->shouldSuppressCrystallization.hasValue = true;
+                }
+                else
+                {
+                    generationConfig->insertionRadiiCount = Utilities::ParseInt(consoleArguments[1]);
+                }
+            }
         }
         // ReMove rattlers
         else if (consoleArguments[0] == "-rm")
@@ -144,6 +177,36 @@ namespace Execution
         else if (consoleArguments[0] == "-sf")
         {
             generationConfig->executionMode = ExecutionMode::StructureFactorCalculation;
+        }
+        // LocalOrientationalDisorder
+        else if (consoleArguments[0] == "-lod")
+        {
+            generationConfig->executionMode = ExecutionMode::LocalOrientationalDisorder;
+        }
+        // Molecular Dynamics Immediate
+        else if (consoleArguments[0] == "-mdi")
+        {
+            generationConfig->executionMode = ExecutionMode::ImmediateMolecularDynamicsCalculation;
+        }
+        // NearestNeighborsCalculation. Calculates a nearest neighbor for each particle
+        else if (consoleArguments[0] == "-nnc")
+        {
+            generationConfig->executionMode = ExecutionMode::NearestNeighborsCalculation;
+        }
+        // ActiveGeometryCalculation
+        else if (consoleArguments[0] == "-agc")
+        {
+            generationConfig->executionMode = ExecutionMode::ActiveGeometryCalculation;
+            if (consoleArguments.size() > 1)
+            {
+                // NOTE: a very dirty hack. Specify the expected number of active particles with insertionRadiiCount
+                // TODO: fix
+                generationConfig->insertionRadiiCount = Utilities::ParseInt(consoleArguments[1]);
+            }
+            else
+            {
+                generationConfig->insertionRadiiCount = -1;
+            }
         }
         else
         {
@@ -174,6 +237,18 @@ namespace Execution
             generationConfig->generationAlgorithm = PackingGenerationAlgorithm::LubachevskyStillingerEquilibrationBetweenCompressions;
             optionsStartIndex++;
         }
+        // ConstantPower
+        else if (consoleArguments[0] == "-lscp")
+        {
+            generationConfig->generationAlgorithm = PackingGenerationAlgorithm::LubachevskyStillingerConstantPower;
+            optionsStartIndex++;
+        }
+        // Biazzo
+        else if (consoleArguments[0] == "-lsb")
+        {
+            generationConfig->generationAlgorithm = PackingGenerationAlgorithm::LubachevskyStillingerBiazzo;
+            optionsStartIndex++;
+        }
         // ForceBiasedAlgorithm
         else if (consoleArguments[0] == "-fba")
         {
@@ -192,6 +267,12 @@ namespace Execution
             generationConfig->generationAlgorithm = PackingGenerationAlgorithm::KhirevichJodreyTory;
             optionsStartIndex++;
         }
+        // ClosestJammingSearch. To avoid naming collision, use shortened "Zinchenko".
+        else if (consoleArguments[0] == "-zin")
+        {
+            generationConfig->generationAlgorithm = PackingGenerationAlgorithm::ClosestJammingSearch;
+            optionsStartIndex++;
+        }
         // MonteCarlo algorithm (don't use -mc to avoid confusion with -md)
         else if (consoleArguments[0] == "-mca")
         {
@@ -205,26 +286,29 @@ namespace Execution
             optionsStartIndex++;
         }
 
+        if (consoleArguments.size() > optionsStartIndex && consoleArguments[optionsStartIndex] == "-suppress")
+        {
+            generationConfig->shouldSuppressCrystallization.value = true;
+            generationConfig->shouldSuppressCrystallization.hasValue = true;
+            optionsStartIndex++;
+        }
+
         if (consoleArguments.size() > optionsStartIndex)
         {
             generationConfig->contractionRate = atof(consoleArguments[optionsStartIndex].c_str());
+            optionsStartIndex++;
         }
-        if (consoleArguments.size() > optionsStartIndex + 1)
-        {
-            generationConfig->maxIterations = atoi(consoleArguments[optionsStartIndex + 1].c_str());
-        }
-        if (consoleArguments.size() > optionsStartIndex + 2)
-        {
-            generationConfig->maxRunsCount = atoi(consoleArguments[optionsStartIndex + 2].c_str());
-        }
-        if (consoleArguments.size() > optionsStartIndex + 3)
-        {
-            generationConfig->minRunsCount = atoi(consoleArguments[optionsStartIndex + 3].c_str());
-        }
-        if (consoleArguments.size() > (optionsStartIndex + 4) && consoleArguments[optionsStartIndex + 4] == "-stop")
-        {
-            generationConfig->stopOnTheoreticalDensity = true;
-        }
+
+//        if (consoleArguments.size() > optionsStartIndex)
+//        {
+//            generationConfig->finalContractionRate = atof(consoleArguments[optionsStartIndex].c_str());
+//            optionsStartIndex++;
+//        }
+//
+//        if (consoleArguments.size() > optionsStartIndex)
+//        {
+//            generationConfig->contractionRateDecreaseFactor = atof(consoleArguments[optionsStartIndex].c_str());
+//        }
     }
 }
 

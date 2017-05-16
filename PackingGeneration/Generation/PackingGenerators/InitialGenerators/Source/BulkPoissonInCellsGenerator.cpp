@@ -32,7 +32,7 @@ namespace PackingGenerators
     {
         Packing& particlesRef = *particles;
         int cellsCount = config->particlesCount / PARTICLES_IN_CELL;
-        int linearCellsCount = static_cast<int>(floor(pow(cellsCount, 1.0 / 3.0)));
+        int linearCellsCount = static_cast<int>(floor(pow(cellsCount, 1.0 / DIMENSIONS)));
         cellsCount = linearCellsCount * linearCellsCount * linearCellsCount;
         int particlesInCell = config->particlesCount / cellsCount;
 
@@ -60,7 +60,7 @@ namespace PackingGenerators
             {
                 cellCoordinates[Axis::X] = 0;
                 cellCoordinates[Axis::Y]++;
-                if (cellCoordinates[Axis::Y] == linearCellsCount)
+                if (DIMENSIONS == 3 && cellCoordinates[Axis::Y] == linearCellsCount)
                 {
                     cellCoordinates[Axis::Y] = 0;
                     cellCoordinates[Axis::Z]++;

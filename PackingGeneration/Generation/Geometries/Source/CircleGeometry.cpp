@@ -5,6 +5,7 @@
 #include "../Headers/CircleGeometry.h"
 #include "Core/Headers/Exceptions.h"
 #include "Core/Headers/Constants.h"
+#include "Core/Headers/VectorUtilities.h"
 #include "Generation/Model/Headers/Config.h"
 
 using namespace Model;
@@ -14,7 +15,22 @@ namespace Geometries
 {
     CircleGeometry::CircleGeometry(const SystemConfig& config) : BaseGeometry(config)
     {
-        throw NotImplementedException("Check code");
+        if (packingHalfSize[Axis::X] != packingHalfSize[Axis::Y])
+        {
+            throw NotImplementedException("The system is an ellipse in cross-section. Currently only true circles are supported.");
+        }
+
+        VectorUtilities::InitializeWith(&shift, 0.0);
+    }
+
+    CircleGeometry::CircleGeometry(const SystemConfig& config, const SpatialVector& shift) : BaseGeometry(config)
+    {
+        if (packingHalfSize[Axis::X] != packingHalfSize[Axis::Y])
+        {
+            throw NotImplementedException("The system is an ellipse in cross-section. Currently only true circles are supported.");
+        }
+
+        this->shift = shift;
     }
 
     CircleGeometry::~CircleGeometry()
@@ -24,7 +40,8 @@ namespace Geometries
 
     FLOAT_TYPE CircleGeometry::GetTotalVolume() const
     {
-        return packingHalfSize[Axis::X] * packingHalfSize[Axis::Y] * config->packingSize[Axis::Z] * PI;
+        FLOAT_TYPE crossSectionSurface = PI * packingHalfSize[Axis::X] * packingHalfSize[Axis::Y];
+        return crossSectionSurface * config->packingSize[Axis::Z];
     }
 
     void CircleGeometry::EnsurePeriodicConditions(DomainParticle* firstParticle, DomainParticle* secondParticle) const
@@ -34,27 +51,31 @@ namespace Geometries
 
     void CircleGeometry::EnsureBoundaries(const DomainParticle& initialParticle, DomainParticle* movedParticle, FLOAT_TYPE minNormalizedDistance) const
     {
-        throw NotImplementedException("Check code");
+        while (~IsSphereInside(movedParticle->coordinates, movedParticle->diameter * 0.5))
+        {
+            movedParticle->coordinates[Axis::X] = initialParticle.coordinates[Axis::X] + (1.0 - minNormalizedDistance) * (Math::GetNextRandom() - 0.5) * movedParticle->diameter;
+            movedParticle->coordinates[Axis::Y] = initialParticle.coordinates[Axis::Y] + (1.0 - minNormalizedDistance) * (Math::GetNextRandom() - 0.5) * movedParticle->diameter;
+        }
 
-//        Position center;
-//
-//        movedParticle->coordinates
-//
-//        FLOAT_TYPE distanceToBoundarySquare =
-//                (movedParticle->x - packingXSizeHalf) * (movedParticle->x - packingXSizeHalf) +
-//                (config->packingXSize * config->packingXSize) / (config->packingYSize * config->packingYSize) * (movedParticle->y - packingYSizeHalf) * (movedParticle->y - packingYSizeHalf);
-//
-//        FLOAT_TYPE maxDistanceToBoundarySquare = (config->packingXSize - movedParticle->d) * (config->packingXSize - movedParticle->d) * 0.25;
-//
-//        while(distanceToBoundarySquare > maxDistanceToBoundarySquare)
-//        {
-//            movedParticle->x = initialParticle->x + (1.0 - minNormalizedDistance) * (drand48() - 0.5) * movedParticle->d;
-//            movedParticle->y = initialParticle->y + (1.0 - minNormalizedDistance) * (drand48() - 0.5) * movedParticle->d;
-//        }
-//
-//        EnsureVerticalPeriodicityAfterRepulsion(movedParticle->z);
+        EnsureVerticalPeriodicityAfterRepulsion(&movedParticle->coordinates, Axis::Z);
     }
 
+    bool CircleGeometry::IsSphereInside(const Core::SpatialVector& sphereCenter, Core::FLOAT_TYPE sphereRadius) const
+    {
+        SpatialVector localCoordinates;
+        VectorUtilities::Subtract(sphereCenter, shift, &localCoordinates);
+        FLOAT_TYPE distanceToAxisX = localCoordinates[Axis::X] - packingHalfSize[Axis::X];
+        FLOAT_TYPE distanceToAxisY = localCoordinates[Axis::Y] - packingHalfSize[Axis::Y];
+        FLOAT_TYPE ratio = config->packingSize[Axis::X] / config->packingSize[Axis::Y];
 
+        FLOAT_TYPE distanceToAxisSquare = distanceToAxisX * distanceToAxisX + ratio * ratio * distanceToAxisY * distanceToAxisY;
+
+        // This is probably incorrect in case of an ellipse. maxDistanceToAxisSquare depends on sphereCenter in case of an ellipse (but i scale the distanceToAxisSquare).
+        FLOAT_TYPE maxDistanceToAxisSquare = (packingHalfSize[Axis::X] - sphereRadius) * (packingHalfSize[Axis::Y] - sphereRadius);
+
+        bool isInsideCrossSection = distanceToAxisSquare <= maxDistanceToAxisSquare;
+        bool isInsideAlongZ = localCoordinates[Axis::Z] >= 0 && localCoordinates[Axis::Z] <= config->packingSize[Axis::Z];
+        return isInsideCrossSection && isInsideAlongZ;
+    }
 }
 

@@ -6,6 +6,7 @@
 CPP_SRCS += \
 ../Tests/Source/Assert.cpp \
 ../Tests/Source/ByteUtilityTests.cpp \
+../Tests/Source/ClosestJammingStepTests.cpp \
 ../Tests/Source/ClosestPairProviderTests.cpp \
 ../Tests/Source/ColumnMajorIndexingProviderTests.cpp \
 ../Tests/Source/EndiannessProviderStub.cpp \
@@ -23,6 +24,7 @@ CPP_SRCS += \
 OBJS += \
 ./Tests/Source/Assert.o \
 ./Tests/Source/ByteUtilityTests.o \
+./Tests/Source/ClosestJammingStepTests.o \
 ./Tests/Source/ClosestPairProviderTests.o \
 ./Tests/Source/ColumnMajorIndexingProviderTests.o \
 ./Tests/Source/EndiannessProviderStub.o \
@@ -40,6 +42,7 @@ OBJS += \
 CPP_DEPS += \
 ./Tests/Source/Assert.d \
 ./Tests/Source/ByteUtilityTests.d \
+./Tests/Source/ClosestJammingStepTests.d \
 ./Tests/Source/ClosestPairProviderTests.d \
 ./Tests/Source/ColumnMajorIndexingProviderTests.d \
 ./Tests/Source/EndiannessProviderStub.d \
@@ -59,7 +62,7 @@ CPP_DEPS += \
 Tests/Source/%.o: ../Tests/Source/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: Cygwin C++ Compiler'
-	g++ -DBOOST_DISABLE_ASSERTS -I../Externals/Boost -I../PackingGeneration -O3 -funroll-loops -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	g++ -DBOOST_DISABLE_ASSERTS -DNDEBUG -I../Externals/Boost -I../Externals/Eigen -I../PackingGeneration -O3 -funroll-loops -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

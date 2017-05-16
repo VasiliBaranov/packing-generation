@@ -173,25 +173,46 @@ namespace PackingGenerators
     void MonteCarloStep::ArrangeInCubicArray()
     {
         Packing& particlesRef = *particles;
-        ParticleIndex particleCountByOneSide = static_cast<ParticleIndex>(Math::Round(pow(config->particlesCount, 1.0 / 3.0)));
+        ParticleIndex particleCountByOneSide = static_cast<ParticleIndex>(Math::Round(pow(config->particlesCount, 1.0 / DIMENSIONS)));
         SpatialVector cellSize;
 
         VectorUtilities::DivideByValue(config->packingSize, static_cast<FLOAT_TYPE>(particleCountByOneSide), &cellSize);
 
         // Other particles remain unchanged.
-        for (ParticleIndex i = 0; i < particleCountByOneSide; ++i)
+        // TODO: make the code dimensions-agnostic: use lattice and lattice indexing provider functionality
+        if (DIMENSIONS == 3)
         {
-            for (ParticleIndex j = 0; j < particleCountByOneSide; ++j)
+            for (ParticleIndex i = 0; i < particleCountByOneSide; ++i)
             {
-                for (ParticleIndex k = 0; k < particleCountByOneSide; ++k)
+                for (ParticleIndex j = 0; j < particleCountByOneSide; ++j)
                 {
-                    ParticleIndex index = k * particleCountByOneSide * particleCountByOneSide + j * particleCountByOneSide + i;
+                    for (ParticleIndex k = 0; k < particleCountByOneSide; ++k)
+                    {
+                        ParticleIndex index = k * particleCountByOneSide * particleCountByOneSide + j * particleCountByOneSide + i;
+                        DomainParticle& particle = particlesRef[index];
+
+                        SpatialVector displacement;
+                        displacement[Axis::X] = 0.5 + i;
+                        displacement[Axis::Y] = 0.5 + j;
+                        displacement[Axis::Z] = 0.5 + k;
+
+                        VectorUtilities::Multiply(cellSize, displacement, &particle.coordinates);
+                    }
+                }
+            }
+        }
+        if (DIMENSIONS == 2)
+        {
+            for (ParticleIndex i = 0; i < particleCountByOneSide; ++i)
+            {
+                for (ParticleIndex j = 0; j < particleCountByOneSide; ++j)
+                {
+                    ParticleIndex index = j * particleCountByOneSide + i;
                     DomainParticle& particle = particlesRef[index];
 
                     SpatialVector displacement;
                     displacement[Axis::X] = 0.5 + i;
                     displacement[Axis::Y] = 0.5 + j;
-                    displacement[Axis::Z] = 0.5 + k;
 
                     VectorUtilities::Multiply(cellSize, displacement, &particle.coordinates);
                 }

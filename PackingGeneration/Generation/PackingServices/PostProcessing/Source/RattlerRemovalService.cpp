@@ -102,6 +102,13 @@ namespace PackingServices
         vector<bool>& processedMaskRef = *processedMask;
         const Packing& particlesRef = *particles;
 
+        if (particlesRef[particleIndex].isImmobile)
+        {
+            processedMaskRef[particleIndex] = true;
+            rattlerMaskRef[particleIndex] = false;
+            return;
+        }
+
         // Continue, even if processed and not rattler, as may call when removing an intersecting particle, and introduce new rattlers
         if (processedMaskRef[particleIndex] && rattlerMaskRef[particleIndex])
         {

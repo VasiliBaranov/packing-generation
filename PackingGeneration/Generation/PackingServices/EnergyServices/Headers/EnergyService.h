@@ -51,6 +51,8 @@ namespace PackingServices
 
         OVERRIDE EnergiesResult GetContractionEnergies(const std::vector<Core::FLOAT_TYPE>& contractionRatios, const std::vector<const IPairPotential*>& pairPotentials);
 
+        OVERRIDE void GetContractionEnergiesPerParticle(const std::vector<Core::FLOAT_TYPE>& contractionRatios, const std::vector<const IPairPotential*>& pairPotentials, std::vector<EnergiesPerParticle>* energiesPerParticle);
+
         OVERRIDE Model::ParticlePair FillParticleForces(Core::FLOAT_TYPE contractionRatio, const IPairPotential& pairPotential, std::vector<Core::SpatialVector>* particleForces);
 
     private:
@@ -71,24 +73,6 @@ namespace PackingServices
         void FillCurrentParticleForce(Model::ParticleIndex particleIndex, Core::FLOAT_TYPE contractionRatio, const IPairPotential& pairPotential, Core::SpatialVector* force);
 
         DISALLOW_COPY_AND_ASSIGN(EnergyService);
-
-    private:
-        template<class T>
-        class IndexesComparer
-        {
-        private:
-            const std::vector<T>& values;
-
-        public:
-            IndexesComparer(const std::vector<T>& valuesArray) : values(valuesArray)
-            {
-            };
-
-            bool operator()(int i, int j)
-            {
-                return values[i] < values[j];
-            };
-        };
     };
 }
 

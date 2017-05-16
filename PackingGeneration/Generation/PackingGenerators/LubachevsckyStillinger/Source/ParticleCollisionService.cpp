@@ -29,10 +29,36 @@ namespace PackingGenerators
     // See Lubachevscky, Stillinger (1990) Geometric properties of random disk packings
     FLOAT_TYPE ParticleCollisionService::FillVelocitiesAfterCollision(FLOAT_TYPE currentTime, const MovingParticle& firstParticle, const MovingParticle& secondParticle, SpatialVector* firstVelocity, SpatialVector* secondVelocity) const
     {
+        if (!firstParticle.isImmobile && !secondParticle.isImmobile)
+        {
+            return FillVelocitiesAfterCollisionBothMobile(currentTime, firstParticle, secondParticle, firstVelocity, secondVelocity);
+        }
+        else
+        {
+            if (firstParticle.isImmobile && secondParticle.isImmobile)
+            {
+                throw InvalidOperationException("Both particles in the collision are immobile.");
+            }
+            if (firstParticle.isImmobile)
+            {
+                return FillVelocitiesAfterCollisionOneImmobile(currentTime, firstParticle, secondParticle, firstVelocity, secondVelocity);
+            }
+            else
+            {
+                return FillVelocitiesAfterCollisionOneImmobile(currentTime, secondParticle, firstParticle, secondVelocity, firstVelocity);
+            }
+        }
+    }
+
+    FLOAT_TYPE ParticleCollisionService::FillVelocitiesAfterCollisionBothMobile(FLOAT_TYPE currentTime, const MovingParticle& firstParticle, const MovingParticle& secondParticle,
+            SpatialVector* firstVelocity, SpatialVector* secondVelocity) const
+    {
+        SpatialVector firstToSecondDifference;
+        FillDifference(currentTime, firstParticle, secondParticle, &firstToSecondDifference);
+        FLOAT_TYPE length = VectorUtilities::GetLength(firstToSecondDifference);
+
         SpatialVector firstToSecondUnitVector;
-        FillDifference(currentTime, firstParticle, secondParticle, &firstToSecondUnitVector);
-        FLOAT_TYPE length = VectorUtilities::GetLength(firstToSecondUnitVector);
-        VectorUtilities::DivideByValue(firstToSecondUnitVector, length, &firstToSecondUnitVector);
+        VectorUtilities::DivideByValue(firstToSecondDifference, length, &firstToSecondUnitVector);
 
         // Parallel means parallel to the firstToSecondUnitVector
         SpatialVector firstParallelVelocity;
@@ -41,17 +67,17 @@ namespace PackingGenerators
         SpatialVector firstTransverseVelocity;
         SpatialVector secondTransverseVelocity;
 
-        FLOAT_TYPE firstParallelVelocityLength = SplitVectorIntoComponents(firstParticle.velocity, firstToSecondUnitVector, &firstParallelVelocity, &firstTransverseVelocity);
-        FLOAT_TYPE secondParallelVelocityLength = SplitVectorIntoComponents(secondParticle.velocity, firstToSecondUnitVector, &secondParallelVelocity, &secondTransverseVelocity);
+        FLOAT_TYPE firstParallelVelocityProjection = SplitVectorIntoComponents(firstParticle.velocity, firstToSecondUnitVector, &firstParallelVelocity, &firstTransverseVelocity);
+        FLOAT_TYPE secondParallelVelocityProjection = SplitVectorIntoComponents(secondParticle.velocity, firstToSecondUnitVector, &secondParallelVelocity, &secondTransverseVelocity);
 
         FLOAT_TYPE radiusGrowthSum = (firstParticle.diameter + secondParticle.diameter) * ratioGrowthRate * 0.5;
 
-        // We may choose boundary velocities such that their sum equals to radiusGrowthSum (so that even if both parallel velocities are zero, the particles will not collide due to radii increase).
-        // But we choose twice as large boundary velocities to be very sure (in the original code by Donev each velocity was 2.0 * radiusGrowthSum).
+        // We choose boundary velocities such that their sum equals to radiusGrowthSum (so that even if both parallel velocities are zero, the particles will not collide due to radii increase).
+        // In Donev code s[i].v = vjpar + dhat*2.*growthrate + viperp, but growthrate is for radius growth rate, and 2*growthrate is for diameter growth rate (or radiusGrowthSum).
         SpatialVector firstBoundaryVelocity;
         SpatialVector secondBoundaryVelocity;
-        VectorUtilities::MultiplyByValue(firstToSecondUnitVector, 2.0 * radiusGrowthSum, &firstBoundaryVelocity);
-        VectorUtilities::MultiplyByValue(firstToSecondUnitVector, - 2.0 * radiusGrowthSum, &secondBoundaryVelocity); // As it grows in an opposite direction
+        VectorUtilities::MultiplyByValue(firstToSecondUnitVector, radiusGrowthSum, &firstBoundaryVelocity);
+        VectorUtilities::MultiplyByValue(firstToSecondUnitVector, - radiusGrowthSum, &secondBoundaryVelocity); // As it grows in an opposite direction
 
         // Collision means preserving transverse velocities and exchanging parallel velocities. Plus we should add the boundary velocities from neighbors.
         *firstVelocity = firstTransverseVelocity;
@@ -66,7 +92,44 @@ namespace PackingGenerators
         // (but the kinetic energy term should be multiplied by 2 to make p = nkT for ideal gas, as E = 3 / 2 nkT).
         // exchangedMomentum = sum by all events r_ij m_i delta_v_i (see also LubachevsckyStillingerStep::CalculateStatistics), computed NOT for the pair of particles in the event.
         // Do not include radiusGrowthSum to calculate pressure as if particles were not growing at all (as done in monosized LS code by Donev and Skoge).
-        FLOAT_TYPE exchangedMomentum = (firstParallelVelocityLength + secondParallelVelocityLength) * length;
+        FLOAT_TYPE exchangedMomentum = (firstParallelVelocityProjection - secondParallelVelocityProjection) * length;
+        return exchangedMomentum;
+    }
+
+    FLOAT_TYPE ParticleCollisionService::FillVelocitiesAfterCollisionOneImmobile(FLOAT_TYPE currentTime, const MovingParticle& immobileParticle, const MovingParticle& mobileParticle,
+            SpatialVector* immobileVelocity, SpatialVector* mobileVelocity) const
+    {
+        SpatialVector immobileToMobileDifference;
+        FillDifference(currentTime, immobileParticle, mobileParticle, &immobileToMobileDifference);
+        FLOAT_TYPE length = VectorUtilities::GetLength(immobileToMobileDifference);
+
+        SpatialVector immobileToMobileUnitVector;
+        VectorUtilities::DivideByValue(immobileToMobileDifference, length, &immobileToMobileUnitVector);
+
+        // Parallel means parallel to the immobileToMobileUnitVector
+        SpatialVector mobileParallelVelocity;
+        SpatialVector mobileTransverseVelocity;
+        FLOAT_TYPE mobileParallelVelocityLength = SplitVectorIntoComponents(mobileParticle.velocity, immobileToMobileUnitVector, &mobileParallelVelocity, &mobileTransverseVelocity);
+
+        FLOAT_TYPE radiusGrowthSum = (immobileParticle.diameter + mobileParticle.diameter) * ratioGrowthRate * 0.5;
+
+        SpatialVector boundaryVelocitiesSum;
+        VectorUtilities::MultiplyByValue(immobileToMobileUnitVector, 2.0 * radiusGrowthSum, &boundaryVelocitiesSum);
+
+        VectorUtilities::InitializeWith(immobileVelocity, 0.0);
+
+        // Collision with immobile particle means preserving the transverse velocity and reversing the parallel velocity. Plus we should add the boundary velocities' sum.
+        *mobileVelocity = mobileTransverseVelocity;
+        VectorUtilities::Subtract(*mobileVelocity, mobileParallelVelocity, mobileVelocity);
+        VectorUtilities::Add(*mobileVelocity, boundaryVelocitiesSum, mobileVelocity);
+
+        // In the general case of unequal exchanged momenta
+        // exchangedMomentum = sum by all events (r_ij m_i delta_v_i + r_ji m_j delta_v_j) / 2.
+        // The term for collision with an immobile particle is
+        // (r_ij m_i delta_v_i + r_ji m_j delta_v_j) / 2 =
+        // (r_ij m_i 2 v_i + r_ji m_j 0) / 2 =
+        // r_ij m_i v_i
+        FLOAT_TYPE exchangedMomentum = mobileParallelVelocityLength * length;
         return exchangedMomentum;
     }
 
@@ -76,11 +139,19 @@ namespace PackingGenerators
         VectorUtilities::MultiplyByValue(normal, parallelVectorProjection, parallelToNormal);
         VectorUtilities::Subtract(vector, *parallelToNormal, transverseToNormal);
 
-        return std::abs(parallelVectorProjection);
+        return parallelVectorProjection;
     }
 
     FLOAT_TYPE ParticleCollisionService::GetCollisionTime(FLOAT_TYPE currentTime, const MovingParticle& firstParticle, const MovingParticle& secondParticle) const
     {
+        // After OptimumSequentialAddition, i mark a lot of particles at the boundary as immobile.
+        // But i want to run LS or modified LS for the particles surrounded by the layer of immobile particles, which often initially touch each other.
+        // For pairs of immobile particles, the method GetCollisionTime shall always return infinity.
+        if (firstParticle.isImmobile && secondParticle.isImmobile)
+        {
+            return -1;
+        }
+
         FLOAT_TYPE currentInnerDiameterRatio = initialInnerDiameterRatio + ratioGrowthRate * currentTime;
 
         SpatialVector relativeVelocity;
@@ -134,9 +205,11 @@ namespace PackingGenerators
         // Spheres are apart, c > 0
         else
         {
-            // 2 b t + c == 0
+            // a == 0. But it can be very small as well
+//            if (std::abs(a) < 10.0 * EPSILON)
             if (a == 0)
             {
+                // 2 b t + c == 0
                 // Boundaries are approaching
                 if (b < 0.0)
                 {

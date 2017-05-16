@@ -8,7 +8,18 @@
 #include <boost/array.hpp>
 
 // TODO: Move to Core namespace and Constants.h
+// TWO_DIMENSIONAL define may be used only here and in Tests to choose between 2D or 3D versions.
+#ifdef TWO_DIMENSIONAL
+const int DIMENSIONS = 2;
+#else
 const int DIMENSIONS = 3;
+#endif
+
+#ifdef TWO_DIMENSIONAL
+#define REMOVE_LAST_DIMENSION_IF_NEEDED(X, Y, Z) {{(X), (Y)}}
+#else
+#define REMOVE_LAST_DIMENSION_IF_NEEDED(X, Y, Z) {{(X), (Y), (Z)}}
+#endif
 
 // Use typedef instead of #define, as they may lead to better compiler checks
 namespace Core
@@ -40,6 +51,11 @@ namespace Core
     {
         T value;
         bool hasValue;
+
+        Nullable()
+        {
+            hasValue = false;
+        }
     };
 }
 

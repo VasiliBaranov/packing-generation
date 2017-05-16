@@ -2,11 +2,18 @@
 // Distributed under the MIT software license
 // See the accompanying file License.txt or http://opensource.org/licenses/MIT
 
+#include <cstdio>
 #include "../Headers/BezrukovJodreyToryStep.h"
 #include "Core/Headers/VectorUtilities.h"
+#include "Core/Headers/StlUtilities.h"
+#include "Core/Headers/Math.h"
+#include "Core/Geometry/Headers/GeometryParameters.h"
+#include "Core/Lattice/Headers/ColumnMajorIndexingProvider.h"
 #include "Generation/Model/Headers/Config.h"
 #include "Generation/PackingServices/EnergyServices/Headers/IEnergyService.h"
 #include "Generation/PackingServices/DistanceServices/Headers/INeighborProvider.h"
+#include "Generation/PackingServices/Headers/GeometryService.h"
+#include "Generation/PackingServices/Headers/MathService.h"
 #include "Generation/Geometries/Headers/IGeometry.h"
 
 using namespace PackingServices;
@@ -93,6 +100,12 @@ namespace PackingGenerators
         for (ParticleIndex particleIndex = 0; particleIndex < config->particlesCount; ++particleIndex)
         {
             DomainParticle& particle = particlesRef[particleIndex];
+
+            if (particle.isImmobile)
+            {
+                continue;
+            }
+
             neighborProvider->StartMove(particle.index);
 
             // Need to multiply twice by outerDiameterRatio, as energy service computes forces by contracting distance, not expanding diameters, so Bezrukov formula is computed a little incorrectly.
@@ -106,7 +119,7 @@ namespace PackingGenerators
 
     void BezrukovJodreyToryStep::ResetOuterDiameterRatio()
     {
-        outerDiameterRatio = pow(NOMINAL_DENSITY_RATIO, 1.0 / 3.0);
+        outerDiameterRatio = pow(NOMINAL_DENSITY_RATIO, 1.0 / DIMENSIONS);
         initialOuterDiameterRatio = outerDiameterRatio;
     }
 }

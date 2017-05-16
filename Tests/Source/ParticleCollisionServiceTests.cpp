@@ -35,9 +35,8 @@ namespace Tests
         particleCollisionService->Initialize(1.0, 0.0);
 
         config.reset(new SystemConfig());
-        config->packingSize[Axis::X] = 10;
-        config->packingSize[Axis::Y] = 10;
-        config->packingSize[Axis::Z] = 10;
+        SpatialVector packignSize = REMOVE_LAST_DIMENSION_IF_NEEDED(10, 10, 10);
+        config->packingSize = packignSize;
         config->particlesCount = 2;
         config->boundariesMode = BoundariesMode::Bulk;
 
@@ -46,12 +45,18 @@ namespace Tests
 
         mathService->SetContext(*context.get());
 
-        first.coordinates[Axis::X] = 0; first.coordinates[Axis::Y] = 0.5; first.coordinates[Axis::Z] = 0.5; first.diameter = 1;
-        first.velocity[Axis::X] = 1; first.velocity[Axis::Y] = 0; first.velocity[Axis::Z] = 0;
+        SpatialVector c1 = REMOVE_LAST_DIMENSION_IF_NEEDED(0, 0.5, 0.5);
+        SpatialVector v1 = REMOVE_LAST_DIMENSION_IF_NEEDED(1, 0, 0);
+        first.coordinates = c1;
+        first.velocity = v1;
+        first.diameter = 1;
         first.lastEventTime = 0;
 
-        second.coordinates[Axis::X] = 2; second.coordinates[Axis::Y] = 0.5; second.coordinates[Axis::Z] = 0.5; second.diameter = 1;
-        second.velocity[Axis::X] = 0; second.velocity[Axis::Y] = 0; second.velocity[Axis::Z] = 0;
+        SpatialVector c2 = REMOVE_LAST_DIMENSION_IF_NEEDED(2, 0.5, 0.5);
+        SpatialVector v2 = REMOVE_LAST_DIMENSION_IF_NEEDED(0, 0, 0);
+        second.coordinates = c2;
+        second.velocity = v2;
+        second.diameter = 1;
         second.lastEventTime = 0;
     }
 
@@ -114,11 +119,15 @@ namespace Tests
         const string name = "FillVelocitiesAfterCollision_ParticlesStillButGrowing_VelocitiesSpreadThem";
         Assert::IsLessThanZero(firstVelocity[0], name);
         Assert::AreAlmostEqual(0.0, firstVelocity[1], name);
-        Assert::AreAlmostEqual(0.0, firstVelocity[2], name);
 
         Assert::IsGreaterThanZero(secondVelocity[0], name);
         Assert::AreAlmostEqual(0.0, secondVelocity[1], name);
-        Assert::AreAlmostEqual(0.0, secondVelocity[2], name);
+
+        if (DIMENSIONS == 3)
+        {
+            Assert::AreAlmostEqual(0.0, firstVelocity[2], name);
+            Assert::AreAlmostEqual(0.0, secondVelocity[2], name);
+        }
 
         TearDown();
     }

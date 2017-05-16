@@ -2,6 +2,8 @@
 // Distributed under the MIT software license
 // See the accompanying file License.txt or http://opensource.org/licenses/MIT
 
+#include <stdlib.h>
+#include <stdio.h>
 #include "Headers/TestRunner.h"
 
 using namespace Tests;
@@ -16,6 +18,16 @@ using namespace Tests;
 // 2. Go to Debug Configurations (in the Debug dropdown), add new configuration, specify Test/PackingGeneration.exe as executable
 int main (int argc, char **argv)
 {
+    // Change buffering mode to store printf output correctly:
+    // 1. when program is terminated with Load Sharing Facility, and buffer may not be flushed
+    // 2. when output is redirected or added to a file (> log.txt or | tee log.txt) and an error occurs
+    int bufferChangeResult = setvbuf(stdout, NULL, _IONBF, 0);
+    if (bufferChangeResult != 0)
+    {
+        perror("Buffering mode could not be changed");
+        return EXIT_FAILURE;
+    }
+
     TestRunner::RunTests();
 
     return 0;

@@ -11,7 +11,7 @@
 #include "Generation/Constants.h"
 #include "Core/Headers/IEndiannessProvider.h"
 #include "Core/Headers/Exceptions.h"
-#include "Core/Headers/ByteUtility.h"
+#include "Core/Headers/Utilities.h"
 #include "Generation/PackingServices/PostProcessing/Headers/OrderService.h"
 namespace Model { class ExecutionConfig; }
 
@@ -32,6 +32,9 @@ namespace PackingServices
 
         void ReadConfig(std::string baseFolder, Model::ExecutionConfig* config) const;
 
+        // TODO: create an ActiveConfig class, with shift, but without particle count
+        void ReadActiveConfig(std::string activeConfigPath, Model::SystemConfig* activeConfig, Core::SpatialVector* shift) const;
+
         void ReadParticleDiameters(std::string diametersFilePath, Model::Packing* particles) const;
 
         void ReadInsertionRadii(std::string radiiFilePath, std::vector<Core::FLOAT_TYPE>* insertionRadii) const;
@@ -39,6 +42,13 @@ namespace PackingServices
         void ReadPackingInfo(std::string infoFilePath, Model::PackingInfo* packingInfo) const;
 
         void ReadParticleDistances(std::string distancesFilePath, int particleCount, Core::FLOAT_TYPE** particleDistances) const;
+
+        void ReadContractionEnergies(std::string energiesFilePath, std::vector<Core::FLOAT_TYPE>* contractionRatios,
+                std::vector<Core::FLOAT_TYPE>* energyPowers, std::vector<Core::FLOAT_TYPE>* contractionEnergies, std::vector<int>* nonRattlersCounts) const;
+
+        void ReadNearestNeighbors(std::string neighborsFilePath, std::vector<Model::ParticlePair>* closestPairs) const;
+
+        void ReadImmobileParticleIndexes(std::string immobileParticlesPath, std::vector<Model::ParticleIndex>* immobileParticleIndexes) const;
 
         // Writes
         void AppendPacking(std::string packingFilePath, const Model::Packing& particles) const;
@@ -49,14 +59,20 @@ namespace PackingServices
 
         void SerializeConfig(std::string configFilePath, const Model::ExecutionConfig& config) const;
 
+        void SerializeActiveConfig(std::string activeConfigPath, const Model::SystemConfig& activeConfig, const Core::SpatialVector& shift) const;
+
         void SerializeInsertionRadii(std::string radiiFilePath, const std::vector<Core::FLOAT_TYPE>& insertionRadii) const;
+
+        void SerializeDistancesToSurfaces(std::string distancesFolderPath, const std::vector<int>& surfaceIndexes, const std::vector<std::vector<Core::FLOAT_TYPE> >& distancesToSurfaces, bool shouldAppend) const;
+
+        void SerializeContactNumberDistribution(std::string contactNumberDistributionFilePath, const std::vector<int>& neighborCounts, const std::vector<int>& neighborCountFrequencies) const;
 
         void SerializeParticleDirections(std::string distancesFilePath, int particleCount, const std::vector<OrderService::NeighborDirections>& particleDirections) const;
 
         void SerializeContractionEnergies(std::string energiesFilePath, const std::vector<Core::FLOAT_TYPE>& contractionRatios,
                 const std::vector<Core::FLOAT_TYPE>& energyPowers, const std::vector<Core::FLOAT_TYPE>& contractionEnergies, const std::vector<int>& nonRattlersCounts) const;
 
-        void SerializeOrder(std::string orderFilePath, const OrderService::Order order) const;
+        void SerializeOrder(std::string orderFilePath, const OrderService::Order& order) const;
 
         void SerializeEntropy(std::string entropyFilePath, Core::FLOAT_TYPE entropy) const;
 
@@ -76,10 +92,20 @@ namespace PackingServices
 
         void SerializeStructureFactor(std::string structureFactorFilePath, const Model::StructureFactor& structureFactor) const;
 
+        void SerializeLocalOrientationalDisorder(std::string disorderFilePath, const OrderService::LocalOrientationalDisorder& disorder) const;
+
+        void SerializeCloseNeighbors(std::string neighborsFilePath, const OrderService::LocalOrientationalDisorder& disorder) const;
+
+        void SerializeNeighborVectorSums(std::string neighborVectorSumsFilePath, const std::vector<Core::FLOAT_TYPE>& neighborVectorSumsNorms, const std::vector<bool>& rattlerMask, Core::FLOAT_TYPE maxNeighborVectorSumForNonRattlers) const;
+
+        void SerializeNearestNeighbors(std::string nearestNeighborsFilePath, const std::vector<Model::ParticlePair>& closestPairs, const std::vector<bool>& isImmobileMask) const;
+
         virtual ~PackingSerializer();
 
     private:
         void WritePacking(std::string packingFilePath, const Model::Packing& particles, bool shouldAppend) const;
+
+        boost::array<Core::FLOAT_TYPE, 3> MakeSpatialVectorThreeDimensional(const Core::SpatialVector& vector) const;
 
         DISALLOW_COPY_AND_ASSIGN(PackingSerializer);
 
@@ -92,7 +118,7 @@ namespace PackingServices
             {
                 for (int i = 0; i < valuesCount; ++i)
                 {
-                    target[i] = Core::ByteUtility::DoByteSwap(source[i]);
+                    target[i] = Core::Utilities::DoByteSwap(source[i]);
                 }
             }
             else
@@ -127,10 +153,11 @@ namespace PackingServices
         }
 
         template<class T>
-        void ReadLittleEndian(T* values, size_t valuesCount, FILE* file) const
+        bool ReadLittleEndian(T* values, size_t valuesCount, FILE* file) const
         {
-            fread(values, sizeof(T), valuesCount, file);
+            size_t readValuesCount = fread(values, sizeof(T), valuesCount, file);
             SwapBytesIfNecessary(values, values, valuesCount);
+            return readValuesCount == valuesCount;
         }
     };
 }

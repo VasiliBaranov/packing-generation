@@ -16,11 +16,13 @@
 #include "../Headers/ParticleCollisionServiceTests.h"
 #include "../Headers/VelocityServiceTests.h"
 #include "../Headers/GeometryCollisionServiceTests.h"
+#include "../Headers/ClosestJammingStepTests.h"
 
 namespace Tests
 {
     void TestRunner::RunTests(void)
     {
+//        ClosestJammingStepTests::RunTests(); TODO: fix
         HcpGeneratorTests::RunTests();
         ClosestPairProviderTests::RunTests();
         ColumnMajorIndexingProviderTests::RunTests();

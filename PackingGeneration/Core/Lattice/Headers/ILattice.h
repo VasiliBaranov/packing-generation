@@ -16,6 +16,8 @@ namespace Core
 
         virtual int GetLatticeSize() const = 0;
 
+        virtual int GetDimensions() const = 0;
+
         //Gets the lattice vector by the index.
         virtual void FillLatticeVector(int latticeVectorIndex, DiscreteSpatialVector* latticeVector) const = 0;
 
