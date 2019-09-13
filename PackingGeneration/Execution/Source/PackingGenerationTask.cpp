@@ -277,6 +277,10 @@ namespace Execution
         {
             generationManager->CalculateActiveGeometry(userConfig);
         }
+        else if (generationConfig.executionMode == ExecutionMode::SuccessfulPermutationProbability)
+        {
+            generationManager->CalculateSuccessfulPermutationProbability(userConfig);
+        }
         else
         {
             throw NotImplementedException("Execution mode not supported.");

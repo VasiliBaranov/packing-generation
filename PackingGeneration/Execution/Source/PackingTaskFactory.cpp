@@ -208,6 +208,10 @@ namespace Execution
                 generationConfig->insertionRadiiCount = -1;
             }
         }
+        else if (consoleArguments[0] == "-permprob")
+        {
+            generationConfig->executionMode = ExecutionMode::SuccessfulPermutationProbability;
+        }
         else
         {
             ParseAlgorithm(generationConfig);

@@ -191,7 +191,8 @@ namespace Model
             DistancesToClosestSurfacesCalculation = 15,
             ContactNumberDistributionCalculation = 16,
             NearestNeighborsCalculation = 17,
-            ActiveGeometryCalculation = 18
+            ActiveGeometryCalculation = 18,
+            SuccessfulPermutationProbability = 19
         };
     };
 

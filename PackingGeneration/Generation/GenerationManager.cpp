@@ -164,6 +164,11 @@ namespace Generation
         ExecuteAlgorithm(userConfig, ACTIVE_GEOMETRY_FILE_NAME, true, true, &GenerationManager::CalculateActiveGeometry);
     }
 
+    void GenerationManager::CalculateSuccessfulPermutationProbability(const Model::ExecutionConfig& userConfig)
+    {
+        ExecuteAlgorithm(userConfig, SUCCESSFUL_PERMUTATION_PROBABILITY_FILE_NAME, true, true, &GenerationManager::CalculateSuccessfulPermutationProbability);
+    }
+
     void GenerationManager::ExecuteAlgorithm(const ExecutionConfig& userConfig, string targetFileName,
             bool shouldExitIfTargetFileExists, bool shouldAlwaysReadPacking, Action algorithm)
     {
@@ -648,6 +653,11 @@ namespace Generation
         }
 
         packingSerializer->SerializeActiveConfig(targetFilePath, activeConfig, shift);
+    }
+
+    void GenerationManager::CalculateSuccessfulPermutationProbability(const Model::ExecutionConfig& fullConfig, const Model::ModellingContext& context, std::string targetFilePath, Model::Packing* particles)
+    {
+
     }
 
     void GenerationManager::FillContractionRatios(vector<FLOAT_TYPE>* contractionRatios) const

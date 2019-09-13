@@ -22,6 +22,7 @@ namespace Generation
     const std::string INSERTION_RADII_FILE_NAME = "insertion_radii.txt";
     const std::string DISTANCES_TO_CLOSEST_SURFACES_FOLDER_NAME = "distances_to_closest_surfaces";
     const std::string CONTACT_NUMBER_DISTRIBUTION_FILE_NAME = "contact_number_distribution.txt";
+    const std::string CONTACTING_NEIGHBORS_FILE_NAME = "contacting_neighbors.txt";
     const std::string ENTROPY_FILE_NAME = "entropy.txt";
     const std::string PARTICLE_DIRECTIONS_FILE_NAME = "particle_directions.txt";
     const std::string CONTRACTION_ENERGIES_FILE_NAME = "contraction_energies.txt";
@@ -37,6 +38,7 @@ namespace Generation
     const std::string NEAREST_NEIGHBORS_FILE_NAME = "nearest_neighbors.txt";
     const std::string ACTIVE_GEOMETRY_FILE_NAME = "active_geometry.conf";
     const std::string IMMOBILE_PARTICLES_FILE_NAME = "immobileParticleIndexes.txt";
+    const std::string SUCCESSFUL_PERMUTATION_PROBABILITY_FILE_NAME = "successful_permutation_probability.txt";
 }
 
 #endif /* Generation_Constants_h */

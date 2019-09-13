@@ -96,6 +96,8 @@ namespace Generation
 
         void CalculateActiveGeometry(const Model::ExecutionConfig& userConfig);
 
+        void CalculateSuccessfulPermutationProbability(const Model::ExecutionConfig& userConfig);
+
         virtual ~GenerationManager();
 
     private:
@@ -168,6 +170,8 @@ namespace Generation
         void CalculateNearestNeighbors(const Model::ExecutionConfig& fullConfig, const Model::ModellingContext& context, std::string targetFilePath, Model::Packing* particles);
 
         void CalculateActiveGeometry(const Model::ExecutionConfig& fullConfig, const Model::ModellingContext& context, std::string targetFilePath, Model::Packing* particles);
+
+        void CalculateSuccessfulPermutationProbability(const Model::ExecutionConfig& fullConfig, const Model::ModellingContext& context, std::string targetFilePath, Model::Packing* particles);
 
         DISALLOW_COPY_AND_ASSIGN(GenerationManager);
 
