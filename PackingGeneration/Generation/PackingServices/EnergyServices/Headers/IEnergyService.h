@@ -25,6 +25,7 @@ namespace PackingServices
         {
             std::vector<Core::FLOAT_TYPE> contractionEnergiesPerParticle;
             std::vector<bool> rattlerMask;
+            std::vector<std::vector<int>> touchingNeighborIndexesPerParticle;
         };
 
     public:
@@ -33,12 +34,15 @@ namespace PackingServices
         virtual void SetPotentialNormalizer(Core::FLOAT_TYPE value) = 0;
 
         // I would prefer to make IPairPotential an internal field of EnergyService, but passing several potentials here allows calculation energies 2 times faster (about 1 minute instead of 2 per packing, 300 packings)
-        virtual EnergiesResult GetContractionEnergies(const std::vector<Core::FLOAT_TYPE>& contractionRatios, const std::vector<const IPairPotential*>& pairPotentials) = 0;
+        virtual EnergiesResult GetContractionEnergies(const std::vector<Core::FLOAT_TYPE>& contractionRatios, 
+            const std::vector<const IPairPotential*>& pairPotentials) = 0;
 
         // TODO: sync this methods with GetContractionEnergies (should return rattlers or not)
         virtual Model::ParticlePair FillParticleForces(Core::FLOAT_TYPE contractionRatio, const IPairPotential& pairPotential, std::vector<Core::SpatialVector>* particleForces) = 0;
 
-        virtual void GetContractionEnergiesPerParticle(const std::vector<Core::FLOAT_TYPE>& contractionRatios, const std::vector<const IPairPotential*>& pairPotentials, std::vector<EnergiesPerParticle>* energiesPerParticle) = 0;
+        virtual void GetContractionEnergiesPerParticle(const std::vector<Core::FLOAT_TYPE>& contractionRatios, 
+            const std::vector<const IPairPotential*>& pairPotentials, 
+            std::vector<EnergiesPerParticle>* energiesPerParticle) = 0;
 
         // Gets a min number of neighbors used to consider a particle as a non-rattler (inclusive)
         virtual int GetMinNeighborsCount() const = 0;

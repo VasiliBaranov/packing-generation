@@ -67,6 +67,8 @@ namespace PackingServices
 
         void SerializeContactNumberDistribution(std::string contactNumberDistributionFilePath, const std::vector<int>& neighborCounts, const std::vector<int>& neighborCountFrequencies) const;
 
+        void SerializeContactingNeighborIndexes(std::string contactingNeighborIndexesFilePath, const std::vector<std::vector<int>>& neighborIndexes) const;
+
         void SerializeParticleDirections(std::string distancesFilePath, int particleCount, const std::vector<OrderService::NeighborDirections>& particleDirections) const;
 
         void SerializeContractionEnergies(std::string energiesFilePath, const std::vector<Core::FLOAT_TYPE>& contractionRatios,

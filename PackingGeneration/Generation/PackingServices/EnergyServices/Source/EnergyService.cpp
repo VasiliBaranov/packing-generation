@@ -52,6 +52,7 @@ namespace PackingServices
 
         vector<int> currentParticleNeighborsCounts(energyTypesCount);
         vector<FLOAT_TYPE> currentParticleEnergies(energyTypesCount);
+        vector<vector<int>> currentParticleNeighborIndexes(energyTypesCount);
 
         for (ParticleIndex particleIndex = 0; particleIndex < config->particlesCount; ++particleIndex)
         {
@@ -61,7 +62,12 @@ namespace PackingServices
 
             FilterCloseNeighbors();
 
-            FillCurrentParticleEnergies(particleIndex, contractionRatios, pairPotentials, &currentParticleEnergies, &currentParticleNeighborsCounts);
+            FillCurrentParticleEnergies(particleIndex, 
+                contractionRatios, 
+                pairPotentials, 
+                &currentParticleEnergies, 
+                &currentParticleNeighborsCounts,
+                &currentParticleNeighborIndexes);
 
             for (int energyTypeIndex = 0; energyTypeIndex < energyTypesCount; ++energyTypeIndex)
             {
@@ -79,7 +85,9 @@ namespace PackingServices
     }
 
     // TODO: Merge with GetContractionEnergies!!!!
-    OVERRIDE void EnergyService::GetContractionEnergiesPerParticle(const vector<FLOAT_TYPE>& contractionRatios, const vector<const IPairPotential*>& pairPotentials, vector<IEnergyService::EnergiesPerParticle>* energiesPerParticle)
+    OVERRIDE void EnergyService::GetContractionEnergiesPerParticle(const vector<FLOAT_TYPE>& contractionRatios, 
+        const vector<const IPairPotential*>& pairPotentials, 
+        vector<IEnergyService::EnergiesPerParticle>* energiesPerParticle)
     {
         size_t energyTypesCount = contractionRatios.size();
         vector<IEnergyService::EnergiesPerParticle>& energiesPerParticleRef = *energiesPerParticle;
@@ -88,10 +96,12 @@ namespace PackingServices
         {
             energiesPerParticleRef[energyTypeIndex].contractionEnergiesPerParticle.resize(config->particlesCount);
             energiesPerParticleRef[energyTypeIndex].rattlerMask.resize(config->particlesCount);
+            energiesPerParticleRef[energyTypeIndex].touchingNeighborIndexesPerParticle.resize(config->particlesCount);
         }
 
         vector<int> currentParticleNeighborsCounts(energyTypesCount);
         vector<FLOAT_TYPE> currentParticleEnergies(energyTypesCount);
+        vector<vector<int>> currentParticleTouchingNeighborsIndexes(energyTypesCount);
 
         for (ParticleIndex particleIndex = 0; particleIndex < config->particlesCount; ++particleIndex)
         {
@@ -99,12 +109,20 @@ namespace PackingServices
 
             FilterCloseNeighbors();
 
-            FillCurrentParticleEnergies(particleIndex, contractionRatios, pairPotentials, &currentParticleEnergies, &currentParticleNeighborsCounts);
+            currentParticleTouchingNeighborsIndexes.clear();
+
+            FillCurrentParticleEnergies(particleIndex, 
+                contractionRatios, 
+                pairPotentials, 
+                &currentParticleEnergies, 
+                &currentParticleNeighborsCounts,
+                &currentParticleTouchingNeighborsIndexes);
 
             for (size_t energyTypeIndex = 0; energyTypeIndex < energyTypesCount; ++energyTypeIndex)
             {
                 energiesPerParticleRef[energyTypeIndex].contractionEnergiesPerParticle[particleIndex] = currentParticleEnergies[energyTypeIndex];
                 energiesPerParticleRef[energyTypeIndex].rattlerMask[particleIndex] = currentParticleNeighborsCounts[energyTypeIndex] < minNeighborsCount;
+                energiesPerParticleRef[energyTypeIndex].touchingNeighborIndexesPerParticle.swap(currentParticleTouchingNeighborsIndexes);
             }
         }
     }
@@ -252,14 +270,19 @@ namespace PackingServices
             const vector<FLOAT_TYPE>& contractionRatios,
             const vector<const IPairPotential*>& pairPotentials,
             vector<FLOAT_TYPE>* currentParticleEnergies,
-            vector<int>* currentParticleNeighborsCounts)
+            vector<int>* currentParticleNeighborsCounts,
+            vector<vector<int>>* currentParticleTouchingNeighborsIndexes)
     {
         int energyTypesCount = contractionRatios.size();
         vector<int>& currentParticleNeighborsCountsRef = *currentParticleNeighborsCounts;
         vector<FLOAT_TYPE>& currentParticleEnergiesRef = *currentParticleEnergies;
+        vector<vector<int>>& currentParticleTouchingNeighborsIndexesRef = *currentParticleTouchingNeighborsIndexes;
         const Packing& particlesRef = *particles;
         currentParticleNeighborsCountsRef.resize(energyTypesCount, 0);
         currentParticleEnergiesRef.resize(energyTypesCount, 0.0);
+
+        currentParticleTouchingNeighborsIndexesRef.clear();
+        currentParticleTouchingNeighborsIndexesRef.resize(energyTypesCount);
 
         const DomainParticle& particle = particlesRef[particleIndex];
 
@@ -285,6 +308,7 @@ namespace PackingServices
                 {
                     currentParticleEnergiesRef[energyTypeIndex] += potentialNormalizer * energy.value;
                     currentParticleNeighborsCountsRef[energyTypeIndex]++;
+                    currentParticleTouchingNeighborsIndexesRef[energyTypeIndex].push_back(neighborIndex);
                 }
             }
         }

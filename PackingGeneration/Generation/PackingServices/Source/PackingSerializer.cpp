@@ -474,6 +474,30 @@ namespace PackingServices
         }
     }
 
+    void PackingSerializer::SerializeContactingNeighborIndexes(std::string contactingNeighborIndexesFilePath, const std::vector<std::vector<int>>& neighborIndexes) const
+    {
+        ScopedFile<LogErrorHandler> file(contactingNeighborIndexesFilePath, FileOpenMode::Write | FileOpenMode::Binary);
+        fprintf(file, "contactingNeighborIndexesPerParticle\n");
+
+        // TODO: make a helper function to store lists of lists
+        for (int particleIndex = 0; particleIndex < neighborIndexes.size(); particleIndex++)
+        {
+            const std::vector<int>& currentNeighborIndexes = neighborIndexes[particleIndex];
+            if (currentNeighborIndexes.size() > 0)
+            {
+                for (int i = 0; i < currentNeighborIndexes.size() - 1; i++)
+                {
+                    fprintf(file, "%d ", currentNeighborIndexes[i]);
+                }
+                fprintf(file, "%d", currentNeighborIndexes[currentNeighborIndexes.size() - 1]);
+            }
+            if (particleIndex < (neighborIndexes.size() - 1))
+            {
+                fprintf(file, "\n");
+            }
+        }
+    }
+
     void PackingSerializer::SerializeParticleDirections(string distancesFilePath, int particleCount, const vector<OrderService::NeighborDirections>& particleDirections) const
     {
         ScopedFile<LogErrorHandler> file(distancesFilePath, FileOpenMode::Write | FileOpenMode::Binary);

@@ -136,7 +136,12 @@ namespace PackingServices
         return -negativeContractionRatio;
     }
 
-    FLOAT_TYPE InsertionRadiiGenerator::GetContactNumberDistribution(const Packing& particles, IEnergyService* energyService, FLOAT_TYPE contractionRate, vector<int>* neighborCounts, vector<int>* neighborCountFrequencies) const
+    FLOAT_TYPE InsertionRadiiGenerator::GetContactNumberDistribution(const Packing& particles, 
+        IEnergyService* energyService, 
+        FLOAT_TYPE contractionRate, 
+        vector<int>* neighborCounts, 
+        vector<int>* neighborCountFrequencies,
+        vector<vector<int>>* touchingParticleIndexes) const
     {
         vector<FLOAT_TYPE> contractionRatios(1, contractionRate);
         const HarmonicPotential zeroPotential(0.0);
@@ -148,6 +153,8 @@ namespace PackingServices
         IEnergyService::EnergiesPerParticle& energiesPerParticle = energiesPerParticleVector[0];
         vector<int> neighborCountsPerParticle(energiesPerParticle.contractionEnergiesPerParticle.size());
         VectorUtilities::Round(energiesPerParticle.contractionEnergiesPerParticle, &neighborCountsPerParticle);
+
+        touchingParticleIndexes->swap(energiesPerParticle.touchingNeighborIndexesPerParticle);
 
         int maxNeighborCountPosition = StlUtilities::FindMaxElementPosition(neighborCountsPerParticle);
         int maxNeighborCount = neighborCountsPerParticle[maxNeighborCountPosition];
@@ -177,6 +184,18 @@ namespace PackingServices
         FLOAT_TYPE totalContacts = VectorUtilities::Sum(contacts);
         FLOAT_TYPE nonRattlerCounts = VectorUtilities::Sum(*neighborCountFrequencies);
         FLOAT_TYPE coordinationNumber = totalContacts / nonRattlerCounts;
+
+        // Estimate coordination number from neighbor indexes only
+        int totalContactsFromIndexes = 0;
+        for (const vector<int>& currentParticleNeighborIndexes : energiesPerParticle.touchingNeighborIndexesPerParticle)
+        {
+            totalContactsFromIndexes += currentParticleNeighborIndexes.size();
+        }
+        FLOAT_TYPE coordinationNumberFromIndexes = (FLOAT_TYPE)totalContactsFromIndexes / particles.size();
+
+        printf("Coordination number from contacts historam (possibly with rattlers excluded): %f\n", coordinationNumber);
+        printf("Coordination number from touching indexes (currently always with rattlers!): %f\n", coordinationNumberFromIndexes);
+
         return coordinationNumber;
     }
 

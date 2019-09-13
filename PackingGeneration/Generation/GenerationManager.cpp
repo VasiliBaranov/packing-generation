@@ -283,13 +283,18 @@ namespace Generation
         FLOAT_TYPE contractionRate = 1.0 - 1e-4;
         vector<int> neighborCounts;
         vector<int> neighborCountFrequencies;
+        vector<vector<int>> touchingParticleIndexes;
         contractionEnergyService->SetParticles(*particles);
         FLOAT_TYPE estimatedCoordinationNumber = insertionRadiiGenerator->GetContactNumberDistribution(*particles, contractionEnergyService,
-                contractionRate, &neighborCounts, &neighborCountFrequencies);
+                contractionRate, &neighborCounts, &neighborCountFrequencies, &touchingParticleIndexes);
 
         printf("Estimated coordination number is %f\n", estimatedCoordinationNumber);
 
         packingSerializer->SerializeContactNumberDistribution(targetFilePath, neighborCounts, neighborCountFrequencies);
+
+        string targetFolder = Core::Path::GetParentPath(targetFilePath);
+        string contactNumbersFilePath = Core::Path::Append(targetFolder, CONTACTING_NEIGHBORS_FILE_NAME);
+        packingSerializer->SerializeContactingNeighborIndexes(contactNumbersFilePath, touchingParticleIndexes);
 
 
 //        FLOAT_TYPE expectedCoordinationNumber = GetExpectedCoordinationNumber(fullConfig, context, targetFilePath, particles);

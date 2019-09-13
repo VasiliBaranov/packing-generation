@@ -44,7 +44,12 @@ namespace PackingServices
         // These functions will be used primarily for calculation of entropy with fixed coordination number
         Core::FLOAT_TYPE GetContractionRateForCoordinationNumber(IEnergyService* energyService, Core::FLOAT_TYPE expectedAverageCoordinationNumber);
 
-        Core::FLOAT_TYPE GetContactNumberDistribution(const Model::Packing& particles, IEnergyService* energyService, Core::FLOAT_TYPE contractionRate, std::vector<int>* neighborCounts, std::vector<int>* neighborCountFrequencies) const;
+        Core::FLOAT_TYPE GetContactNumberDistribution(const Model::Packing& particles, 
+            IEnergyService* energyService, 
+            Core::FLOAT_TYPE contractionRate, 
+            std::vector<int>* neighborCounts, 
+            std::vector<int>* neighborCountFrequencies,
+            std::vector<std::vector<int>>* touchingParticleIndexes) const;
 
         virtual ~InsertionRadiiGenerator();
 

@@ -68,7 +68,8 @@ namespace PackingServices
                 const std::vector<Core::FLOAT_TYPE>& contractionRatios,
                 const std::vector<const IPairPotential*>& pairPotentials,
                 std::vector<Core::FLOAT_TYPE>* currentParticleEnergies,
-                std::vector<int>* currentParticleNeighborsCounts);
+                std::vector<int>* currentParticleNeighborsCounts,
+                std::vector<std::vector<int>>* currentParticleNeighborsIndexes);
 
         void FillCurrentParticleForce(Model::ParticleIndex particleIndex, Core::FLOAT_TYPE contractionRatio, const IPairPotential& pairPotential, Core::SpatialVector* force);
 
