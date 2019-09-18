@@ -202,6 +202,64 @@ namespace PackingServices
         return coordinationNumber;
     }
 
+    // The method will always return zero.
+    // The probability per particle is ~0.5. But the probability per packing is 0.5^N, which is a vanishing number.
+    FLOAT_TYPE InsertionRadiiGenerator::GetSuccessfulPermutationProbability(Packing* particles, int maxAttemptsCount) const
+    {
+        Packing& particlesRef = *particles;
+
+        vector<int> permutation(particles->size());
+        VectorUtilities::FillLinearScale(0, &permutation);
+
+
+        Packing originalPacking = particlesRef; // copy
+
+        distanceProvider->SetParticles(particlesRef);
+        int successfulPermutations = 0;
+
+        for (int permutationIndex = 0; permutationIndex < maxAttemptsCount; permutationIndex++)
+        {
+            StlUtilities::RandomlyShuffle(&permutation);
+
+            //for (size_t particleIndex = 0; particleIndex < particlesRef.size(); particleIndex++)
+            //{
+            //    Particle& currentParticle = particlesRef[particleIndex];
+            //    distanceProvider->StartMove(particleIndex);
+
+            //    int targetParticleIndex = permutation[particleIndex];
+            //    const Particle& targetParticle = originalPacking[targetParticleIndex];
+            //    currentParticle.coordinates = targetParticle.coordinates;
+
+            //    distanceProvider->EndMove();
+            //}
+
+            // for such large moves the stupid method (reinitializing things every time) is actually faster
+            for (size_t particleIndex = 0; particleIndex < particlesRef.size(); particleIndex++)
+            {
+                Particle& currentParticle = particlesRef[particleIndex];
+
+                int targetParticleIndex = permutation[particleIndex];
+                const Particle& targetParticle = originalPacking[targetParticleIndex];
+                currentParticle.coordinates = targetParticle.coordinates;
+            }
+            distanceProvider->SetParticles(particlesRef);
+
+            ParticlePair closestPair = distanceProvider->FindClosestPair();
+            printf("normalizedDistanceSquare: %f\n", closestPair.normalizedDistanceSquare);
+            bool permutationSuccessful = closestPair.normalizedDistanceSquare >= 1.0;
+            if (permutationSuccessful)
+            {
+                successfulPermutations++;
+            }
+            if ((permutationIndex + 1) % 10 == 0)
+            {
+                printf("Permutations done: %d, successful permutations: %d, permutation probability %f\n",
+                    permutationIndex + 1, successfulPermutations, (FLOAT_TYPE)successfulPermutations / (permutationIndex + 1));
+            }
+        }
+        return (FLOAT_TYPE)successfulPermutations / maxAttemptsCount;
+    }
+
     void InsertionRadiiGenerator::FillNormalizedContactingNeighborDistances(const Packing& particles,
         const vector<vector<int>>& touchingParticleIndexes,
         vector<FLOAT_TYPE>* normalizedContactingNeighborDistances) const

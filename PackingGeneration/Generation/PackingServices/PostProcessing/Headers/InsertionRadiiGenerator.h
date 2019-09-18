@@ -55,6 +55,8 @@ namespace PackingServices
             const std::vector<std::vector<int>>& touchingParticleIndexes,
             std::vector<Core::FLOAT_TYPE>* normalizedContactingNeighborDistances) const;
 
+        Core::FLOAT_TYPE GetSuccessfulPermutationProbability(Model::Packing* particles, int maxAttemptsCount) const;
+
         virtual ~InsertionRadiiGenerator();
 
     private:
