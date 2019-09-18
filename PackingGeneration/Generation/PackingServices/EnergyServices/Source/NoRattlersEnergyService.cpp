@@ -136,6 +136,7 @@ namespace PackingServices
         {
             energiesPerParticleRef[energyTypeIndex].contractionEnergiesPerParticle.resize(config->particlesCount, 0.0);
             energiesPerParticleRef[energyTypeIndex].rattlerMask.resize(config->particlesCount);
+            energiesPerParticleRef[energyTypeIndex].touchingNeighborIndexesPerParticle.resize(config->particlesCount);
 
             FLOAT_TYPE contractionRatio = contractionRatios[energyTypeIndex];
             const IPairPotential* pairPotential = pairPotentials[energyTypeIndex];
@@ -166,6 +167,7 @@ namespace PackingServices
                     if (energy.hasValue)
                     {
                         energiesPerParticleRef[energyTypeIndex].contractionEnergiesPerParticle[particleIndex] += potentialNormalizer * energy.value;
+                        energiesPerParticleRef[energyTypeIndex].touchingNeighborIndexesPerParticle[particleIndex].push_back(neighborIndex);
                     }
                 }
             }

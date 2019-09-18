@@ -122,7 +122,8 @@ namespace PackingServices
             {
                 energiesPerParticleRef[energyTypeIndex].contractionEnergiesPerParticle[particleIndex] = currentParticleEnergies[energyTypeIndex];
                 energiesPerParticleRef[energyTypeIndex].rattlerMask[particleIndex] = currentParticleNeighborsCounts[energyTypeIndex] < minNeighborsCount;
-                energiesPerParticleRef[energyTypeIndex].touchingNeighborIndexesPerParticle.swap(currentParticleTouchingNeighborsIndexes);
+                energiesPerParticleRef[energyTypeIndex].touchingNeighborIndexesPerParticle[particleIndex].swap(currentParticleTouchingNeighborsIndexes[energyTypeIndex]);
+                //energiesPerParticleRef[energyTypeIndex].touchingNeighborIndexesPerParticle[particleIndex] = currentParticleTouchingNeighborsIndexes[energyTypeIndex];
             }
         }
     }

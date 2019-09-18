@@ -187,14 +187,17 @@ namespace PackingServices
 
         // Estimate coordination number from neighbor indexes only
         int totalContactsFromIndexes = 0;
-        for (const vector<int>& currentParticleNeighborIndexes : energiesPerParticle.touchingNeighborIndexesPerParticle)
+        for (const vector<int>& currentParticleNeighborIndexes : *touchingParticleIndexes)
         {
-            totalContactsFromIndexes += currentParticleNeighborIndexes.size();
+            if (currentParticleNeighborIndexes.size() > 0)
+            {
+                totalContactsFromIndexes += currentParticleNeighborIndexes.size();
+            }
         }
-        FLOAT_TYPE coordinationNumberFromIndexes = (FLOAT_TYPE)totalContactsFromIndexes / particles.size();
+        FLOAT_TYPE coordinationNumberFromIndexes = (FLOAT_TYPE)totalContactsFromIndexes / nonRattlerCounts;
 
         printf("Coordination number from contacts historam (possibly with rattlers excluded): %f\n", coordinationNumber);
-        printf("Coordination number from touching indexes (currently always with rattlers!): %f\n", coordinationNumberFromIndexes);
+        printf("Coordination number from touching indexes (possibly with rattlers excluded): %f\n", coordinationNumberFromIndexes);
 
         return coordinationNumber;
     }

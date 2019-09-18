@@ -3,4 +3,9 @@
   <PropertyGroup>
     <ShowAllFiles>true</ShowAllFiles>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LocalDebuggerCommandArguments>-connumdist</LocalDebuggerCommandArguments>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
+  </PropertyGroup>
 </Project>

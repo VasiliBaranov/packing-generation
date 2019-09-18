@@ -279,6 +279,7 @@ namespace Generation
     void GenerationManager::CalculateContactNumberDistribution(const ExecutionConfig& fullConfig, const ModellingContext& context, string targetFilePath, Packing* particles)
     {
         printf("Calculating contact number distributions\n");
+        Packing& packingToUse = *particles;
 
         // just make sure that the closest pair touches
         //ClosestPairProvider 
@@ -289,15 +290,20 @@ namespace Generation
         if (closestNormalizedDistance > 1.0001)
         {
             printf("Min normalized distance is too high, parcking was probably not rescaled to the final density. Rescaling before contacts calculation...\n");
+            Packing rescaledParticles = *particles;
+            for (Particle& p : rescaledParticles)
+            {
+                p.diameter *= closestNormalizedDistance;
+            }
+            packingToUse = rescaledParticles;
         }
-        Packing rescaledParticles = *particles;
 
         FLOAT_TYPE contractionRate = 1.0 - 1e-4;
         vector<int> neighborCounts;
         vector<int> neighborCountFrequencies;
         vector<vector<int>> touchingParticleIndexes;
-        contractionEnergyService->SetParticles(*particles);
-        FLOAT_TYPE estimatedCoordinationNumber = insertionRadiiGenerator->GetContactNumberDistribution(*particles, contractionEnergyService,
+        contractionEnergyService->SetParticles(packingToUse);
+        FLOAT_TYPE estimatedCoordinationNumber = insertionRadiiGenerator->GetContactNumberDistribution(packingToUse, contractionEnergyService,
                 contractionRate, &neighborCounts, &neighborCountFrequencies, &touchingParticleIndexes);
 
         printf("Estimated coordination number is %f\n", estimatedCoordinationNumber);
