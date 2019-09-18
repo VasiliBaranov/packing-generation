@@ -280,6 +280,18 @@ namespace Generation
     {
         printf("Calculating contact number distributions\n");
 
+        // just make sure that the closest pair touches
+        //ClosestPairProvider 
+        distanceService->SetParticles(*particles);
+        ParticlePair closestPair = distanceService->FindClosestPair();
+        FLOAT_TYPE closestNormalizedDistance = std::sqrt(closestPair.normalizedDistanceSquare);
+        printf("Normalized distance of a closest pair is %f\n", closestNormalizedDistance);
+        if (closestNormalizedDistance > 1.0001)
+        {
+            printf("Min normalized distance is too high, parcking was probably not rescaled to the final density. Rescaling before contacts calculation...\n");
+        }
+        Packing rescaledParticles = *particles;
+
         FLOAT_TYPE contractionRate = 1.0 - 1e-4;
         vector<int> neighborCounts;
         vector<int> neighborCountFrequencies;
