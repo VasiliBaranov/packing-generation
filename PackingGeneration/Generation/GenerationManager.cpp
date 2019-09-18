@@ -314,6 +314,11 @@ namespace Generation
         string contactNumbersFilePath = Core::Path::Append(targetFolder, CONTACTING_NEIGHBORS_FILE_NAME);
         packingSerializer->SerializeContactingNeighborIndexes(contactNumbersFilePath, touchingParticleIndexes);
 
+        vector<FLOAT_TYPE> normalizedContactingNeighborDistances;
+        insertionRadiiGenerator->FillNormalizedContactingNeighborDistances(packingToUse, touchingParticleIndexes, &normalizedContactingNeighborDistances);
+
+        string contactingNeighborDistancesFilePath = Core::Path::Append(targetFolder, CONTACTING_NEIGHBOR_DISTANCES_FILE_NAME);
+        packingSerializer->SerializeContactingNeighborDistances(contactingNeighborDistancesFilePath, normalizedContactingNeighborDistances);
 
 //        FLOAT_TYPE expectedCoordinationNumber = GetExpectedCoordinationNumber(fullConfig, context, targetFilePath, particles);
 //        // Find the best contraction rate to get this coordination number

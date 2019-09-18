@@ -202,6 +202,31 @@ namespace PackingServices
         return coordinationNumber;
     }
 
+    void InsertionRadiiGenerator::FillNormalizedContactingNeighborDistances(const Packing& particles,
+        const vector<vector<int>>& touchingParticleIndexes,
+        vector<FLOAT_TYPE>* normalizedContactingNeighborDistances) const
+    {
+        std::vector<FLOAT_TYPE>& normalizedContactingNeighborDistancesRef = *normalizedContactingNeighborDistances;
+        normalizedContactingNeighborDistancesRef.clear();
+
+        FLOAT_TYPE meanRadius = geometryService->GetMeanParticleDiameter(particles) * 0.5;
+        FLOAT_TYPE radiusStd = geometryService->GetParticleDiameterStd(particles) * 0.5;
+        printf("Radius mean: %f, radius std: %f, polydispersity: %f", meanRadius, radiusStd, radiusStd / meanRadius);
+
+        for (size_t particleIndex = 0; particleIndex < touchingParticleIndexes.size(); particleIndex++)
+        {
+            const std::vector<int>& currentTouchingIndexes = touchingParticleIndexes[particleIndex];
+            FLOAT_TYPE particleRadius = particles[particleIndex].diameter * 0.5;
+            for (size_t neighborIndex = 0; neighborIndex < currentTouchingIndexes.size(); neighborIndex++)
+            {
+                FLOAT_TYPE neighborRadius = particles[neighborIndex].diameter * 0.5;
+                FLOAT_TYPE distance = (particleRadius + neighborRadius) / meanRadius;
+                normalizedContactingNeighborDistancesRef.push_back(distance);
+            }
+        }
+        Core::StlUtilities::Sort(&normalizedContactingNeighborDistancesRef);
+    }
+
     void InsertionRadiiGenerator::FillInsertionRadii(const Packing& particles, int insertionRadiiCount, vector<FLOAT_TYPE>* insertionRadii) const
     {
         distanceProvider->SetParticles(particles);

@@ -51,6 +51,10 @@ namespace PackingServices
             std::vector<int>* neighborCountFrequencies,
             std::vector<std::vector<int>>* touchingParticleIndexes) const;
 
+        void FillNormalizedContactingNeighborDistances(const Model::Packing& particles,
+            const std::vector<std::vector<int>>& touchingParticleIndexes,
+            std::vector<Core::FLOAT_TYPE>* normalizedContactingNeighborDistances) const;
+
         virtual ~InsertionRadiiGenerator();
 
     private:

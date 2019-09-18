@@ -474,7 +474,7 @@ namespace PackingServices
         }
     }
 
-    void PackingSerializer::SerializeContactingNeighborIndexes(std::string contactingNeighborIndexesFilePath, const std::vector<std::vector<int>>& neighborIndexes) const
+    void PackingSerializer::SerializeContactingNeighborIndexes(string contactingNeighborIndexesFilePath, const vector<vector<int>>& neighborIndexes) const
     {
         ScopedFile<LogErrorHandler> file(contactingNeighborIndexesFilePath, FileOpenMode::Write | FileOpenMode::Binary);
         fprintf(file, "contactingNeighborIndexesPerParticle\n");
@@ -495,6 +495,17 @@ namespace PackingServices
             {
                 fprintf(file, "\n");
             }
+        }
+    }
+
+    void PackingSerializer::SerializeContactingNeighborDistances(string contactingNeighborDistancesFilePath, const vector<FLOAT_TYPE>& contactingNeighborDistances) const
+    {
+        ScopedFile<LogErrorHandler> file(contactingNeighborDistancesFilePath, FileOpenMode::Write | FileOpenMode::Binary);
+        fprintf(file, "contactingNeighborDistances\n");
+
+        for (size_t i = 0; i < contactingNeighborDistances.size(); ++i)
+        {
+            fprintf(file, "%f\n", contactingNeighborDistances[i]);
         }
     }
 

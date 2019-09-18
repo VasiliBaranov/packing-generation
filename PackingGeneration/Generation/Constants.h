@@ -23,6 +23,7 @@ namespace Generation
     const std::string DISTANCES_TO_CLOSEST_SURFACES_FOLDER_NAME = "distances_to_closest_surfaces";
     const std::string CONTACT_NUMBER_DISTRIBUTION_FILE_NAME = "contact_number_distribution.txt";
     const std::string CONTACTING_NEIGHBORS_FILE_NAME = "contacting_neighbors.txt";
+    const std::string CONTACTING_NEIGHBOR_DISTANCES_FILE_NAME = "contacting_neighbor_distances.txt";
     const std::string ENTROPY_FILE_NAME = "entropy.txt";
     const std::string PARTICLE_DIRECTIONS_FILE_NAME = "particle_directions.txt";
     const std::string CONTRACTION_ENERGIES_FILE_NAME = "contraction_energies.txt";
