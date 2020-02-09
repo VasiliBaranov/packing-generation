@@ -187,7 +187,17 @@ namespace PackingServices
         // But i currently put it in the DistanceService, and use it not like it is supposed to be used. I also assume that the constructor and computation below do not change any of the services.
         // TODO: REWRITE!!!!
         DistanceService distanceService(mathService, geometryService, lubachevsckyStillingerStep->neighborProvider);
-        distanceService.FillIntermediateScatteringFunctionForWaveVectors(*(context->config), referencePacking, particles, waveVectors, scatteringFunctionValues, selfPartValues);
+
+        std::vector<int >particleIndexesOfInterest; // default empty value. ISF will be calculated for all particles
+
+        distanceService.FillIntermediateScatteringFunctionForWaveVectors(
+            *(context->config), 
+            referencePacking, 
+            particles, 
+            particleIndexesOfInterest,
+            waveVectors, 
+            scatteringFunctionValues, 
+            selfPartValues);
 
         // No averaging. TODO: precompute waveVectorLengths
 //        vector<FLOAT_TYPE> waveVectorLengths(waveVectors.size());

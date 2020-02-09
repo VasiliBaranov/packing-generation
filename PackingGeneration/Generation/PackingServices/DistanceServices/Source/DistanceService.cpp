@@ -245,7 +245,7 @@ namespace PackingServices
 
     // See http://en.wikipedia.org/wiki/Structure_factor, cf. (4) or (5).
     // TODO: Make static or move to another service!
-    void DistanceService::FillStructureFactor(StructureFactor* structureFactor) const
+    void DistanceService::FillStructureFactor(const std::vector<ParticleIndex>& particleIndexesOfInterest, StructureFactor* structureFactor) const
     {
         if (DIMENSIONS == 2)
         {
@@ -257,7 +257,7 @@ namespace PackingServices
         FillPeriodicWaveVectorsUpToPeak(*config, &periodicWaveVectors, &waveVectorLengths);
 
         vector<FLOAT_TYPE> structureFactorValues;
-        FillStructureFactorForWaveVectors(*config, *particles, periodicWaveVectors, &structureFactorValues);
+        FillStructureFactorForWaveVectors(*config, *particles, particleIndexesOfInterest, periodicWaveVectors, &structureFactorValues);
 
         vector<int> permutation;
         StlUtilities::SortPermutation(waveVectorLengths, &permutation);
@@ -389,15 +389,32 @@ namespace PackingServices
         }
     }
 
-    void DistanceService::FillStructureFactorForWaveVectors(const SystemConfig& config, const Packing& particles,
-            const vector<SpatialVector>& waveVectors, vector<FLOAT_TYPE>* structureFactors) const
+    void DistanceService::FillStructureFactorForWaveVectors(
+        const SystemConfig& config, 
+        const Packing& particles,
+        const std::vector<ParticleIndex>& particleIndexesOfInterest,
+        const vector<SpatialVector>& waveVectors, 
+        vector<FLOAT_TYPE>* structureFactors) const
     {
         vector<FLOAT_TYPE> selfPartValues; // TODO: support passing null and omitting the self-part computation!
-        FillIntermediateScatteringFunctionForWaveVectors(config, particles, particles, waveVectors, structureFactors, &selfPartValues);
+        FillIntermediateScatteringFunctionForWaveVectors(
+            config, 
+            particles, 
+            particles, 
+            particleIndexesOfInterest, 
+            waveVectors, 
+            structureFactors, 
+            &selfPartValues);
     }
 
-    void DistanceService::FillIntermediateScatteringFunctionForWaveVectors(const SystemConfig& config, const Packing& firstPacking, const Packing& secondPacking,
-            const vector<SpatialVector>& waveVectors, vector<FLOAT_TYPE>* intermediateScatteringFunctionValues, vector<FLOAT_TYPE>* selfPartValues) const
+    void DistanceService::FillIntermediateScatteringFunctionForWaveVectors(
+        const SystemConfig& config, 
+        const Packing& firstPacking, 
+        const Packing& secondPacking,
+        const std::vector<ParticleIndex>& particleIndexesOfInterest,
+        const vector<SpatialVector>& waveVectors, 
+        vector<FLOAT_TYPE>* intermediateScatteringFunctionValues, 
+        vector<FLOAT_TYPE>* selfPartValues) const
     {
         if (DIMENSIONS == 2)
         {
@@ -408,6 +425,13 @@ namespace PackingServices
         vector<FLOAT_TYPE>& selfPartValuesRef = *selfPartValues;
         intermediateScatteringFunctionValuesRef.resize(waveVectors.size());
         selfPartValuesRef.resize(waveVectors.size());
+
+        // TODO: rewrite
+        ParticleIndex maxIndex = config.particlesCount;
+        if (particleIndexesOfInterest.size() > 0)
+        {
+            maxIndex = particleIndexesOfInterest.size();
+        }
 
         for (size_t i = 0; i < waveVectors.size(); ++i)
         {
@@ -420,8 +444,19 @@ namespace PackingServices
             complex<FLOAT_TYPE> secondComplexSum(0.0, 0.0);
             complex<FLOAT_TYPE> selfPartValue(0.0, 0.0);
             complex<FLOAT_TYPE> imaginaryUnit(0.0, 1.0);
-            for (ParticleIndex particleIndex = 0; particleIndex < config.particlesCount; ++particleIndex)
+
+            for (ParticleIndex i = 0; i < maxIndex; ++i)
             {
+                ParticleIndex particleIndex;
+                if (particleIndexesOfInterest.size() == 0)
+                {
+                    particleIndex = i;
+                }
+                else
+                {
+                    particleIndex = particleIndexesOfInterest[i];
+                }
+
                 FLOAT_TYPE firstDotProduct = VectorUtilities::GetDotProduct(waveVector, firstPacking[particleIndex].coordinates);
                 complex<FLOAT_TYPE> firstExponent = exp(imaginaryUnit * firstDotProduct);
                 firstComplexSum += firstExponent;

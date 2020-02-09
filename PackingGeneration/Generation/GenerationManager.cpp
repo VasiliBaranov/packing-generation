@@ -517,9 +517,37 @@ namespace Generation
     {
         printf("Calculating structure factor\n");
 
+        Packing& particlesRef = *particles;
+
+        std::vector<int> particleIndexesOfInterest;
+        // TODO: introduce a separate parameter
+        if (fullConfig.generationConfig.insertionRadiiCount > 0)
+        {
+            int particlesToChooseCount = fullConfig.generationConfig.insertionRadiiCount;
+
+            // choosing that many largest particles
+            // NOTE: maybe use nth element
+            std::vector<double> diameters;
+            for (const DomainParticle& particle : particlesRef)
+            {
+                diameters.push_back(particle.diameter);
+            }
+            std::vector<int> permutation;
+            StlUtilities::SortPermutation(diameters, &permutation);
+
+            permutation.erase(permutation.begin() + particlesToChooseCount, permutation.end());
+
+            particleIndexesOfInterest.swap(permutation);
+
+            printf("Expected to calculate structure factor for %d smallest particles. Selected %d smallest particles\n", 
+                particlesToChooseCount,
+                particleIndexesOfInterest.size());
+        }
+
+
         distanceService->SetParticles(*particles);
         StructureFactor structureFactor;
-        distanceService->FillStructureFactor(&structureFactor);
+        distanceService->FillStructureFactor(particleIndexesOfInterest, &structureFactor);
 
         packingSerializer->SerializeStructureFactor(targetFilePath, structureFactor);
     }

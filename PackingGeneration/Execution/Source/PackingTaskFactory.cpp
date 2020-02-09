@@ -177,6 +177,16 @@ namespace Execution
         else if (consoleArguments[0] == "-sf")
         {
             generationConfig->executionMode = ExecutionMode::StructureFactorCalculation;
+            if (consoleArguments.size() > 1)
+            {
+                // NOTE: a very dirty hack.  We specify the number of smallest particles to use in calculation through insertionRadiiCount
+                // TODO: fix
+                generationConfig->insertionRadiiCount = Utilities::ParseInt(consoleArguments[1]);
+            }
+            else
+            {
+                generationConfig->insertionRadiiCount = -1;
+            }
         }
         // LocalOrientationalDisorder
         else if (consoleArguments[0] == "-lod")

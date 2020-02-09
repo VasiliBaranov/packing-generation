@@ -55,19 +55,37 @@ namespace PackingServices
 
         void FillPairCorrelationFunction(Model::PairCorrelationFunction* pairCorrelationFunction) const;
 
-        void FillStructureFactor(Model::StructureFactor* structureFactor) const;
+        void FillStructureFactor(
+            const std::vector<Model::ParticleIndex>& particleIndexesOfInterest, 
+            Model::StructureFactor* structureFactor) const;
 
-        void FillPeriodicWaveVectorsUpToPeak(const Model::SystemConfig& config,
-                        std::vector<Core::SpatialVector>* periodicWaveVectors, std::vector<Core::FLOAT_TYPE>* waveVectorLengths) const;
+        void FillPeriodicWaveVectorsUpToPeak(
+            const Model::SystemConfig& config,
+            std::vector<Core::SpatialVector>* periodicWaveVectors, 
+            std::vector<Core::FLOAT_TYPE>* waveVectorLengths) const;
 
-        void FillPeriodicWaveVectors(const Model::SystemConfig& config, Core::FLOAT_TYPE expectedWaveVectorLength, Core::FLOAT_TYPE waveVectorHalfWidth,
-                std::vector<Core::SpatialVector>* periodicWaveVectors, std::vector<Core::FLOAT_TYPE>* waveVectorLengths) const;
+        void FillPeriodicWaveVectors(
+            const Model::SystemConfig& config, 
+            Core::FLOAT_TYPE expectedWaveVectorLength, 
+            Core::FLOAT_TYPE waveVectorHalfWidth,
+            std::vector<Core::SpatialVector>* periodicWaveVectors, 
+            std::vector<Core::FLOAT_TYPE>* waveVectorLengths) const;
 
-        void FillStructureFactorForWaveVectors(const Model::SystemConfig& config, const Model::Packing& particles,
-                const std::vector<Core::SpatialVector>& waveVectors, std::vector<Core::FLOAT_TYPE>* structureFactors) const;
+        void FillStructureFactorForWaveVectors(
+            const Model::SystemConfig& config, 
+            const Model::Packing& particles,
+            const std::vector<Model::ParticleIndex>& particleIndexesOfInterest,
+            const std::vector<Core::SpatialVector>& waveVectors, 
+            std::vector<Core::FLOAT_TYPE>* structureFactors) const;
 
-        void FillIntermediateScatteringFunctionForWaveVectors(const Model::SystemConfig& config, const Model::Packing& firstPacking, const Model::Packing& secondPacking,
-                const std::vector<Core::SpatialVector>& waveVectors, std::vector<Core::FLOAT_TYPE>* intermediateScatteringFunctionValues, std::vector<Core::FLOAT_TYPE>* selfPartValues) const;
+        void FillIntermediateScatteringFunctionForWaveVectors(
+            const Model::SystemConfig& config, 
+            const Model::Packing& firstPacking, 
+            const Model::Packing& secondPacking,
+            const std::vector<Model::ParticleIndex>& particleIndexesOfInterest,
+            const std::vector<Core::SpatialVector>& waveVectors, 
+            std::vector<Core::FLOAT_TYPE>* intermediateScatteringFunctionValues, 
+            std::vector<Core::FLOAT_TYPE>* selfPartValues) const;
 
         void FillNeighborVectorSums(std::vector<Core::FLOAT_TYPE>* neighborVectorSumsNorms, Core::FLOAT_TYPE contractionRate) const;
 
