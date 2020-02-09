@@ -91,6 +91,12 @@ namespace Core
             StlUtilities::Sort(permutation, comparer);
         }
 
+        template<class TContainer>
+        static void RandomlyShuffle(TContainer* vector)
+        {
+            std::random_shuffle(vector->begin(), vector->end());
+        }
+
         template<class T>
         static void Permute(const std::vector<T>& source, const std::vector<int>& permutation, std::vector<T>* target)
         {

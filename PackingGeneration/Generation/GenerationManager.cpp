@@ -685,7 +685,15 @@ namespace Generation
 
     void GenerationManager::CalculateSuccessfulPermutationProbability(const Model::ExecutionConfig& fullConfig, const Model::ModellingContext& context, std::string targetFilePath, Model::Packing* particles)
     {
+        printf("Calculating successful permutation probability\n");
+        Packing& packingToUse = *particles;
 
+        int maxPermutations = 5000;
+        FLOAT_TYPE successfulPermutationProbability = insertionRadiiGenerator->GetSuccessfulPermutationProbability(particles, maxPermutations);
+
+        printf("Estimated successful permutation probability is %f\n", successfulPermutationProbability);
+
+        //packingSerializer->SerializeContactNumberDistribution(targetFilePath, neighborCounts, neighborCountFrequencies);
     }
 
     void GenerationManager::FillContractionRatios(vector<FLOAT_TYPE>* contractionRatios) const
