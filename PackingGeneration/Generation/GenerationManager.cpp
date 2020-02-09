@@ -539,9 +539,19 @@ namespace Generation
 
             particleIndexesOfInterest.swap(permutation);
 
-            printf("Expected to calculate structure factor for %d smallest particles. Selected %d smallest particles\n", 
+            double maxSelectedDiameter = 0;
+            for (int i : particleIndexesOfInterest)
+            {
+                if (particlesRef[i].diameter > maxSelectedDiameter)
+                {
+                    maxSelectedDiameter = particlesRef[i].diameter;
+                }
+            }
+
+            printf("Expected to calculate structure factor for %d smallest particles. Selected %d smallest particles. Max selected diameter: %f\n", 
                 particlesToChooseCount,
-                particleIndexesOfInterest.size());
+                particleIndexesOfInterest.size(),
+                maxSelectedDiameter);
         }
 
 

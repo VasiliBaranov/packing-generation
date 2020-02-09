@@ -427,10 +427,10 @@ namespace PackingServices
         selfPartValuesRef.resize(waveVectors.size());
 
         // TODO: rewrite
-        ParticleIndex maxIndex = config.particlesCount;
+        ParticleIndex particlesOfInterestCount = config.particlesCount;
         if (particleIndexesOfInterest.size() > 0)
         {
-            maxIndex = particleIndexesOfInterest.size();
+            particlesOfInterestCount = particleIndexesOfInterest.size();
         }
 
         for (size_t i = 0; i < waveVectors.size(); ++i)
@@ -445,7 +445,7 @@ namespace PackingServices
             complex<FLOAT_TYPE> selfPartValue(0.0, 0.0);
             complex<FLOAT_TYPE> imaginaryUnit(0.0, 1.0);
 
-            for (ParticleIndex i = 0; i < maxIndex; ++i)
+            for (ParticleIndex i = 0; i < particlesOfInterestCount; ++i)
             {
                 ParticleIndex particleIndex;
                 if (particleIndexesOfInterest.size() == 0)
@@ -481,13 +481,13 @@ namespace PackingServices
             {
                 secondComplexSum = firstComplexSum;
 
-                selfPartValue = config.particlesCount;
+                selfPartValue = particlesOfInterestCount;
             }
 
             complex<FLOAT_TYPE> secondComplexSumConjugate = std::conj(secondComplexSum);
             FLOAT_TYPE intermediateScatteringFunctionValue = (firstComplexSum * secondComplexSumConjugate).real(); // In case both sums were initially equal, the result is the norm (squared length)
-            intermediateScatteringFunctionValuesRef[i] = intermediateScatteringFunctionValue / config.particlesCount; // If the first and second packings are equal, returns structure factor
-            selfPartValuesRef[i] = selfPartValue.real() / config.particlesCount;
+            intermediateScatteringFunctionValuesRef[i] = intermediateScatteringFunctionValue / particlesOfInterestCount; // If the first and second packings are equal, returns structure factor
+            selfPartValuesRef[i] = selfPartValue.real() / particlesOfInterestCount;
         }
     }
 
