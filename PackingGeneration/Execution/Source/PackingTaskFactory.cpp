@@ -179,13 +179,21 @@ namespace Execution
             generationConfig->executionMode = ExecutionMode::StructureFactorCalculation;
             if (consoleArguments.size() > 1)
             {
-                // NOTE: a very dirty hack.  We specify the number of smallest particles to use in calculation through insertionRadiiCount
-                // TODO: fix
-                generationConfig->insertionRadiiCount = Utilities::ParseInt(consoleArguments[1]);
+                generationConfig->particlesToKeepForStructureFactor = Utilities::ParseInt(consoleArguments[1]);
+
+                generationConfig->keepSmallParticlesForStructureFactor.hasValue = true;
+                generationConfig->keepSmallParticlesForStructureFactor.value = true;
+
+                if (generationConfig->particlesToKeepForStructureFactor < 0)
+                {
+                    generationConfig->particlesToKeepForStructureFactor = -generationConfig->particlesToKeepForStructureFactor;
+                    generationConfig->keepSmallParticlesForStructureFactor.value = false;
+                }
             }
             else
             {
-                generationConfig->insertionRadiiCount = -1;
+                generationConfig->particlesToKeepForStructureFactor = -1;
+                generationConfig->keepSmallParticlesForStructureFactor.hasValue = false;
             }
         }
         // LocalOrientationalDisorder

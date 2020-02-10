@@ -71,6 +71,8 @@ namespace Model
         generationAlgorithm = PackingGenerationAlgorithm::Unknown;
 
         insertionRadiiCount = -1;
+        particlesToKeepForStructureFactor = -1;
+        keepSmallParticlesForStructureFactor.hasValue = false;
     }
 
     void GenerationConfig::MergeWith(const GenerationConfig& config)
@@ -133,6 +135,14 @@ namespace Model
         if (insertionRadiiCount < 0)
         {
             insertionRadiiCount = config.insertionRadiiCount;
+        }
+        if (particlesToKeepForStructureFactor < 0)
+        {
+            particlesToKeepForStructureFactor = config.particlesToKeepForStructureFactor;
+        }
+        if (!keepSmallParticlesForStructureFactor.hasValue)
+        {
+            keepSmallParticlesForStructureFactor = config.keepSmallParticlesForStructureFactor;
         }
     }
 

@@ -70,6 +70,8 @@ namespace Model
 
         // Params for other algorithms
         int insertionRadiiCount;
+        int particlesToKeepForStructureFactor;
+        Core::Nullable<bool> keepSmallParticlesForStructureFactor;
 
     public:
         GenerationConfig();

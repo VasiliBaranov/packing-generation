@@ -520,10 +520,10 @@ namespace Generation
         Packing& particlesRef = *particles;
 
         std::vector<int> particleIndexesOfInterest;
-        // TODO: introduce a separate parameter
-        if (fullConfig.generationConfig.insertionRadiiCount > 0)
+        if (fullConfig.generationConfig.particlesToKeepForStructureFactor > 0)
         {
-            int particlesToChooseCount = fullConfig.generationConfig.insertionRadiiCount;
+            int particlesToChooseCount = fullConfig.generationConfig.particlesToKeepForStructureFactor;
+            bool keepSmallest = fullConfig.generationConfig.keepSmallParticlesForStructureFactor.value;
 
             // choosing that many largest particles
             // NOTE: maybe use nth element
@@ -535,23 +535,47 @@ namespace Generation
             std::vector<int> permutation;
             StlUtilities::SortPermutation(diameters, &permutation);
 
-            permutation.erase(permutation.begin() + particlesToChooseCount, permutation.end());
+            if (keepSmallest)
+            {
+                permutation.erase(permutation.begin() + particlesToChooseCount, permutation.end());
+            }
+            else
+            {
+                int particlesToRemove = permutation.size() - particlesToChooseCount;
+                permutation.erase(permutation.begin(), permutation.begin() + particlesToRemove);
+            }
 
             particleIndexesOfInterest.swap(permutation);
 
+            double minSelectedDiameter = 1000; // TODO: use numeric_limits
             double maxSelectedDiameter = 0;
             for (int i : particleIndexesOfInterest)
             {
-                if (particlesRef[i].diameter > maxSelectedDiameter)
+                double diameter = particlesRef[i].diameter;
+                if (diameter > maxSelectedDiameter)
                 {
-                    maxSelectedDiameter = particlesRef[i].diameter;
+                    maxSelectedDiameter = diameter;
+                }
+                if (diameter < minSelectedDiameter)
+                {
+                    minSelectedDiameter = diameter;
                 }
             }
 
-            printf("Expected to calculate structure factor for %d smallest particles. Selected %d smallest particles. Max selected diameter: %f\n", 
-                particlesToChooseCount,
-                particleIndexesOfInterest.size(),
-                maxSelectedDiameter);
+            if (keepSmallest)
+            {
+                printf("Expected to calculate structure factor for %d smallest particles. Selected %d smallest particles. Max selected diameter: %f\n",
+                    particlesToChooseCount,
+                    particleIndexesOfInterest.size(),
+                    maxSelectedDiameter);
+            }
+            else
+            {
+                printf("Expected to calculate structure factor for %d largest particles. Selected %d largest particles. Min selected diameter: %f\n",
+                    particlesToChooseCount,
+                    particleIndexesOfInterest.size(),
+                    minSelectedDiameter);
+            }
         }
 
 
