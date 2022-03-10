@@ -13,10 +13,10 @@ It was developed by me (Vasili Baranau) while doing research on hard-sphere pack
 This code (release v1.0.1.28) **has a DOI**: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.580324.svg)](https://doi.org/10.5281/zenodo.580324).
 
 If you use this program in research projects, please **cite the paper** 
-*Baranau and Tallarek (2014) Random-close packing limits for monodisperse and polydisperse hard spheres*, 
-[doi:10.1039/C3SM52959B](http://pubs.rsc.org/en/content/articlelanding/2014/sm/c3sm52959b). 
-Or, alternatively, *Baranau et al. (2013) Pore-size entropy of random hard-sphere packings*; 
-[doi:10.1039/C3SM27374A](http://pubs.rsc.org/en/content/articlelanding/2013/sm/c3sm27374a).
+*Baranau and Tallarek (2017) Another resolution of the configurational entropy paradox as applied to hard spheres*, 
+[doi:10.1063/1.4999483](https://aip.scitation.org/doi/abs/10.1063/1.4999483). 
+Or, alternatively, *Baranau and Tallarek (2021) Beyond Salsburg–Wood: Glass equation of state for polydisperse hard spheres*, 
+[doi:10.1063/5.0036411](https://aip.scitation.org/doi/full/10.1063/5.0036411).
 
 Sample generated packings look like this:
 
