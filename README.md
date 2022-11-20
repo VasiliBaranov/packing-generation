@@ -358,15 +358,24 @@ packing, then create a packing with a Lubachevsky–Stillinger protocol, then fi
 density for the LS packing by the LS with gradual densification protocol, then calculate Q6 local 
 and global order for the final packing.
 
-PackingGeneration.exe -fba | tee log_fba.txt <br>
-PackingGeneration.exe -ls | tee log_ls.txt <br>
-PackingGeneration.exe -lsgd | tee log_lsgd.txt <br>
-Rescale particle diameters as done in the [MATLAB script](https://github.com/VasiliBaranov/packing-generation/blob/master/Docs/MATLAB%20scripts%20for%20interpreting%20results/ReadPackingScript.m) and explained in the [note on final diameters](https://github.com/VasiliBaranov/packing-generation#21-note-on-final-diameters) <br>
-PackingGeneration.exe -order | tee log_entropy.txt
+* PackingGeneration.exe -fba | tee log_fba.txt
+* Delete or rename the packing.nfo file (see below)
+* PackingGeneration.exe -ls | tee log_ls.txt
+* Delete or rename the packing.nfo file (see below)
+* PackingGeneration.exe -lsgd | tee log_lsgd.txt
+* Rescale particle diameters as done in the [MATLAB script](https://github.com/VasiliBaranov/packing-generation/blob/master/Docs/MATLAB%20scripts%20for%20interpreting%20results/ReadPackingScript.m) and explained in the [note on final diameters](https://github.com/VasiliBaranov/packing-generation#21-note-on-final-diameters)
+* PackingGeneration.exe -order | tee log_entropy.txt
 
 As explained in the [note on final diameters](https://github.com/VasiliBaranov/packing-generation#21-note-on-final-diameters),
 you can omit rescaling the packing between different generation steps (*-fba*, *-ls*, *-lsgd*) because each of them scales 
 the packing prior to generation anyway. When using only the Q6 order measure (*-order*), you can actually omit rescaling the 
 packing at all, because *-order* depends only on particle positions and not on diameters, 
-but rescaling is needed in the general case, of course.
+but rescaling is needed in the general case.
 
+You need to delete the `packing.nfo` file between re-generations because it is a marker file that says that generation 
+was finished, and the program will skip generation in a folder where this file is present. 
+It is a helpful feature  if you run the program in a folder with multiple subfolders 
+(different generation configurations, for example), 
+and some of the generations are already finished and you don't need to run them again. 
+Currently, the program doesn't report why it skips generation if packing.nfo is present, 
+it just silently omits such folders.
