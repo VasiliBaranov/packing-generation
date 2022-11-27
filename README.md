@@ -1,4 +1,4 @@
-# Welcome to the PackingGeneration project
+# Welcome to the PackingGeneration project [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/VasiliBaranov/packing-generation/blob/master/packing-generation.ipynb)
 
 The program allows hard-sphere packing generation and packing post-processing (see the [sphere packing](
 http://en.wikipedia.org/wiki/Sphere_packing) and the [random-close packing](http://en.wikipedia.org/wiki/Random_close_pack) wikipedia pages).
@@ -352,6 +352,8 @@ LAPACK, and also some updates to compiling and linking options (see the
 [Docs/Compilation.txt](https://github.com/VasiliBaranov/packing-generation/tree/master/Docs/Compilation.txt)).
 
 # 4. Sample usage
+
+For a self-contained reproducer of a packing generation, please see [this Google Colab notebook](https://colab.research.google.com/github/VasiliBaranov/packing-generation/blob/master/packing-generation.ipynb).
 
 This section includes sample codes to do the following: generate initial force-biased algorithm 
 packing, then create a packing with a Lubachevsky–Stillinger protocol, then find the closest jamming 
